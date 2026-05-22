@@ -8,14 +8,15 @@
 
 1. [Core Philosophy](#core-philosophy)
 2. [The PRD-First Approach](#the-prd-first-approach)
-3. [Writing a Good PLAN.md](#writing-a-good-planmd)
-4. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
-5. [Workflow for Changes](#workflow-for-changes)
-6. [Architecture Decision Records (ADR) in Depth](#architecture-decision-records-adr-in-depth)
-7. [Additional Files Worth Adding](#additional-files-worth-adding)
-8. [Repository Organization](#repository-organization)
-9. [Working with the Agent: Practical Commands](#working-with-the-agent-practical-commands)
-10. [Golden Rules](#golden-rules)
+3. [PRD vs Spec — Two Layers, Same Question](#prd-vs-spec--two-layers-same-question)
+4. [Writing a Good PLAN.md](#writing-a-good-planmd)
+5. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
+6. [Workflow for Changes](#workflow-for-changes)
+7. [Architecture Decision Records (ADR) in Depth](#architecture-decision-records-adr-in-depth)
+8. [Additional Files Worth Adding](#additional-files-worth-adding)
+9. [Repository Organization](#repository-organization)
+10. [Working with the Agent: Practical Commands](#working-with-the-agent-practical-commands)
+11. [Golden Rules](#golden-rules)
 
 ---
 
@@ -52,6 +53,46 @@ Treating PRD as living causes two problems:
 - The original intent gets diluted over time
 
 Keep the original PRD pristine. Archive it in `docs/prd/` with a date. New direction → new PRD or roadmap entry, not edits to the old one.
+
+---
+
+## PRD vs Spec — Two Layers, Same Question
+
+PRDs and feature specs look similar at a glance — both have "scope" sections, both describe "what we're building." New teams ask: *do we really need both?*
+
+Yes. They live at different layers and have different lifetimes.
+
+| | PRD | Spec |
+|---|---|---|
+| **Scope** | The whole product/system | A single feature or change |
+| **Lifetime** | Written once, frozen after v1 ships | Written before the PR, frozen after merge |
+| **Granularity** | *"Build a campaign delivery platform"* | *"Add ZIP-per-batch compression to `OneXmlOneFileStrategyMerge`"* |
+| **Audience** | Stakeholders, founding team | Developers, the AI agent about to write code |
+| **Frequency** | Maybe once in the project's life | Dozens or hundreds per year |
+| **Owner** | Product / founder | Engineer driving the change |
+
+### Concrete example
+
+```
+PRD (2025-01): "Build a campaign delivery platform with CHD/SKD
+                files, SFTP delivery, broker mailing."
+   ↓
+spec (2026-01-campaign-retry): "Add retry-with-backoff to SFTP
+                                delivery on transient failures."
+spec (2026-02-zip-per-batch):  "Switch from per-campaign ZIPs
+                                to per-batch ZIPs."
+spec (2026-03-...): ...
+```
+
+The PRD answers *why this system exists*. Specs answer *what changed this week*.
+
+### The trap each avoids
+
+**Specs without a PRD:** six months in, nobody remembers why retries even matter — the partner SLA requires < 1% failure rate, but that requirement lives only in someone's head. New engineers (and the AI agent) propose "simpler" solutions that miss the point.
+
+**PRD without specs:** the PRD becomes a Frankenstein document where every change request gets appended. Original v1 intent dilutes, decision history disappears, and after two years the PRD reads like a press release for a product that doesn't exist.
+
+Two artifacts, two lifetimes, two purposes. The overlap in fields is real but cosmetic — the level of detail is completely different.
 
 ---
 
@@ -391,7 +432,7 @@ Beyond what we've covered (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, sp
 
 ### Critical (should exist early)
 
-**`RUNBOOK.md` / `OPERATIONS.md`** — what to do when things break. How to restart Quartz jobs, how to check SFTP state, where the logs live, how to diagnose a stuck campaign. This is the document that saves you at 3 a.m. The agent also uses it when you ask for diagnostic scripts.
+**`RUNBOOK.md` / `OPERATIONS.md`** — what to do when things break. How to restart Quartz jobs, how to check SFTP state, where the logs live, how to diagnose a stuck campaign. This is the document that saves you at 3 a.m. The agent also uses it when you ask for diagnostic scripts. → See the companion [Runbook / Operations Documentation Guide](runbook-operations-guide.md) for templates, anti-patterns, and agent prompts.
 
 **`SECURITY.md`** — how to report vulnerabilities (for public repos or projects with clients), but also internally: where secrets live, how we rotate them, what we *never* commit. Essential for projects with GDPR/RODO obligations.
 
