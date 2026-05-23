@@ -17,7 +17,7 @@
 
 ## Acceptance criteria
 
-- [ ] [Concrete, testable. e.g. "POST /api/x with payload Y returns 201 and a row in T_LOG"]
+- [ ] [Concrete, testable. e.g. "POST /api/x with payload Y returns 201 and a row in event_log"]
 - [ ] ...
 
 ## Impact on existing code

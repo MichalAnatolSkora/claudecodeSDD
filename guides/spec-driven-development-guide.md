@@ -66,7 +66,7 @@ Yes. They live at different layers and have different lifetimes.
 |---|---|---|
 | **Scope** | The whole product/system | A single feature or change |
 | **Lifetime** | Written once, frozen after v1 ships | Written before the PR, frozen after merge |
-| **Granularity** | *"Build a campaign delivery platform"* | *"Add ZIP-per-batch compression to `OneXmlOneFileStrategyMerge`"* |
+| **Granularity** | *"Build an order delivery platform"* | *"Add ZIP-per-batch compression to `BatchXmlMerger`"* |
 | **Audience** | Stakeholders, founding team | Developers, the AI agent about to write code |
 | **Frequency** | Maybe once in the project's life | Dozens or hundreds per year |
 | **Owner** | Product / founder | Engineer driving the change |
@@ -74,12 +74,12 @@ Yes. They live at different layers and have different lifetimes.
 ### Concrete example
 
 ```
-PRD (2025-01): "Build a campaign delivery platform with CHD/SKD
-                files, SFTP delivery, broker mailing."
+PRD (2025-01): "Build an order delivery platform with HDR/DTL
+                files, SFTP delivery, partner mailing."
    ↓
-spec (2026-01-campaign-retry): "Add retry-with-backoff to SFTP
+spec (2026-01-order-retry): "Add retry-with-backoff to SFTP
                                 delivery on transient failures."
-spec (2026-02-zip-per-batch):  "Switch from per-campaign ZIPs
+spec (2026-02-zip-per-batch):  "Switch from per-order ZIPs
                                 to per-batch ZIPs."
 spec (2026-03-...): ...
 ```
@@ -105,7 +105,7 @@ A good `PLAN.md` answers questions the agent would otherwise guess at. Every gue
 - **Concrete decisions, not options.** Don't write "consider MediatR or services" — pick one. A plan is not a brainstorm.
 - **Separate what (requirements) from how (architecture).** Mixing them produces code that mixes layers.
 - **Explicit exclusions.** An "out of scope" section prevents the agent from adding features you don't want now.
-- **Testable acceptance criteria.** "Works correctly" → bad. "POST /api/x with payload Y returns 201 and a row in T_LOG" → good.
+- **Testable acceptance criteria.** "Works correctly" → bad. "POST /api/x with payload Y returns 201 and a row in event_log" → good.
 - **Open questions in a separate section.** Forces decisions before the agent starts coding (and before it fabricates an answer).
 - **File structure upfront.** Otherwise the agent invents its own and you refactor.
 
@@ -128,7 +128,7 @@ A good `PLAN.md` answers questions the agent would otherwise guess at. Every gue
 - Data access pattern: repository + Dapper, no EF
 - DI: ...
 - Logging: Serilog, contract matching `IBaseHandler<TSelf>`
-- Naming conventions: `SCH_X.T_Y`, `PK_T_Y`, ...
+- Naming conventions: lowercase snake_case for schemas/tables (e.g. `app.orders`), primary keys named `id`
 
 ## Data Model
 ### Tables (DDL diff)
@@ -156,7 +156,7 @@ tests/
 ```
 
 ## Tasks (in execution order)
-1. DDL migration script for `SCH_X.T_Y`
+1. DDL migration script for `app.x`
 2. `XRepository` + unit tests for queries
 3. `XHandler` (pure logic, no I/O in tests)
 4. `POST /api/x` endpoint + FluentValidation
@@ -164,7 +164,7 @@ tests/
 6. Quartz job registration (if applicable)
 
 ## Acceptance Criteria
-- [ ] `POST /api/x` with valid payload → 201 + row in `T_Y`
+- [ ] `POST /api/x` with valid payload → 201 + row in `x`
 - [ ] Missing required field → 400 with specific message
 - [ ] Integration test covers happy path + 2 error cases
 - [ ] Each test runs against an isolated database
@@ -172,14 +172,14 @@ tests/
 ## Constraints
 - Do NOT use EF Core
 - Do NOT add CQRS/MediatR — handlers called directly
-- Maintain consistency with `OneXmlOneFileStrategyMerge` pattern
+- Maintain consistency with `BatchXmlMerger` pattern
 
 ## Open Questions
-- [ ] Does `T_Y` use soft-delete or hard?
+- [ ] Does `x` use soft-delete or hard?
 - [ ] Retry policy for SFTP — Polly or custom?
 
 ## References
-- `src/.../FileImportTablesRepository.cs` — repo pattern to follow
+- `src/.../OrderImportRepository.cs` — repo pattern to follow
 - `docs/adr/ADR-007-dapper.md`
 ````
 
@@ -205,7 +205,7 @@ These define the "physics" of your codebase. Change them only when fundamentals 
 
 ### Layer 2: Per-feature (created, implemented, frozen)
 
-- `specs/2026-01-campaign-retry/spec.md` + `plan.md` + `tasks.md`
+- `specs/2026-01-order-retry/spec.md` + `plan.md` + `tasks.md`
 - After shipping, append `STATUS: shipped (PR #123, 2026-01-15)`
 - Never edit retroactively — this is history
 
@@ -236,14 +236,14 @@ First write an ADR (why, alternatives rejected, consequences). Only then write a
 
 ### Concrete Example
 
-Say you have a deployed `OneXmlOneFileStrategyMerge` and want to add ZIP compression per batch:
+Say you have a deployed `BatchXmlMerger` and want to add ZIP compression per batch:
 
 ```
-specs/2026-02-campaign-zip-per-batch/
+specs/2026-02-order-zip-per-batch/
 ├── spec.md
-│   # Goal: ZIP per batch instead of per campaign
-│   # Affects: OneXmlOneFileStrategyMerge, FlagFileWriter
-│   # Does NOT affect: SFTP delivery, T_CAMPAGINES_LOG schema
+│   # Goal: ZIP per batch instead of per order
+│   # Affects: BatchXmlMerger, ReadyFileWriter
+│   # Does NOT affect: SFTP delivery, order_log schema
 ├── plan.md
 │   # Decisions: SharpZipLib (already in solution), streaming, not in-memory
 │   # Files to modify: ...
@@ -251,7 +251,7 @@ specs/2026-02-campaign-zip-per-batch/
 └── tasks.md
     # 1. Integration test for new behavior (red)
     # 2. ZipBatchWriter + unit tests
-    # 3. Integration in MergeFilesIntoOneXml
+    # 3. Integration in MergeFilesIntoBatchXml
     # 4. Quartz config migration (if interval changes)
 ```
 
@@ -267,7 +267,7 @@ In `CLAUDE.md` you add one line in the "Conventions" section: *"Batch compressio
 
 **"Impact on existing code" section in every spec.md.** Forces thinking about side effects before the agent starts generating. This is where you catch "ah, this breaks the `IBaseHandler<TSelf>` contract" *before* four hours of debugging.
 
-**Link spec to PR.** In the PR description: `Implements: specs/2026-01-campaign-retry/`. After merge, append the PR number to spec.md. After a year you have full traceability: feature → spec → code → decision.
+**Link spec to PR.** In the PR description: `Implements: specs/2026-01-order-retry/`. After merge, append the PR number to spec.md. After a year you have full traceability: feature → spec → code → decision.
 
 ---
 
@@ -300,9 +300,9 @@ Write an ADR when a decision:
 Accepted — 2026-01-15
 
 ## Context
-The system processes campaigns with CHD/SKD files, where critical needs include:
-- batch query performance (10k+ records per campaign)
-- full control over SQL (legacy SCH_FILE_IMPORT schema, many joins)
+The system processes orders with HDR/DTL files, where critical needs include:
+- batch query performance (10k+ records per order)
+- full control over SQL (`legacy_import` schema with many joins)
 - debugging simplicity — team knows T-SQL better than LINQ
 
 EF Core would be the natural choice for a new .NET 8 project, but:
@@ -312,8 +312,8 @@ EF Core would be the natural choice for a new .NET 8 project, but:
 
 ## Decision
 We use Dapper as the sole data access layer.
-Repositories are hand-written, one class per aggregate (`FileImportTablesRepository`,
-`CampaignLogRepository`). SQL lives in constants in the repo class, not in .sql files.
+Repositories are hand-written, one class per aggregate (`OrderImportRepository`,
+`OrderLogRepository`). SQL lives in constants in the repo class, not in .sql files.
 
 ## Consequences
 **Positive:**
@@ -337,7 +337,7 @@ Repositories are hand-written, one class per aggregate (`FileImportTablesReposit
 - **Linq2Db** — interesting, but smaller community and less familiar to team
 
 ## References
-- Spike: PR #87 (EF vs Dapper comparison on T_CAMPAGINES_LOG query)
+- Spike: PR #87 (EF vs Dapper comparison on order_log query)
 - Discussion: architecture meeting notes 2026-01-10
 ```
 
@@ -432,7 +432,7 @@ Beyond what we've covered (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, sp
 
 ### Critical (should exist early)
 
-**`RUNBOOK.md` / `OPERATIONS.md`** — what to do when things break. How to restart Quartz jobs, how to check SFTP state, where the logs live, how to diagnose a stuck campaign. This is the document that saves you at 3 a.m. The agent also uses it when you ask for diagnostic scripts. → See the companion [Runbook / Operations Documentation Guide](runbook-operations-guide.md) for templates, anti-patterns, and agent prompts.
+**`RUNBOOK.md` / `OPERATIONS.md`** — what to do when things break. How to restart Quartz jobs, how to check SFTP state, where the logs live, how to diagnose a stuck order. This is the document that saves you at 3 a.m. The agent also uses it when you ask for diagnostic scripts. → See the companion [Runbook / Operations Documentation Guide](runbook-operations-guide.md) for templates, anti-patterns, and agent prompts.
 
 **`SECURITY.md`** — how to report vulnerabilities (for public repos or projects with clients), but also internally: where secrets live, how we rotate them, what we *never* commit. Essential for projects with GDPR/RODO obligations.
 
@@ -442,7 +442,7 @@ Beyond what we've covered (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, sp
 
 ### Very Useful (second tier)
 
-**`GLOSSARY.md`** — separately or as a section of `DOMAIN.md`. Dictionary of business terms: CHD, SKD, FLG, batch, campaign, broker. Without this, the agent mixes terminology and you spend time on corrections. This is the document that *most improves* generated code quality, because variable and class names start being consistent.
+**`GLOSSARY.md`** — separately or as a section of `DOMAIN.md`. Dictionary of business terms: HDR, DTL, RDY, batch, order, partner. Without this, the agent mixes terminology and you spend time on corrections. This is the document that *most improves* generated code quality, because variable and class names start being consistent.
 
 **`API.md` or OpenAPI/Swagger spec in the repo** — contract with the outside world. If you have a public API, generate `openapi.yaml` and keep it in the repo. The agent reads it before adding an endpoint and doesn't invent new conventions.
 
@@ -454,11 +454,11 @@ Beyond what we've covered (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, sp
 
 ### Domain-Specific
 
-**`docs/integrations/`** — one file per external integration. `sftp-velobank.md`, `inpost-shipx.md`, `gemini-image-gen.md`. Each contains: endpoints, auth, limits, quirks, sample payloads, partner-side contacts. Invaluable when the agent generates integration code — without it, it improvises based on general API knowledge.
+**`docs/integrations/`** — one file per external integration. `sftp-acme-bank.md`, `carrier-shipping-api.md`, `imagegen-vendor.md`. Each contains: endpoints, auth, limits, quirks, sample payloads, partner-side contacts. Invaluable when the agent generates integration code — without it, it improvises based on general API knowledge.
 
-**`docs/data-flows/`** — diagrams (Mermaid in markdown) of main flows: how a campaign flows from CHD file to delivery, how brokerage mailing works. Mermaid renders natively in GitHub/GitLab; the agent can also read it.
+**`docs/data-flows/`** — diagrams (Mermaid in markdown) of main flows: how an order flows from HDR file to delivery, how partner mailing works. Mermaid renders natively in GitHub/GitLab; the agent can also read it.
 
-**`docs/schemas/`** — DDL of current schema + ERD. `SCH_FILE_IMPORT.sql`, `SCH_CAMPAGINES.sql`. Plus diff migrations in a separate folder. The agent reading the current schema won't invent column names.
+**`docs/schemas/`** — DDL of current schema + ERD. `legacy_import.sql`, `app.sql`. Plus diff migrations in a separate folder. The agent reading the current schema won't invent column names.
 
 **`docs/decisions-log.md`** (or `docs/journal.md`) — quicker than ADR notes: *"2026-05-15: tried Polly for SFTP retry, works, but waiting for permanent decision."* These are in-flight decisions not yet worth a full ADR, but you want to remember them. Review quarterly and either promote to ADR or discard.
 
@@ -518,11 +518,11 @@ Practical layout for a mid-sized .NET project:
 └── specs/
     ├── _template/
     │   └── spec.md
-    ├── 2026-01-campaign-retry/
+    ├── 2026-01-order-retry/
     │   ├── spec.md
     │   ├── plan.md
     │   └── tasks.md
-    └── 2026-02-brokerage-csv-validation/
+    └── 2026-02-partner-csv-validation/
         └── ...
 ```
 
@@ -603,7 +603,7 @@ Show me the draft before creating the file.
 A spec is ready. Now you want the agent to implement it. Don't just say "code it up."
 
 ```
-We're implementing specs/2026-02-campaign-zip-per-batch/.
+We're implementing specs/2026-02-order-zip-per-batch/.
 Read spec.md, plan.md, and tasks.md in that folder.
 Also read CLAUDE.md and the referenced source files in plan.md.
 
@@ -624,7 +624,7 @@ For smaller specs you can compress this, but the principle holds: **task by task
 This is the step most teams skip, and it's why repos rot. After merging code, the agent should help maintain the docs that just became outdated.
 
 ```
-We just merged PR #123 implementing specs/2026-02-campaign-zip-per-batch/.
+We just merged PR #123 implementing specs/2026-02-order-zip-per-batch/.
 Please:
 1. Append "STATUS: shipped (PR #123, 2026-05-21)" to spec.md
 2. Check if ARCHITECTURE.md needs updating (new component, changed boundary?)
@@ -640,9 +640,9 @@ This 5-minute habit prevents documentation drift over months.
 Refactors invalidate large parts of context. Help the agent re-orient.
 
 ```
-We just completed a major refactor of the campaign processing pipeline.
+We just completed a major refactor of the order processing pipeline.
 Before we continue work:
-1. Read the current state of src/Campaigns/ and src/Infrastructure/
+1. Read the current state of src/Orders/ and src/Infrastructure/
 2. Compare against ARCHITECTURE.md — list discrepancies
 3. Propose updates to ARCHITECTURE.md to reflect reality
 4. Create docs/snapshots/2026-05-post-refactor.md describing the new state

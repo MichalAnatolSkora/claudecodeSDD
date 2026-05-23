@@ -88,8 +88,8 @@ Every runbook entry must pass the **3 a.m. test**: could a half-awake on-call en
 
 This means:
 
-- **Exact commands, not descriptions of commands.** `kubectl -n campaigns rollout restart deployment/scheduler` — not *"restart the scheduler deployment"*.
-- **Concrete paths, not project-relative hints.** `/var/log/campaigns/scheduler.log` — not *"check the scheduler logs"*.
+- **Exact commands, not descriptions of commands.** `kubectl -n orders rollout restart deployment/scheduler` — not *"restart the scheduler deployment"*.
+- **Concrete paths, not project-relative hints.** `/var/log/orders/scheduler.log` — not *"check the scheduler logs"*.
 - **Copy-pasteable queries.** Real SQL with real table names, not `SELECT * FROM <log_table>`.
 - **What "success" looks like at each step.** Otherwise the on-call doesn't know whether to continue or escalate.
 - **An escalation path.** If step 5 fails, who do you call, and what time zone are they in?
@@ -108,7 +108,7 @@ If a step contains the word *"check"* without specifying *what command* and *wha
 > 2. If unreachable, escalate to network team (Slack `#net-oncall`) — do not proceed.
 > 3. If reachable, check the most recent Quartz job log:
 >    ```bash
->    tail -200 /var/log/campaigns/quartz.log | grep -E "SftpDeliveryJob|ERROR"
+>    tail -200 /var/log/orders/quartz.log | grep -E "SftpDeliveryJob|ERROR"
 >    ```
 > 4. If you see `AuthenticationException`, the host key may have rotated — go to entry `SFTP host key rotation`.
 > 5. If you see `IOException: connection reset`, restart the Quartz job:
@@ -179,18 +179,18 @@ Every entry — whether for an incident, a maintenance task, or a deployment —
 ## Full Entry Template
 
 ````markdown
-# Runbook: SFTP delivery stuck (campaigns queue building up)
+# Runbook: SFTP delivery stuck (orders queue building up)
 
-**Severity:** High — outbound campaign delivery is halted. Customer SLAs at risk after 30 min.
+**Severity:** High — outbound order delivery is halted. Customer SLAs at risk after 30 min.
 **Last verified:** 2026-05-12 (incident replay)
 **Owner:** Platform team (`#platform-oncall`)
 
 ## Symptoms
 
-- Grafana alert `CampaignDeliveryLag > 15m` firing
-- Dashboard `Campaigns > Delivery` shows `pending_in_queue` rising
-- Recent entries in `T_CAMPAGINES_LOG` have `STATUS = 'QUEUED'` older than 10 min
-- (Sometimes) Slack alert from `#campaigns-alerts` bot
+- Grafana alert `OrderDeliveryLag > 15m` firing
+- Dashboard `Orders > Delivery` shows `pending_in_queue` rising
+- Recent entries in `order_log` have `status = 'QUEUED'` older than 10 min
+- (Sometimes) Slack alert from `#orders-alerts` bot
 
 ## Pre-checks (30 seconds)
 
@@ -229,7 +229,7 @@ If connection refused or times out → escalate to network team (`#net-oncall`).
 
 ### Step 3: Is the job throwing?
 ```bash
-tail -500 /var/log/campaigns/quartz.log \
+tail -500 /var/log/orders/quartz.log \
   | grep -E "SftpDeliveryJob" \
   | tail -50
 ```
@@ -250,19 +250,19 @@ Expected: `{"status":"running"}`
 
 If status remains `paused` after 30 seconds, restart the service:
 ```bash
-sudo systemctl restart campaigns-scheduler
+sudo systemctl restart orders-scheduler
 ```
 
 ### Recovery B: SFTP host key rotation
 1. Fetch the partner's new host key (from email or partner portal — never accept blindly).
-2. Update `/etc/campaigns/known_hosts`:
+2. Update `/etc/orders/known_hosts`:
    ```bash
    sudo ssh-keygen -R sftp.partner.example.com
-   ssh-keyscan -H sftp.partner.example.com >> /etc/campaigns/known_hosts
+   ssh-keyscan -H sftp.partner.example.com >> /etc/orders/known_hosts
    ```
 3. Verify fingerprint against the partner's confirmation:
    ```bash
-   ssh-keygen -lf /etc/campaigns/known_hosts | grep sftp.partner
+   ssh-keygen -lf /etc/orders/known_hosts | grep sftp.partner
    ```
 4. Restart the scheduler (see Recovery A).
 
@@ -273,19 +273,19 @@ sudo systemctl restart campaigns-scheduler
    ```
 2. Watch one cycle (jobs run every 5 min):
    ```bash
-   tail -f /var/log/campaigns/quartz.log | grep SftpDeliveryJob
+   tail -f /var/log/orders/quartz.log | grep SftpDeliveryJob
    ```
 3. If next cycle succeeds → done. If next cycle also fails → escalate.
 
 ### Recovery D: Heap exhausted
 1. Check current batch size in `appsettings.Production.json`:
    ```bash
-   jq '.Campaigns.BatchSize' /etc/campaigns/appsettings.Production.json
+   jq '.Orders.BatchSize' /etc/orders/appsettings.Production.json
    ```
 2. If above 5000 — temporarily reduce:
    ```bash
-   sudo /usr/local/bin/campaigns-config set Campaigns.BatchSize=2500
-   sudo systemctl restart campaigns-scheduler
+   sudo /usr/local/bin/orders-config set Orders.BatchSize=2500
+   sudo systemctl restart orders-scheduler
    ```
 3. File ticket to investigate root cause (a 5000-batch should not OOM — see `docs/postmortems/2026-03-batch-oom.md`).
 
@@ -296,27 +296,27 @@ After any recovery path:
 1. Queue should drain within 2 cycles (~10 min):
    ```sql
    SELECT COUNT(*)
-   FROM SCH_CAMPAGINES.T_CAMPAGINES_LOG
-   WHERE STATUS = 'QUEUED'
-     AND CREATED_AT < DATEADD(MINUTE, -10, GETUTCDATE());
+   FROM app.order_log
+   WHERE status = 'QUEUED'
+     AND created_at < DATEADD(MINUTE, -10, GETUTCDATE());
    ```
    Expected: `0` (or steadily decreasing on repeated query).
 
-2. Grafana alert `CampaignDeliveryLag` clears within 15 min.
+2. Grafana alert `OrderDeliveryLag` clears within 15 min.
 
-3. Spot-check one campaign end-to-end:
+3. Spot-check one order end-to-end:
    ```sql
-   SELECT TOP 1 CAMPAIGN_ID, STATUS, DELIVERED_AT
-   FROM SCH_CAMPAGINES.T_CAMPAGINES_LOG
-   WHERE STATUS = 'DELIVERED'
-   ORDER BY DELIVERED_AT DESC;
+   SELECT TOP 1 order_id, status, delivered_at
+   FROM app.order_log
+   WHERE status = 'DELIVERED'
+   ORDER BY delivered_at DESC;
    ```
-   `DELIVERED_AT` should be within the last 5 min.
+   `delivered_at` should be within the last 5 min.
 
 ## Escalation
 
-- Within 15 min of incident start without resolution → page on-call lead via PagerDuty (`Campaigns > P1`)
-- If partner-side issue confirmed → notify business owner: jane.doe@company.com (+CC `#campaigns-business`)
+- Within 15 min of incident start without resolution → page on-call lead via PagerDuty (`Orders > P1`)
+- If partner-side issue confirmed → notify business owner: jane.doe@company.com (+CC `#orders-business`)
 - If customer-visible impact confirmed → trigger Status Page incident (procedure: `docs/runbooks/status-page.md`)
 
 ## Post-incident
@@ -407,7 +407,7 @@ Examples:
 Not tied to a specific incident — general "how do I figure out X" recipes.
 
 Examples:
-- `how-to-trace-a-stuck-campaign.md`
+- `how-to-trace-a-stuck-order.md`
 - `how-to-find-the-slow-query.md`
 - `how-to-correlate-logs-across-services.md`
 
@@ -507,7 +507,7 @@ Do NOT invent diagnostic commands. If a procedure isn't documented,
 flag it as a missing runbook entry and propose adding one.
 ```
 
-This single block prevents the agent from confidently hallucinating `systemctl restart quartz` when your actual service is `campaigns-scheduler.service`.
+This single block prevents the agent from confidently hallucinating `systemctl restart quartz` when your actual service is `orders-scheduler.service`.
 
 ---
 
@@ -681,7 +681,7 @@ The entry is titled *"Restart Quartz scheduler"* — but the on-call doesn't kno
 The procedure was correct *when it was written* but the system changed and no one re-ran it. The cure: the quarterly "actually execute one entry against staging" ritual.
 
 ### 7. Embedded secrets
-Runbook entries with credentials, tokens, or internal URLs that are sensitive. The runbook lives in version control — secrets belong in your secret manager, with the runbook pointing to *how to retrieve them* (`vault read secret/campaigns/sftp/prod`), not embedding them.
+Runbook entries with credentials, tokens, or internal URLs that are sensitive. The runbook lives in version control — secrets belong in your secret manager, with the runbook pointing to *how to retrieve them* (`vault read secret/orders/sftp/prod`), not embedding them.
 
 ### 8. Procedures that require tribal knowledge
 *"Restart the cluster the usual way."* What's the usual way? The runbook exists precisely so that the *not-usual* engineer can do it.
