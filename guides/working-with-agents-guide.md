@@ -15,24 +15,53 @@
 7. [Working on Specs, ADRs, and Refactors](#working-on-specs-adrs-and-refactors)
 8. [Working on Runbooks and Operational Tasks](#working-on-runbooks-and-operational-tasks)
 9. [Universal Prompting Patterns](#universal-prompting-patterns)
-10. [When the Agent Drifts](#when-the-agent-drifts)
-11. [Maintaining Documentation Proactively](#maintaining-documentation-proactively)
-12. [Anti-Patterns](#anti-patterns)
-13. [Golden Rules](#golden-rules)
+10. [Claude Code Building Blocks](#claude-code-building-blocks)
+11. [When the Agent Drifts](#when-the-agent-drifts)
+12. [Maintaining Documentation Proactively](#maintaining-documentation-proactively)
+13. [Anti-Patterns](#anti-patterns)
+14. [Golden Rules](#golden-rules)
 
 ---
 
 ## Core Philosophy
 
+### The mental model
+
 The agent is not a colleague who has been on the team for two years. It is a *very fast* colleague who joined this morning, who reads only what you put in front of them, and who confidently fills any blank with a plausible-sounding guess. Your job is to leave fewer blanks.
 
-Three insights flow from this:
+That framing matters because the most common mistake — by experienced engineers, no less — is treating the agent like it shares your context. It doesn't. It hasn't read last month's Slack discussion. It doesn't know which library you abandoned and why. It hasn't met your domain expert. Every session starts at zero plus whatever you put in front of it in the prompt.
 
-1. **Agents don't "discover" your codebase.** They read what you point them at, or what they find via search. Pointers in `CLAUDE.md` and explicit prompts beat hope.
-2. **More docs ≠ more context.** Past a threshold, more docs cause *more* drift, not less, because attention dilutes.
-3. **The agent's memory ends with the session.** Anything that must persist lives in committed files. Anything in chat history is ephemeral.
+The flip side is the part most people undervalue: within whatever context you *do* give it, the agent is unusually good. It pattern-matches well, follows clear instructions reliably, writes idiomatic code in the style you point it at, and doesn't get tired. Working with an agent effectively is less about *prompting* and more about *briefing* — feeding that capability the right material instead of fighting it.
 
-Everything else in this guide is downstream of those three.
+### Three insights everything else flows from
+
+**1. Agents don't "discover" your codebase. They read what you point them at, or what they find via explicit search.**
+
+A new human teammate would naturally browse — open a few files, click around the tree, read the README, ask someone. The agent doesn't have curiosity. If your prompt says *"fix the bug in the order export,"* the agent runs `grep` for *"order export,"* reads the matches, and tries to fix the bug. It won't read `ARCHITECTURE.md` unless you tell it to, the relevant ADR unless someone references it, or the GLOSSARY entry that would have explained why this particular workaround exists.
+
+This is both a feature (focus, fewer wasted reads) and a bug (blindness to context you *assumed* it had). Pointers in `CLAUDE.md` and explicit references in prompts beat hoping it will figure things out on its own.
+
+**2. More docs is not more context. Past a threshold, more docs cause *more* drift, not less.**
+
+The intuitive model — *more documentation = more for the agent to read = better output* — is wrong past a surprisingly low threshold. Three things break down at once:
+
+- **Attention dilutes.** Even when everything fits in the context window, an important convention on page 30 gets the same per-token attention as filler on page 3. The agent reads it but doesn't weigh it equally.
+- **Search noise rises.** With four similarly-named files, the agent picks one — sometimes wrong, sometimes inconsistently across the same session.
+- **Stale content drags.** A two-year-old ADR marked `Status: Superseded` gets read as authoritative because the supersede note is small and easy to miss.
+
+The implication: curate, don't accumulate. A 5-file repo with sharp, fresh docs outperforms a 50-file repo where most docs are partially stale. (See [How Many Files Is Too Many](#how-many-files-is-too-many) for the thresholds and mitigations.)
+
+**3. The agent's memory ends when the session ends.**
+
+This is the insight new users miss most often, and the one that compounds the most damage. The agent has no persistent memory across sessions. If you spent an hour today teaching it that *"in this codebase, repositories handle SQL and services handle business logic, and never the other way around"* — that knowledge is gone tomorrow. The next session starts blank.
+
+The implication: anything that must persist lives in **committed files**. `CLAUDE.md` is where conventions live. `docs/adr/` is where decisions live. `specs/` is where intent lives. *Anything in chat history is ephemeral and will be forgotten.* The corollary: don't waste a session teaching the agent something verbally without writing it down — you're paying tokens for knowledge that's scheduled to evaporate.
+
+### The mindset shift
+
+Everything else in this guide is downstream of those three insights and one underlying mindset shift: from *"the agent is my colleague"* to *"the agent is my colleague with amnesia, who needs a written briefing before each session."*
+
+If you internalize only the briefing-document framing, you'll get most of the value of the rest of this guide for free.
 
 ---
 
@@ -549,6 +578,180 @@ on why. If any of them are stale or wrong-source, tell me before you proceed.
 ```
 
 The last one is underrated — it surfaces silent assumptions early.
+
+---
+
+## Claude Code Building Blocks
+
+Plain prompting takes you a long way, but Claude Code (and similar agent tools) ship four building blocks that let you encode recurring workflows so you don't retype them every session: **skills**, **slash commands**, **subagents**, and **hooks**. Each one fits naturally into an SDD repo — and each has a trap you'll only see after using it for a week.
+
+This section explains what each is, where it earns its place in your SDD workflow, an example, and the anti-pattern that comes with it. The decision table at the end is the *"which do I reach for?"* summary.
+
+### Skills
+
+**What they are:** self-contained, named capabilities Claude can discover and invoke. A skill lives in `.claude/skills/<name>/SKILL.md` (project-scoped) or `~/.claude/skills/<name>/SKILL.md` (user-scoped). The SKILL.md frontmatter describes *when* the skill applies; Claude auto-suggests or invokes it when a prompt matches.
+
+**Where they fit in SDD:**
+
+- Workflows you do often enough to name. *"Convert markdown to PDF"*, *"draft a new ADR from a decision summary"*, *"audit doc staleness across the repo"*.
+- Procedures with multi-step instructions that you'd otherwise paste into a prompt every time.
+- Repo-specific automation that benefits new contributors — the skill ships *with* the repo.
+
+**Example: an `adr-draft` skill**
+
+`.claude/skills/adr-draft/SKILL.md`:
+
+```yaml
+---
+name: adr-draft
+description: Draft a new ADR from a brief decision summary, using the project's
+  template at docs/adr/_template.md. Auto-numbers from the highest existing ADR.
+  Marks Status as Proposed; user must manually change to Accepted after review.
+---
+
+When invoked:
+1. Read docs/adr/_template.md.
+2. Scan docs/adr/ for the highest ADR number; the new one is N+1.
+3. Generate ADR-{N+1} from the user's decision summary.
+4. Fill Context, Decision, Consequences, Alternatives Rejected.
+5. Save as docs/adr/ADR-NNN-<slug>.md with Status: Proposed.
+6. Show the draft before considering it final.
+```
+
+The user says *"draft an ADR for switching from Postgres to MySQL"*, the skill fires, the draft follows your template — no re-explaining the template every time.
+
+**Anti-pattern:** wrapping every prompt template in a skill. Skills are best for *procedures with steps*, not for *one-line prompt shortcuts*. For those, use slash commands.
+
+### Slash commands
+
+**What they are:** prompts stored in `.claude/commands/<name>.md` (project) or `~/.claude/commands/<name>.md` (user). Type `/<name>` and the file's content is sent as a prompt, with `$ARGUMENTS` replaced by anything you typed after the command. Lower ceremony than skills; faster to write; user-invoked, not auto-discovered.
+
+**Where they fit in SDD:**
+
+- The recurring prompt templates already documented in this repo (drafting an entry, auditing for staleness, generating diagnostics) become slash commands. *"I'd write a 30-line prompt every time"* becomes *"I type `/audit-docs`."*
+- Per-repo workflow steps: `/start-session` reads `CLAUDE.md` and the most recent spec; `/end-session` writes a session summary.
+- Team-shared commands ship in the repo and apply to every contributor.
+
+**Example: a `/spec-new` command**
+
+`.claude/commands/spec-new.md`:
+
+```markdown
+Read CLAUDE.md, ARCHITECTURE.md, and specs/_template/spec.md.
+
+We're starting a new feature: $ARGUMENTS
+
+Draft specs/YYYY-MM-<slug>/spec.md based on the template.
+List open questions at the end — don't fill them in yourself.
+Show me the draft before saving.
+```
+
+Then `/spec-new add rate limiting to the orders endpoint` does the whole setup in one keystroke.
+
+**Difference from skills:** slash commands are *user-invoked, single-shot prompts*. Skills are *auto-discoverable, multi-step procedures*. If you're tempted to write a skill for *"just a longer prompt I use a lot"*, write a slash command instead — much lighter weight.
+
+**Anti-pattern:** a repo with 30 slash commands. Discovery breaks down past ~10–15. Prefer a small set of high-leverage commands plus inline prompts for the rest.
+
+### Subagents
+
+**What they are:** delegated agents that handle a contained task in their own context window, then return a single result to the main session. Spawned via the Agent tool. Used for work that would bloat the main session if done inline.
+
+**Where they fit in SDD:**
+
+- **Audit tasks.** *"Audit `docs/runbooks/` for staleness against current `src/`."* The audit reads dozens of files; you don't want them in your main context.
+- **Cross-file research.** *"Find every reference to ADR-007 in specs and code; report which are still valid."*
+- **Parallel investigation.** Multiple subagents working independently. One audits docs, one runs the test suite, one drafts the PR description.
+- **Pre-implementation review.** *"Before I implement spec `2026-05-x`, spawn a subagent to read the spec + the affected code and identify gaps in the plan."*
+
+**Example: a doc-audit subagent**
+
+```
+Spawn a subagent with this prompt:
+
+> Read every file in docs/runbooks/ and every file in src/. For each runbook,
+> check whether referenced service names, file paths, and commands still match
+> the current codebase. Return a markdown table: runbook, last verified date,
+> stale items found, suggested action.
+>
+> Do not modify any files. Return only the report.
+
+After the subagent reports back, I'll decide which runbooks to update.
+```
+
+The main session stays focused; the audit happens in parallel.
+
+**Anti-pattern:** spawning a subagent for short tasks. The handoff has overhead — context setup, tool authorization, result transmission. For anything under ~5 tool calls, just do it inline.
+
+### Hooks
+
+**What they are:** automation triggered by events, configured in `settings.json` (project or user). Common events: `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `Stop`, `SubagentStop`. Hooks run shell commands or scripts; the harness executes them, not the agent itself. They can block actions, inject context, or run side effects.
+
+**Where they fit in SDD:**
+
+- **Enforce conventions.** A `PreToolUse` hook on `Edit|Write` for `.md` files runs `markdownlint`; commits to malformed docs get blocked at the source.
+- **Automate doc maintenance.** A `PostToolUse` hook on `Edit|Write` for `guides/*.md` regenerates the PDF via pandoc + Prince. The agent edits markdown; the PDF stays in sync without anyone remembering.
+- **Inject context.** A `UserPromptSubmit` hook prepends a reminder (*"the active ADR list is in `CLAUDE.md` § Active Decisions"*). The agent gets the pointer for free.
+- **End-of-session discipline.** A `Stop` hook checks for uncommitted spec changes, missing PR references in shipped specs, or stale ADRs not updated this session.
+- **Pre-commit gates.** Block commits that touch `src/` without a corresponding spec update, or that modify an ADR with `Status: Accepted` (only headers may be edited).
+
+**Example: PDF auto-regen on guide changes**
+
+`.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$CLAUDE_FILE_PATHS\" in *guides/*.md*) pandoc guides/spec-driven-development-guide.md guides/working-with-agents-guide.md guides/runbook-operations-guide.md -o output.pdf --pdf-engine=prince -H pdf-style-compact.html --metadata title=\"claudecodeSDD\" ;; esac"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Now any time the agent edits a guide, the PDF rebuilds automatically.
+
+**Anti-pattern:** hooks that fail silently. A broken hook that swallows errors is worse than no hook — the agent thinks the convention is enforced, your repo says otherwise. Always log to a file or print to stderr.
+
+### Which one to reach for
+
+| Situation | Right tool |
+|-----------|-----------|
+| One-line prompt you'll type a lot | **Slash command** |
+| Multi-step procedure with file lookups, conditional branches | **Skill** |
+| Read-heavy task (audit, cross-repo research) that would bloat main context | **Subagent** |
+| Something that should happen on a file change, session end, or tool call | **Hook** |
+| One-off prompt you'll never repeat | **Just type it** |
+
+The decision is mostly about *who triggers it* and *how isolated it should be*:
+
+- **You trigger, single-shot, in main context** → slash command
+- **Agent triggers, multi-step, in main context** → skill
+- **You trigger, isolated context, returns summary** → subagent
+- **System triggers on event, runs outside main context** → hook
+
+### How these intersect with the SDD discipline
+
+- **Skills and commands replace the prompt-template appendix.** This guide documents recurring prompts. In production, those prompts should live as `.claude/commands/*.md` and `.claude/skills/*/SKILL.md` files — discoverable, version-controlled with the repo, available to every contributor.
+- **Hooks enforce SDD invariants that humans forget.** *"Update spec status after merge"*, *"regenerate the PDF when guides change"*, *"flag new conventions worth adding to `CLAUDE.md`"* — these are great hook candidates. The hook does the discipline; the human doesn't have to.
+- **Subagents handle audit work that would otherwise be skipped.** Quarterly runbook audits, ADR-vs-code consistency checks, doc staleness reports. You'd never do them by hand; a subagent does them in five minutes.
+- **`CLAUDE.md` is still the hub.** Skills, commands, and hooks are *implementations* of the discipline; `CLAUDE.md` is *where the discipline is declared*. The implementations should reference `CLAUDE.md`, not replace it.
+
+### Anti-patterns across all four
+
+1. **Wrapping every prompt in a skill.** Skills have ongoing cost — they live as files, need maintenance, get out of sync. Use them only for procedures you'll invoke 10+ times.
+2. **A repo with 30 slash commands.** Discovery breaks down past ~10–15. Prefer a small high-leverage set plus inline prompts for the rest.
+3. **Subagents for everything.** Each subagent burns its own tokens for context setup. For anything under ~5 tool calls, inline is cheaper and faster.
+4. **Silent hooks.** A hook that fails without logging is invisible damage. Always log somewhere the team will read.
+5. **Building blocks committed without docs.** A `.claude/skills/audit-everything/SKILL.md` with no comments is a black box. Document the *why* in the file, not just the *what*.
+6. **Hook-driven over-automation.** Not every event needs a hook. The bar: it has to fix a problem that *actually* bit you, not a hypothetical one.
 
 ---
 

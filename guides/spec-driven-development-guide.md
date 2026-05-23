@@ -682,6 +682,15 @@ This is what a *mature* SDD repo looks like — a mid-sized project, ~6–12 mon
 ├── ROADMAP.md                         # planned direction over coming quarters (not detailed plans)
 ├── LICENSE                            # legal — required for OSS, useful internally too
 ├── .env.example                       # template of required env vars (no real values committed)
+├── .claude/                           # Claude Code config — shipped with the repo, used by every contributor
+│   ├── settings.json                  # hooks, permissions, env vars (see Claude Code Building Blocks)
+│   ├── commands/                      # slash commands — recurring prompts as files
+│   │   ├── spec-new.md                # /spec-new <slug> — drafts a new spec from the template
+│   │   ├── audit-docs.md              # /audit-docs — reports staleness across guides + runbooks
+│   │   └── end-session.md             # /end-session — writes a session-notes file
+│   └── skills/                        # multi-step procedures Claude can auto-invoke
+│       └── adr-draft/                 # one folder per skill
+│           └── SKILL.md               # frontmatter + procedure
 ├── docs/                              # everything that isn't a top-level signpost
 │   ├── adr/                           # architecture decisions — immutable, numbered, append-only
 │   │   ├── ADR-001-dapper.md          # one decision per file, status header on top
@@ -756,6 +765,8 @@ This guide describes *what* to write down: PRDs, specs, plans, ADRs, the three-l
 
 - **When the agent loads a file** (and why it sometimes feels random)
 - **How many files is too many** before the agent gets lost in your repo
+- **Token economy** — where tokens are wasted and how prompt caching changes session shape
+- **Claude Code building blocks** — skills, slash commands, subagents, hooks: which to reach for and how each fits an SDD repo
 - Universal prompting patterns (`Plan before code`, `Cite your source`, `Diff, don't replace`, …)
 - Anti-patterns in agent interaction
 

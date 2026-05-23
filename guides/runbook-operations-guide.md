@@ -563,6 +563,8 @@ Concrete prompts for the situations a runbook actually shows up in — drafting 
 
 - **When the agent loads a file** (and why it sometimes feels random)
 - **How many files is too many** before the agent gets lost in your repo
+- **Token economy** — keeping long runbook-audit sessions affordable
+- **Claude Code building blocks** — skills, slash commands, subagents, hooks: e.g. a `/audit-runbooks` slash command, a subagent that walks `docs/runbooks/` and reports staleness, or a hook that flags runbook gaps after a new background-job feature lands
 - Universal prompting patterns (`Plan before code`, `Cite your source`, …) that apply to runbook work just as much as to feature work
 - Anti-patterns in agent interaction
 

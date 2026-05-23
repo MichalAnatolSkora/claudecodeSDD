@@ -12,11 +12,12 @@
 4. [Phase 2 — Forward-only specs (Week 2+)](#phase-2--forward-only-specs-week-2)
 5. [Phase 3 — Reactive ADRs (Month 1+)](#phase-3--reactive-adrs-month-1)
 6. [Phase 4 — Operational layer (as triggered)](#phase-4--operational-layer-as-triggered)
-7. [Reusable agent prompts](#reusable-agent-prompts)
-8. [Anti-patterns](#anti-patterns)
-9. [Worked examples](#worked-examples)
-10. [Timeline and signals of success](#timeline-and-signals-of-success)
-11. [Golden rules for migration](#golden-rules-for-migration)
+7. [Phase 5 — Productionize the prompts (Month 2+)](#phase-5--productionize-the-prompts-month-2)
+8. [Reusable agent prompts](#reusable-agent-prompts)
+9. [Anti-patterns](#anti-patterns)
+10. [Worked examples](#worked-examples)
+11. [Timeline and signals of success](#timeline-and-signals-of-success)
+12. [Golden rules for migration](#golden-rules-for-migration)
 
 ---
 
@@ -205,6 +206,23 @@ You will accumulate ADRs slowly. Target: ~1 ADR per month for the first 6 months
 | First incident worth not repeating | `docs/postmortems/<date>.md` |
 
 Each is born from a specific need. Pre-emptively writing these on day 1 produces docs that are wrong, generic, or both.
+
+---
+
+## Phase 5 — Productionize the prompts (Month 2+)
+
+Once you've been doing SDD for a month or two, you'll notice the same prompts repeating. *"Draft a spec from this description"*, *"audit the runbook against current src/"*, *"check whether any docs reference dead code"* — typed by hand, every time.
+
+That's the signal to promote them from typed prompts to Claude Code building blocks. See [`working-with-agents-guide.md#claude-code-building-blocks`](working-with-agents-guide.md#claude-code-building-blocks) for the full treatment; the migration-relevant moves are:
+
+- **Slash commands first.** Any prompt you've typed 5+ times is a candidate: `.claude/commands/spec-new.md`, `.claude/commands/audit-docs.md`, `.claude/commands/end-session.md`. Single file each, lightweight.
+- **Skills for multi-step procedures.** If a prompt has 5+ steps with conditional branches (e.g., *"draft an ADR, auto-number from existing files, fill template"*), promote it to `.claude/skills/<name>/SKILL.md`. The agent then auto-invokes when relevant.
+- **Subagents for audits.** Quarterly runbook audits, ADR-vs-code consistency checks, doc staleness reports — the kind of read-heavy task that bloats the main session. Spawn a subagent in its own context; get back a summary.
+- **Hooks for invariants.** *"Regenerate the PDF when guides change"*, *"check that shipped specs reference a PR number"*, *"block edits to ADRs with Status: Accepted"* — these are great candidates for `settings.json` hooks. The harness enforces; humans stop having to remember.
+
+**Trigger for this phase:** you find yourself thinking *"I keep typing this exact prompt"* or *"nobody on the team consistently runs the audit prompt I documented in week 1."* That's the moment to package it. Before then, hand-typed prompts are cheaper than the file-and-maintenance overhead.
+
+**Anti-pattern:** doing this in week 1. The prompts that *seem* recurring on day 1 are mostly wrong; the genuinely recurring ones surface only after a few weeks of real use.
 
 ---
 
