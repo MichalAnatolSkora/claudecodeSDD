@@ -8,18 +8,19 @@
 
 1. [Core Philosophy](#core-philosophy)
 2. [Who Practices SDD](#who-practices-sdd)
-3. [The PRD-First Approach](#the-prd-first-approach)
-4. [PRD vs Spec — Two Layers, Same Question](#prd-vs-spec--two-layers-same-question)
-5. [Writing a Good PLAN.md](#writing-a-good-planmd)
-6. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
-7. [Workflow for Changes](#workflow-for-changes)
-8. [Architecture Decision Records (ADR) in Depth](#architecture-decision-records-adr-in-depth)
-9. [The Absolute Minimum](#the-absolute-minimum)
-10. [Migrating from a Legacy Repo to SDD](#migrating-from-a-legacy-repo-to-sdd)
-11. [Additional Files Worth Adding](#additional-files-worth-adding)
-12. [Repository Organization](#repository-organization)
-13. [Working with the Agent](#working-with-the-agent)
-14. [Golden Rules](#golden-rules)
+3. [When SDD Pays Off (and When It's Overhead)](#when-sdd-pays-off-and-when-its-overhead)
+4. [The PRD-First Approach](#the-prd-first-approach)
+5. [PRD vs Spec — Two Layers, Same Question](#prd-vs-spec--two-layers-same-question)
+6. [Writing a Good PLAN.md](#writing-a-good-planmd)
+7. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
+8. [Workflow for Changes](#workflow-for-changes)
+9. [Architecture Decision Records (ADR) in Depth](#architecture-decision-records-adr-in-depth)
+10. [The Absolute Minimum](#the-absolute-minimum)
+11. [Migrating from a Legacy Repo to SDD](#migrating-from-a-legacy-repo-to-sdd)
+12. [Additional Files Worth Adding](#additional-files-worth-adding)
+13. [Repository Organization](#repository-organization)
+14. [Working with the Agent](#working-with-the-agent)
+15. [Golden Rules](#golden-rules)
 
 ---
 
@@ -60,6 +61,82 @@ These are facets of the same idea. The name matters less than the discipline.
 IETF RFCs (1969+), Architecture Decision Records (Michael Nygard, 2011), the C4 model (Simon Brown), the Diátaxis documentation framework (Daniele Procida), and pre-mortems (Gary Klein) — all share DNA with what SDD does today.
 
 For the fuller list, the verified references, and a discussion of adoption depth (vs. depth-of-marketing), see [`sdd-in-the-wild.md`](sdd-in-the-wild.md).
+
+---
+
+## When SDD Pays Off (and When It's Overhead)
+
+SDD has costs. Writing specs takes time; maintaining docs takes time; coordinating around docs adds friction. *"Just prompt and let the agent figure it out"* is faster — for a while.
+
+The question is when the overhead pays off. The answer turns on one thing: how much does **cross-prompt consistency** matter to you?
+
+### Two components of agent output quality
+
+The agent's output has two components:
+
+1. **Single-prompt quality** — how well it writes code for *this one request*, in isolation.
+2. **Cross-prompt consistency** — whether its output matches the rest of the codebase, your conventions, and your prior decisions.
+
+Normal prompting handles (1) well even with no docs. Modern agents are good at writing code that works for a single, contained request.
+
+Normal prompting fails at (2) the moment the codebase outgrows a single context window, the work crosses more than one session, or a second human (or agent) starts touching the same code. **SDD pays its cost specifically to maintain (2).**
+
+If (2) doesn't matter to you, SDD is overhead. If it does, SDD is one of the highest-leverage investments you can make.
+
+### SDD wins when any 2+ of these are true
+
+- The project will be **touched again** after today (next week, next month, next year)
+- **More than one person** (human or agent) will edit this code
+- The code will **run in production** — anything that matters when nobody is watching
+- The domain has **non-obvious logic** — finance, healthcare, regulated industries, complex B2B integrations
+- Some decisions are **hard to reverse** (ORM, database schema, auth model, message broker)
+- The agent will be invoked **across many sessions** against the same codebase
+
+The more of these are true, the more leverage SDD provides. A long-lived production codebase touched by a team using multiple AI tools is the maximum-value case — and the one where the cost of *not* doing SDD compounds fastest.
+
+### Normal prompting is fine when
+
+- The code will be **deleted within a week**, or never touched again
+- This is a **one-shot transformation** — convert this CSV, reformat this text, generate this SQL query
+- A **single-session investigation** — Jupyter notebook for one analysis, then archived
+- **Throwaway** code — hackathon, spike, learning exercise, prototype to validate one assumption
+- The domain is **generic enough** that the agent's priors are reasonable defaults (CRUD on simple entities with no special rules)
+
+In these cases, writing a `CLAUDE.md` is overhead. Just prompt.
+
+### The middle ground: SDD-lite
+
+For solo projects that *might* grow, or projects in the 1–3 month window where it's not yet clear if they'll survive:
+
+- Write a `CLAUDE.md` (one file, ~100 lines)
+- Use `specs/` for non-trivial changes; skip it for trivial ones
+- Skip everything else until a specific trigger fires (see [The Absolute Minimum](#the-absolute-minimum))
+
+That's the minimum-viable SDD investment. It costs ~2 hours upfront and captures most of the drift-prevention benefit without committing you to full SDD discipline. If the project survives 3 months, you'll already have the foundation in place.
+
+### The hidden cost of NOT doing SDD
+
+People often weigh *"the cost of writing docs"* against *"the speed of just prompting."* This misses the cost of NOT having docs:
+
+- Time spent **re-explaining the same convention** every session
+- Time spent **reviewing or refactoring** agent output that drifted from the rest of the code
+- Decisions **re-litigated in PR review** (*"didn't we already discuss this?"*)
+- **New contributors** (human or agent) starting from zero context
+- **Old code that nobody understands** because the rationale lives in someone's head
+- **Production incidents** where nobody knows the original constraints
+
+The trade is: pay X% upfront in docs, save Y% over time in drift, rework, and onboarding friction. The X:Y ratio improves the longer the project lives and the more people touch it.
+
+### A practical decision rule
+
+If you can answer **yes** to two or more of these, the SDD overhead has already paid for itself:
+
+- *"Will I (or anyone) work on this code three months from now?"*
+- *"Will an AI agent touch this code in more than one session?"*
+- *"Does this code have to behave consistently with other code in the same repo?"*
+- *"Are there decisions here that would be expensive to reverse?"*
+
+If the answer to all four is *no* — prompt away. Don't perform documentation theatre on code that's about to be deleted.
 
 ---
 

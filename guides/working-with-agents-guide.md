@@ -10,14 +10,15 @@
 2. [How the Agent Reads Your Repo](#how-the-agent-reads-your-repo)
 3. [When the Agent Loads a File — and Why It Sometimes Doesn't](#when-the-agent-loads-a-file--and-why-it-sometimes-doesnt)
 4. [How Many Files Is Too Many](#how-many-files-is-too-many)
-5. [Starting and Ending Sessions](#starting-and-ending-sessions)
-6. [Working on Specs, ADRs, and Refactors](#working-on-specs-adrs-and-refactors)
-7. [Working on Runbooks and Operational Tasks](#working-on-runbooks-and-operational-tasks)
-8. [Universal Prompting Patterns](#universal-prompting-patterns)
-9. [When the Agent Drifts](#when-the-agent-drifts)
-10. [Maintaining Documentation Proactively](#maintaining-documentation-proactively)
-11. [Anti-Patterns](#anti-patterns)
-12. [Golden Rules](#golden-rules)
+5. [Token Economy](#token-economy)
+6. [Starting and Ending Sessions](#starting-and-ending-sessions)
+7. [Working on Specs, ADRs, and Refactors](#working-on-specs-adrs-and-refactors)
+8. [Working on Runbooks and Operational Tasks](#working-on-runbooks-and-operational-tasks)
+9. [Universal Prompting Patterns](#universal-prompting-patterns)
+10. [When the Agent Drifts](#when-the-agent-drifts)
+11. [Maintaining Documentation Proactively](#maintaining-documentation-proactively)
+12. [Anti-Patterns](#anti-patterns)
+13. [Golden Rules](#golden-rules)
 
 ---
 
@@ -132,6 +133,128 @@ These are squishy — your mileage depends on file sizes, naming clarity, and ho
 6. **Periodic audit.** Quarterly, ask the agent: *"list every markdown file in this repo. For each, identify: last modified date, whether it's still authoritative, whether it conflicts with any other file."* Then prune.
 
 The disciplines compound. With a 30-file repo and good hub-and-spoke organization, the agent works as well as it does on a 10-file repo. With a 30-file repo and no `CLAUDE.md` hub, it works worse than on a 5-file repo.
+
+---
+
+## Token Economy
+
+Tokens are the agent's currency. Every file read, every prompt, every tool output spends them. Sessions get slower and more expensive as the budget burns down, and beyond a threshold the agent's attention starts to dilute even when budget remains.
+
+The goal isn't to *minimize* tokens — it's to spend them where they earn back the most. Most teams over-pay in three or four predictable places.
+
+### Where tokens get wasted
+
+1. **Re-reading the same files.** A long session that reads `CLAUDE.md` four times is doing the work three times for free (caching helps when the prefix is stable — see below).
+2. **Loading entire files when you need one section.** *"Read `OrderRepository.cs`"* when you actually want the `GetOrders` method costs 5,000 tokens to find the 50 you wanted.
+3. **Full-file rewrites instead of diffs.** Generating a 400-line file because you changed 3 lines is the single most common token sink. Diffs cost ~50× less and review faster.
+4. **Verbose ceremony in prompts.** Twelve-line preambles (*"please, kindly, if you would…"*) are pure overhead. The agent doesn't reward politeness with better output.
+5. **Long, unfiltered tool outputs.** `find` returning 800 files; `git log` with 2,000 commits. The agent reads them all, gets less useful per token, and burns budget on noise.
+6. **Re-explaining context each session.** No `CLAUDE.md` → every session pays the *"what is this project"* tax from scratch.
+7. **Iterating by regeneration instead of targeted edit.** *"Give me the whole file again with this one change"* instead of *"show me a diff for just this method."*
+
+### Practical patterns that save tokens
+
+**Be specific about what to read.** Point at file paths and ranges when you can:
+
+```
+Read the GetOrders method in src/Repositories/OrderRepository.cs.
+Don't read the rest of the file.
+```
+
+beats
+
+```
+Read the order repository and find the relevant method.
+```
+
+The first costs a few hundred tokens. The second can easily cost 5,000+ on a large file.
+
+**Use `grep` / `glob` before `read`.** Find first, then load only the matches:
+
+```
+Grep src/ for `processBatch`. From the matches, read only the file
+with the most occurrences. Don't load the others.
+```
+
+**Ask for diffs, not rewrites.** Any prompt that involves changing code should specify:
+
+```
+Show me the change as a diff against the current file.
+Don't reproduce unchanged lines.
+```
+
+For environments that don't render diffs natively, ask for the new code *with a few lines of context* on either side — not the full file.
+
+**Front-load multi-part prompts.** One prompt with five questions is far cheaper than five prompts with one question each — every prompt re-replays system context, tool descriptions, and conversation history.
+
+**Compact `CLAUDE.md`.** Target ~100–250 lines. A 2,000-line `CLAUDE.md` is loaded into every prompt and dilutes attention. The biggest improvement is usually *trimming*, not adding.
+
+**End sessions early.** A 10-prompt session uses less than a 100-prompt session for the same work — each new prompt replays the full history. Save a session summary, start fresh, paste the summary as context.
+
+**Filter tool output before the agent sees it.** Instead of:
+
+```bash
+find . -name "*.cs"
+```
+
+(which might return 2,000 lines), prefer:
+
+```bash
+find . -name "*Order*.cs" -not -path "*/bin/*" -not -path "*/obj/*"
+```
+
+The shell did the filtering; the agent didn't have to. You save the difference.
+
+### Prompt caching
+
+Modern agent platforms (Anthropic's API, Claude Code) cache stable conversation prefixes. A cache hit is roughly **~10% of the cost** of an uncached read on the same content; sessions can become dramatically cheaper per prompt the longer they run, *if* the prefix stays consistent.
+
+To benefit:
+
+- **Put stable docs at the start.** `CLAUDE.md`, `ARCHITECTURE.md`, reference files — load them first, in the same order, every session.
+- **Don't shuffle file-reading order across prompts.** Cache hits depend on exact prefix matches; reordering reads invalidates the cache.
+- **Keep stable files stable.** Editing `CLAUDE.md` mid-session invalidates the cached prefix for that session.
+- **Be aware of TTL.** Caches expire after a few minutes of inactivity (typically 5 min on default tiers). Long pauses reset the saving.
+
+In practice: long sessions with consistent context get *cheaper* per prompt as more of the prefix is cached. This rewards a session shape where you front-load context once and then iterate.
+
+### Token-burning anti-patterns
+
+1. **"Read all files in `src/` and summarize."** Agent reads 200 files, summary is generic, you've burned 50k tokens. Pick 5–10 files instead.
+2. **"Make this production-ready."** Open-ended demands trigger ceremony — lots of generated code *just in case*. Be specific: *"add try/except around the network call, log on failure, return 500."*
+3. **Loading full git diffs to find one bug.** `git log --oneline | head -20` first, then read the specific commit.
+4. **Asking the agent to "remember" by re-pasting context every prompt.** Use a session summary file instead — paste once, reference by path.
+5. **Letting the agent paste back the file you just sent.** Specify *"don't reproduce the input"* if you're worried it will.
+6. **One-prompt-per-question over a 30-minute session** when a single front-loaded prompt would do.
+7. **Asking for the same analysis twice.** Save the first answer somewhere; reference it instead of regenerating.
+
+### Quick token audit
+
+At any point in a session, ask:
+
+```
+How many tool calls have you made so far in this task, and approximately
+how many tokens did each consume? Sort by cost descending.
+```
+
+The agent gives a rough breakdown. The biggest items are almost always:
+
+- One or two large file reads
+- Long tool outputs (find/grep without filters, full git diffs)
+- Re-reads of the same content
+
+That tells you where to cut.
+
+### When NOT to optimize
+
+Token-saving has a cost too — time spent phrasing prompts carefully, the friction of `grep`-before-`read`, the discipline of focused prompts. Skip the optimization when:
+
+- The task is short (3 prompts or fewer)
+- You're exploring and don't yet know what to look at
+- You're on a flat-rate tier and your time matters more than per-token cost
+- The first instinct is the right one and over-engineering the prompt slows you down
+
+Token economy matters at scale and over long sessions. For one-shot prompts, just type.
 
 ---
 
