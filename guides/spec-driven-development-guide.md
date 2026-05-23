@@ -7,16 +7,19 @@
 ## Table of Contents
 
 1. [Core Philosophy](#core-philosophy)
-2. [The PRD-First Approach](#the-prd-first-approach)
-3. [PRD vs Spec — Two Layers, Same Question](#prd-vs-spec--two-layers-same-question)
-4. [Writing a Good PLAN.md](#writing-a-good-planmd)
-5. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
-6. [Workflow for Changes](#workflow-for-changes)
-7. [Architecture Decision Records (ADR) in Depth](#architecture-decision-records-adr-in-depth)
-8. [Additional Files Worth Adding](#additional-files-worth-adding)
-9. [Repository Organization](#repository-organization)
-10. [Working with the Agent: Practical Commands](#working-with-the-agent-practical-commands)
-11. [Golden Rules](#golden-rules)
+2. [Who Practices SDD](#who-practices-sdd)
+3. [The PRD-First Approach](#the-prd-first-approach)
+4. [PRD vs Spec — Two Layers, Same Question](#prd-vs-spec--two-layers-same-question)
+5. [Writing a Good PLAN.md](#writing-a-good-planmd)
+6. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
+7. [Workflow for Changes](#workflow-for-changes)
+8. [Architecture Decision Records (ADR) in Depth](#architecture-decision-records-adr-in-depth)
+9. [The Absolute Minimum](#the-absolute-minimum)
+10. [Migrating from a Legacy Repo to SDD](#migrating-from-a-legacy-repo-to-sdd)
+11. [Additional Files Worth Adding](#additional-files-worth-adding)
+12. [Repository Organization](#repository-organization)
+13. [Working with the Agent](#working-with-the-agent)
+14. [Golden Rules](#golden-rules)
 
 ---
 
@@ -32,6 +35,31 @@ Related terms you'll encounter:
 - **Spec-kit workflow** — GitHub's formalization: `spec.md` → `plan.md` → `tasks.md`
 
 These are facets of the same idea. The name matters less than the discipline.
+
+---
+
+## Who Practices SDD
+
+*"Spec-driven development"* as a *named* methodology is recent — it crystallized in 2024–2025 around the rise of AI coding agents. The underlying disciplines, though, have decades of track record across the industry.
+
+**Explicit AI-era SDD adopters:**
+
+- **GitHub** ships [`spec-kit`](https://github.com/github/spec-kit) — the most direct, named SDD reference implementation, with 100k+ stars. The `spec.md → plan.md → tasks.md` flow in this guide mirrors theirs.
+- **Anthropic** treats `CLAUDE.md` as a first-class concept in Claude Code, with public engineering guidance that maps onto the same workflow.
+- **Cursor** (`.cursorrules`), **Aider** (conventions files), **Continue.dev** (`.continuerules`), and other agent tools have independently converged on the same *"one file the agent always reads"* pattern.
+
+**Pre-AI organizations practicing spec-adjacent discipline:**
+
+- **Amazon** — *Working Backwards* / PR-FAQ memos: new products start with a fake press release plus an FAQ. Structurally a PRD before any code exists.
+- **Google** — design-doc culture by default; Malte Ubl's [*Design docs at Google*](https://www.industrialempathy.com/posts/design-docs-at-google/) is the canonical reference.
+- **Stripe** — RFC-driven engineering; written prose treated as a first-class deliverable.
+- **Basecamp / 37signals** — [Shape Up](https://basecamp.com/shapeup) pitches map almost 1:1 onto modern SDD specs.
+
+**Methodologies that predate SDD and contributed its patterns:**
+
+IETF RFCs (1969+), Architecture Decision Records (Michael Nygard, 2011), the C4 model (Simon Brown), the Diátaxis documentation framework (Daniele Procida), and pre-mortems (Gary Klein) — all share DNA with what SDD does today.
+
+For the fuller list, the verified references, and a discussion of adoption depth (vs. depth-of-marketing), see [`sdd-in-the-wild.md`](sdd-in-the-wild.md).
 
 ---
 
@@ -426,6 +454,87 @@ For a solo or small team — a `docs/adr/` folder and numbering convention is en
 
 ---
 
+## The Absolute Minimum
+
+If you're starting today and don't want to overinvest in docs upfront, what's the smallest set of markdown files that still buys you SDD's benefits?
+
+### The single most important file
+
+**`CLAUDE.md`** at the repo root (or `.cursorrules` for Cursor, equivalent files for other agent tools). If you do nothing else from this guide, do this. It's the only file most agents load automatically; without it your conventions don't exist as far as the agent is concerned. One file the agent always reads beats ten files it might never reach.
+
+### Floor: 3 files (do not go lower)
+
+1. **`CLAUDE.md`** — conventions, what NOT to do, pointers to other docs. The agent's instruction hub.
+2. **`README.md`** — what this project is, how to run it. Entry point for humans (and a fallback for agents).
+3. **One spec file** — `specs/<date-slug>/spec.md` for the current change you're working on. Even if it's 20 lines, even if it's for a single PR.
+
+Below three, you're hoping, not specifying.
+
+### Practical minimum: 5 files (recommended starting set)
+
+For any project beyond a weekend hack, add two more:
+
+4. **`ARCHITECTURE.md`** — high-level structure: layers, modules, key boundaries. A diagram plus ~200 words of prose is enough on day one. Grow it as the system grows.
+5. **`DOMAIN.md`** (or `GLOSSARY.md`) — business terminology, abbreviations, the words specific to your problem space. Skip if your domain is generic (CRUD on things); essential if it has jargon (finance, biotech, logistics, regulated industries).
+
+Five files cover most of the SDD benefit for a project in the 0–3 month range.
+
+### Add the rest reactively, not proactively
+
+Beyond the starter set, each new doc should be triggered by something concrete — not by *"the methodology mentions it."*
+
+| File | Trigger to create it |
+|------|----------------------|
+| `docs/adr/ADR-001-*.md` | First non-trivial, hard-to-reverse decision (ORM choice, message broker, auth approach) |
+| `RUNBOOK.md` / `OPERATIONS.md` | First production incident, or first deploy to a real environment |
+| `TESTING.md` | Third time you explain the test conventions to the agent |
+| `.env.example` + `CONFIG.md` | First time onboarding takes > 1 hour |
+| `CONTRIBUTING.md` | First external contributor, or first time you forget your own commit convention |
+| `CHANGELOG.md` | First time a user asks *"what changed in this version?"* |
+| `docs/integrations/<vendor>.md` | First time the agent generates wrong code against an external API |
+| `docs/postmortems/<date>.md` | First incident worth not repeating |
+
+A `RUNBOOK.md` written before you have a system in production is fiction; a `CHANGELOG.md` written before you have users is busywork. Wait for the trigger; the act of writing the doc *while the problem is fresh* is what makes it useful.
+
+### A rule of thumb for any candidate file
+
+If you can't say *who reads this file, and when*, you don't need it yet.
+
+For each candidate doc, answer:
+
+- **Who reads it?** You? New hires? The agent? Auditors?
+- **When?** Daily? On incident? Before a change? Once at onboarding?
+- **What goes stale if you don't update it?**
+
+A file that fails all three is decoration — skip it.
+
+See [Additional Files Worth Adding](#additional-files-worth-adding) for the fuller catalog organized by priority tier, and the first entry in [Golden Rules](#golden-rules) for the related discipline (*"Don't create documents on spec"*).
+
+---
+
+## Migrating from a Legacy Repo to SDD
+
+The previous section described the starter set for a *new* project. What if you already have a 5-year-old codebase with thousands of files, no `CLAUDE.md`, scattered docs, and decisions buried in two-year-old Slack threads?
+
+**The trap:** the "documentation sprint week" — block out two weeks, write 50 files, generate a wall of agent-confusing text. By week 3 the docs are stale and nobody trusts them. Worst of both worlds: lost feature velocity *and* docs nobody uses.
+
+**The right shape:** incremental, agent-assisted, forward-leaning. Three rules:
+
+1. **Foundation first, in 5–7 days, not 5–7 weeks.** Write `CLAUDE.md`, `ARCHITECTURE.md`, and (if relevant) `DOMAIN.md` *with* the agent reading your existing code. Heavy review, but not from scratch.
+2. **Specs go forward, never backward.** Don't write a "spec" for code that already shipped — that's fan fiction. Every *new* change from migration day forward gets a spec; old features are documented only when something pulls you back into them.
+3. **ADRs are reactive, not retrospective.** Write an ADR the first time the agent makes a bad suggestion that contradicts an unwritten decision. Don't try to backfill every decision ever made.
+
+**Typical 90-day shape:**
+
+- **Week 1**: Foundation (CLAUDE.md → ARCHITECTURE.md → DOMAIN.md), first ADR for the most-violated unwritten rule.
+- **Week 2 onward**: every new change uses spec-driven workflow.
+- **Months 1–3**: ADRs accumulate reactively as triggers fire; first runbook entry after first incident.
+- **End of Q1**: roughly 10–15 markdown files, all earned by use, none decorative.
+
+For the concrete migration scripts, agent prompts that draft each foundation file from existing code, anti-patterns (the big-bang sprint, fabricated-history ADRs, fan-fiction specs, CLAUDE.md as wall-of-text), and worked examples (Python web app, .NET monorepo, C# legacy, OSS project), see [`legacy-to-sdd-migration-guide.md`](legacy-to-sdd-migration-guide.md).
+
+---
+
 ## Additional Files Worth Adding
 
 Beyond what we've covered (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, specs, PRD), consider these categories — from most important to "nice to have."
@@ -482,300 +591,98 @@ Beyond what we've covered (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, sp
 
 ## Repository Organization
 
-Practical layout for a mid-sized .NET project:
+This is what a *mature* SDD repo looks like — a mid-sized project, ~6–12 months into adoption, with most of the optional files earned by use. It is **not** what you start with on day 1. For the day-1 minimum, see [The Absolute Minimum](#the-absolute-minimum); for the migration shape if you have an existing repo, see [`legacy-to-sdd-migration-guide.md`](legacy-to-sdd-migration-guide.md).
 
 ```
 /
-├── README.md
-├── CLAUDE.md                    # agent always reads
-├── ARCHITECTURE.md              # agent always reads
-├── DOMAIN.md                    # agent always reads
-├── CONTRIBUTING.md
-├── CHANGELOG.md
-├── SECURITY.md
-├── ROADMAP.md
-├── LICENSE
-├── .env.example
-├── docs/
-│   ├── adr/
-│   │   ├── ADR-001-dapper.md
+├── README.md                          # entry point for humans — what the project is, how to run
+├── CLAUDE.md                          # entry point for the agent — conventions, what NOT to do, doc map
+├── ARCHITECTURE.md                    # high-level structure — layers, modules, key boundaries
+├── DOMAIN.md                          # business terminology, abbreviations, glossary (skip if generic)
+├── CONTRIBUTING.md                    # branch/commit conventions, PR checklist, how to contribute
+├── CHANGELOG.md                       # user-visible changes per version (Keep a Changelog format)
+├── SECURITY.md                        # vulnerability reporting + internal secrets/rotation policy
+├── ROADMAP.md                         # planned direction over coming quarters (not detailed plans)
+├── LICENSE                            # legal — required for OSS, useful internally too
+├── .env.example                       # template of required env vars (no real values committed)
+├── docs/                              # everything that isn't a top-level signpost
+│   ├── adr/                           # architecture decisions — immutable, numbered, append-only
+│   │   ├── ADR-001-dapper.md          # one decision per file, status header on top
 │   │   └── ADR-002-quartz.md
-│   ├── prd/                     # archive, reference only
+│   ├── prd/                           # original PRDs — archive, reference only (frozen after v1)
 │   │   └── 2025-12-original-prd.md
-│   ├── runbooks/
-│   ├── integrations/
-│   ├── data-flows/
-│   ├── schemas/
-│   ├── postmortems/
-│   ├── research/
-│   ├── templates/
-│   ├── snapshots/
-│   ├── GLOSSARY.md
-│   ├── TESTING.md
-│   ├── ONBOARDING.md
-│   ├── CONFIG.md
-│   └── decisions-log.md
-└── specs/
-    ├── _template/
+│   ├── runbooks/                      # per-incident recovery procedures (the 3 a.m. file)
+│   ├── integrations/                  # one file per external integration — endpoints, quirks, contacts
+│   ├── data-flows/                    # Mermaid diagrams of main flows through the system
+│   ├── schemas/                       # DDL of current schema + ERDs
+│   ├── postmortems/                   # incident analyses — root cause, lessons, follow-ups
+│   ├── research/                      # spike notes, library comparisons, experiments
+│   ├── templates/                     # PR/issue/spec/ADR templates to copy from
+│   ├── snapshots/                     # point-in-time captures before major refactors (rollback context)
+│   ├── GLOSSARY.md                    # alternative home for DOMAIN.md content if you prefer it under docs/
+│   ├── TESTING.md                     # test strategy, conventions, coverage expectations
+│   ├── ONBOARDING.md                  # git clone → working environment, step by step
+│   ├── CONFIG.md                      # env vars and config flags explained
+│   └── decisions-log.md               # in-flight decisions not yet worth a full ADR (review quarterly)
+└── specs/                             # per-feature specs, one folder per change
+    ├── _template/                     # blank spec/plan/tasks to copy from
     │   └── spec.md
-    ├── 2026-01-order-retry/
-    │   ├── spec.md
-    │   ├── plan.md
-    │   └── tasks.md
+    ├── 2026-01-order-retry/           # date-slug naming — folder freezes after PR merges
+    │   ├── spec.md                    # what + acceptance criteria
+    │   ├── plan.md                    # how — decisions, file structure, task order
+    │   └── tasks.md                   # execution checklist with checkboxes
     └── 2026-02-partner-csv-validation/
         └── ...
 ```
 
+### How to read this layout
+
+Three lifetimes are mixed together in the same tree:
+
+- **Stable layer** — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`. Updated as the codebase changes, but the *file itself* exists for the life of the project. The agent loads these (or is pointed at them by `CLAUDE.md`) nearly every session.
+- **Append-only layer** — `docs/adr/`, `docs/postmortems/`, `CHANGELOG.md`. Each new entry is added; old entries are never edited (except for ADR status changes via `Supersedes`). The history is the value.
+- **Frozen layer** — `docs/prd/`, `specs/<date-slug>/`. Written once, frozen after their moment passes (PRD: after v1 ships; spec: after the PR merges). Treat as historical artifacts.
+
+A repo that confuses these layers — editing old ADRs, treating PRD as living, leaving specs perpetually unfinished — rots fastest.
+
+### What you actually start with
+
+Almost none of this on day 1. The earliest version of any SDD repo is:
+
+```
+/
+├── README.md
+├── CLAUDE.md
+└── specs/
+    └── <first-feature>/spec.md
+```
+
+Three files. Everything else is added when a specific trigger fires (see the trigger table in [The Absolute Minimum](#the-absolute-minimum)). A new repo that ships the full tree above on day 1 has docs that are 80% wrong because they were written without active context.
+
+### Common variations
+
+- **Monorepo with multiple services** — one root `CLAUDE.md` for cross-service conventions, plus a `CLAUDE.md` per service for service-specific stack/patterns. Same with `ARCHITECTURE.md` (root: service-level boundaries; per-service: internal structure).
+- **Small project / solo dev** — collapse `docs/` content into top-level files until it gets unwieldy. A single `ARCHITECTURE.md` covering both structure and runbook is fine until it crosses ~600 lines.
+- **OSS project** — heavier emphasis on `CONTRIBUTING.md` and `LICENSE`; lighter on `ROADMAP.md` and `RUNBOOK.md` (operational stuff is private). `CLAUDE.md` written with external contributors' agents in mind.
+- **Regulated industry** — add `docs/compliance/` (audit trails, control mappings) alongside the standard tree. ADRs gain extra weight; throwing decisions in Slack is no longer an option.
+- **Heavy data/ML work** — add `docs/datasets/` (provenance, schemas, sampling) and `docs/experiments/` (separate from `docs/research/` — experiments are reproducible artifacts, research is exploratory notes).
+
+### The principle behind the layout
+
+Every folder and every file in this tree should be there because **something pulled it into being** — a real reader, a real trigger, a real recurring need. The layout is a snapshot of what an organization that practiced SDD discipline for a year ended up with. It is not a checklist to copy onto day 1. If you find yourself adding files because *"the template says to,"* stop. The template is a description of the destination, not a prescription for the path.
+
 ---
 
-## Working with the Agent: Practical Commands
+## Working with the Agent
 
-All the documentation in the world is useless if you don't actually use it when prompting the agent. This section shows concrete prompts for common situations.
+This guide describes *what* to write down: PRDs, specs, plans, ADRs, the three-layer documentation model. The companion guide [`working-with-agents-guide.md`](working-with-agents-guide.md) describes *how to put it in front of the agent* — concrete prompts for starting and ending sessions, drafting and superseding ADRs, implementing specs task-by-task, recovering from drift, plus the underlying mechanics:
 
-### Starting a New Session
+- **When the agent loads a file** (and why it sometimes feels random)
+- **How many files is too many** before the agent gets lost in your repo
+- Universal prompting patterns (`Plan before code`, `Cite your source`, `Diff, don't replace`, …)
+- Anti-patterns in agent interaction
 
-Begin every non-trivial session by anchoring the agent in the relevant context. Don't assume it remembers anything from before — even in long-running tools like Claude Code, fresh context windows are the norm.
-
-**For a new feature:**
-
-```
-Read CLAUDE.md, ARCHITECTURE.md, and DOMAIN.md.
-Then read specs/_template/spec.md to understand our spec format.
-We're starting a new feature: [short description].
-Before writing any code, draft specs/[date-slug]/spec.md based on the template.
-List open questions at the end — don't fill them in yourself.
-```
-
-**For modifying an existing feature:**
-
-```
-Read CLAUDE.md and ARCHITECTURE.md.
-We're modifying [feature]. Read its original spec at specs/[folder]/spec.md
-and the relevant code at [paths].
-I want to: [change description].
-Before changing anything, summarize:
-1. Which files will need to change
-2. Which conventions or ADRs apply
-3. What you would do — wait for my approval before writing code.
-```
-
-The pattern is the same: **load context → state intent → propose plan → wait for green light**. Don't let the agent jump straight to code.
-
-### After Adding a New ADR
-
-When you add a new ADR (especially Accepted or one that Supersedes another), the agent doesn't magically know. Tell it explicitly.
-
-**For a new Accepted ADR:**
-
-```
-I just added docs/adr/ADR-014-quartz-db-config.md.
-Read it carefully. Then:
-1. Update the "Active decisions" list in CLAUDE.md (add ADR-014)
-2. Check if any other docs reference the old approach and need updating
-3. Tell me what code in the current codebase contradicts this ADR
-   — do NOT change code yet, just list the locations.
-```
-
-**For an ADR that Supersedes another:**
-
-```
-ADR-014 supersedes ADR-002. I've already updated ADR-002's status header.
-Please:
-1. Update CLAUDE.md's "Active decisions" list — remove ADR-002, add ADR-014
-2. Grep the codebase and specs/ for references to ADR-002
-3. For each reference, recommend whether it stays (historical context)
-   or needs updating to point to ADR-014.
-```
-
-**For documenting a decision after the fact:**
-
-```
-We just decided to use [X] instead of [Y] for [reason].
-Draft an ADR following the template in docs/adr/_template.md.
-Use the next available number. Status: Accepted, today's date.
-Fill in Context, Decision, Consequences, and Alternatives Rejected.
-Leave References empty — I'll add them.
-Show me the draft before creating the file.
-```
-
-### After Creating a Spec — Starting Implementation
-
-A spec is ready. Now you want the agent to implement it. Don't just say "code it up."
-
-```
-We're implementing specs/2026-02-order-zip-per-batch/.
-Read spec.md, plan.md, and tasks.md in that folder.
-Also read CLAUDE.md and the referenced source files in plan.md.
-
-Work task by task from tasks.md:
-1. Before each task, restate what you're about to do
-2. Write the test first (if applicable per TESTING.md)
-3. Implement
-4. Wait for me to confirm before moving to the next task
-
-Do NOT skip ahead. Do NOT add features not in the spec.
-If something in the spec is unclear, stop and ask — don't guess.
-```
-
-For smaller specs you can compress this, but the principle holds: **task by task, with checkpoints**.
-
-### After Implementing — Updating Documentation
-
-This is the step most teams skip, and it's why repos rot. After merging code, the agent should help maintain the docs that just became outdated.
-
-```
-We just merged PR #123 implementing specs/2026-02-order-zip-per-batch/.
-Please:
-1. Append "STATUS: shipped (PR #123, 2026-05-21)" to spec.md
-2. Check if ARCHITECTURE.md needs updating (new component, changed boundary?)
-3. Check if DOMAIN.md needs updating (new term introduced?)
-4. Check if CLAUDE.md conventions section needs a line about ZipBatchWriter
-5. Show me proposed diffs — I'll approve each one separately.
-```
-
-This 5-minute habit prevents documentation drift over months.
-
-### After a Major Refactor
-
-Refactors invalidate large parts of context. Help the agent re-orient.
-
-```
-We just completed a major refactor of the order processing pipeline.
-Before we continue work:
-1. Read the current state of src/Orders/ and src/Infrastructure/
-2. Compare against ARCHITECTURE.md — list discrepancies
-3. Propose updates to ARCHITECTURE.md to reflect reality
-4. Create docs/snapshots/2026-05-post-refactor.md describing the new state
-   (for future reference and rollback context).
-```
-
-Snapshots are cheap insurance. You almost never need them, but when you do they're priceless.
-
-### When the Agent Drifts (Proposes Something Against Your Conventions)
-
-This will happen. Often. The fix is simple but requires discipline.
-
-**Surgical correction:**
-
-```
-Stop. What you're proposing contradicts ADR-007 (we use Dapper, not EF).
-Re-read ADR-007 and revise your approach.
-```
-
-**When the agent persists:**
-
-```
-You're still suggesting EF patterns. Two possibilities:
-1. You forgot ADR-007 — re-read it now and confirm you understand
-2. You think ADR-007 should change — if so, make the case for a new ADR
-   that supersedes it. Don't sneak EF in via the back door.
-```
-
-**When the agent has a point:**
-
-```
-You're right that ADR-007 doesn't cover this case.
-Draft an ADR-015 that extends ADR-007 for [specific scenario].
-Don't supersede ADR-007 — extend it. Show me the draft.
-```
-
-The pattern: **named documents in your prompts**. "Per our conventions" is weak. "Per ADR-007 section Consequences" is strong.
-
-### Asking the Agent to Maintain Documentation Proactively
-
-Train the agent to flag documentation gaps as it works.
-
-Add this to `CLAUDE.md`:
-
-```markdown
-## Documentation Maintenance Rules
-When working on any task, if you encounter:
-- A convention not documented in CLAUDE.md → propose adding it
-- A decision made implicitly that should be an ADR → flag it
-- Terminology used inconsistently → propose a GLOSSARY entry
-- An integration without docs in docs/integrations/ → propose creating one
-
-Always propose, never edit docs without explicit approval.
-```
-
-Then in sessions, occasionally ask:
-
-```
-Based on our work today, what documentation gaps did you notice?
-List them with priority (critical / nice-to-have).
-```
-
-### Ending a Session
-
-The last 60 seconds of a session matter more than the first 10 minutes.
-
-```
-We're wrapping up. Please produce a session summary:
-1. What we accomplished (with PR/spec references)
-2. What's left in current tasks.md (with status)
-3. Any decisions made that aren't yet in ADRs or specs
-4. Any documentation drift you noticed and didn't address
-5. Suggested next session starting prompt.
-
-Save it as specs/[current-spec]/session-notes-[date].md
-```
-
-This becomes the perfect starter context for your next session — by you or by the agent.
-
-### A Few Universal Prompting Patterns
-
-These work across all situations:
-
-**"Plan before code":**
-```
-Don't write code yet. First, outline what you'll do in 5-10 bullet points.
-I'll approve or correct before you start implementing.
-```
-
-**"Cite your source":**
-```
-For each decision in your proposal, cite the document that supports it
-(CLAUDE.md section, ADR number, spec path).
-If a decision isn't grounded in any document, mark it as [ASSUMPTION]
-and we'll discuss before proceeding.
-```
-
-**"Diff, don't replace":**
-```
-Show me proposed changes as diffs against the current file,
-not as a full rewrite. I want to see exactly what changes.
-```
-
-**"Question before assumption":**
-```
-If anything in this task is ambiguous, list your questions before starting.
-I'd rather answer 5 questions now than refactor 50 lines later.
-```
-
-**"Stay in scope":**
-```
-The spec is specs/2026-02-x/. Do not modify any file outside the paths
-listed in plan.md. If you think a change outside scope is necessary,
-stop and propose extending the spec — don't silently expand.
-```
-
-### Anti-Patterns in Agent Interaction
-
-What NOT to do:
-
-1. **"Just figure it out."** The agent will. The result will not match your conventions.
-
-2. **"Use best practices."** Whose best practices? Yours are in CLAUDE.md. Reference them.
-
-3. **"Make it production-ready."** Meaningless. Say what production-ready means in your context (logging, error handling, tests, observability) — or point to TESTING.md and CLAUDE.md.
-
-4. **Loading every doc on every prompt.** Wastes tokens, dilutes attention. Pick relevant context per task.
-
-5. **Skipping the post-implementation doc update.** This is how repos rot. The discipline is: spec → code → docs update, every time.
-
-6. **Letting the agent write ADRs unsupervised.** ADRs are decisions you own. The agent can draft. You approve.
-
-7. **Asking the agent to "remember" something across sessions.** It can't. Write it down in CLAUDE.md, or it doesn't exist.
+Read it once before you start using the workflow described in this guide on a real project. It's the thinnest layer between the documentation conventions here and the prompts that put them into effect.
 
 ---
 

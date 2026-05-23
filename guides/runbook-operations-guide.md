@@ -16,7 +16,7 @@
 8. [Organization: Single File vs Folder Structure](#organization-single-file-vs-folder-structure)
 9. [Writing for AI Agents](#writing-for-ai-agents)
 10. [Maintenance Discipline](#maintenance-discipline)
-11. [Working with the Agent: Practical Commands](#working-with-the-agent-practical-commands)
+11. [Working with the Agent](#working-with-the-agent)
 12. [Anti-Patterns](#anti-patterns)
 13. [Golden Rules](#golden-rules)
 
@@ -557,104 +557,16 @@ Every time you say *"good thing I remembered to check X — that wasn't in the r
 
 ---
 
-## Working with the Agent: Practical Commands
+## Working with the Agent
 
-The runbook lives or dies by use. Here are prompts for the recurring situations.
+Concrete prompts for the situations a runbook actually shows up in — drafting a new entry after an incident, extracting one from a post-mortem, generating diagnostic scripts from runbook content, auditing for staleness, requiring runbook entries before merging operational features — live in the companion guide [`working-with-agents-guide.md`](working-with-agents-guide.md), in its "Working on Runbooks and Operational Tasks" section. That guide also covers the mechanics behind those prompts:
 
-### Drafting a new entry after an incident
+- **When the agent loads a file** (and why it sometimes feels random)
+- **How many files is too many** before the agent gets lost in your repo
+- Universal prompting patterns (`Plan before code`, `Cite your source`, …) that apply to runbook work just as much as to feature work
+- Anti-patterns in agent interaction
 
-```
-We just resolved an incident: [one-line summary].
-Root cause was [X]. Recovery steps were [Y, Z].
-
-Draft a new runbook entry at docs/runbooks/[slug].md using the template at
-docs/runbooks/_template.md.
-
-Fill in:
-- Symptoms (what the on-call would see at the start)
-- Pre-checks, Diagnosis, Recovery
-- Verification
-- Escalation
-- Related entries (search existing runbooks for any that should link)
-
-Mark "Last verified: today's date" and "Owner: [team]".
-Show me the draft before saving.
-```
-
-### Extracting a runbook from a post-mortem
-
-```
-Read docs/postmortems/2026-05-incident-X.md.
-
-Identify any *operational* lessons that should become runbook entries.
-For each:
-1. Propose a runbook filename
-2. Propose a 5-line outline (symptoms → recovery)
-3. Mark whether it's a NEW entry or an EXTENSION of an existing one
-
-List them. I'll pick which to create.
-```
-
-### Updating after an infrastructure change
-
-```
-We just changed [X]: [description]. Files affected: [paths].
-
-Search OPERATIONS.md and docs/runbooks/ for any:
-1. Commands that reference the old name/path/port
-2. Procedures that depend on the old behavior
-3. Health checks or dashboards that need updating
-
-List the locations and the proposed update for each — do NOT change docs yet.
-```
-
-### Generating a diagnostic script from runbook content
-
-```
-Read docs/runbooks/sftp-delivery-stuck.md.
-
-Generate a single bash script that runs all the diagnostic steps from the
-"Diagnosis" section, prints output for each, and exits with:
-- 0 if all checks pass
-- 1 if any check fails
-
-Use exactly the commands and expected outputs in the runbook — do NOT invent.
-If something in the runbook is unclear, list it as a question instead of guessing.
-```
-
-This pattern — *runbook is the spec, script is the artifact* — is much more reliable than asking the agent to invent diagnostics from scratch.
-
-### Auditing the runbook for staleness
-
-```
-Read docs/runbooks/ and OPERATIONS.md.
-For each entry, report:
-1. Last verified date (or "not present")
-2. Whether any referenced hostnames, file paths, or service names
-   appear missing from the current codebase (check src/, config/, infra/)
-3. Whether any referenced ADRs are now Superseded
-
-Output a markdown table. Do not modify any files.
-```
-
-Run this quarterly. It surfaces rot before it bites.
-
-### When the agent generates "production-ready" code without a runbook
-
-If the agent proposes adding a feature with non-trivial operational concerns (new external integration, new background job, new persistent state), require:
-
-```
-Before this is "done," propose the runbook entries that need to exist for this
-feature to be operable:
-- What can break?
-- What's the recovery procedure?
-- What's the health check?
-- What's the escalation path?
-
-List entries to add to docs/runbooks/. We'll write them before merging.
-```
-
-This is the operational equivalent of "tests must accompany the feature." A new background job without a runbook entry is a 3 a.m. waiting to happen.
+Reading those sections once is the single most leveraged way to make this runbook guide pay off in practice.
 
 ---
 
