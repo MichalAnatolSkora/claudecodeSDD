@@ -32,8 +32,9 @@ When new content needs to land in the docs:
 
 Existing detail guides:
 
-- `guides/working-with-agents-guide.md` — how the agent reads files, prompting patterns, anti-patterns, file-count thresholds
+- `guides/working-with-agents-guide.md` — how the agent reads files, prompting patterns, anti-patterns, file-count thresholds, token economy, Claude Code building blocks (skills/commands/subagents/hooks)
 - `guides/runbook-operations-guide.md` — operational / runbook layer
+- `guides/claude-md-guide.md` — how to write a good `CLAUDE.md` itself (what goes in, sizing, the many-docs case, anti-patterns, template)
 - `guides/legacy-to-sdd-migration-guide.md` — the one-time process of retrofitting SDD onto an existing codebase (audit, foundation, forward-only specs, reactive ADRs, agent prompts, worked examples)
 - `guides/sdd-in-the-wild.md` — companies/teams publicly practicing SDD principles (verified adopters + adjacent methodologies)
 

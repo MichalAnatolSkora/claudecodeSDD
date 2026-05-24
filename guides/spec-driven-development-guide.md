@@ -539,6 +539,8 @@ If you're starting today and don't want to overinvest in docs upfront, what's th
 
 **`CLAUDE.md`** at the repo root (or `.cursorrules` for Cursor, equivalent files for other agent tools). If you do nothing else from this guide, do this. It's the only file most agents load automatically; without it your conventions don't exist as far as the agent is concerned. One file the agent always reads beats ten files it might never reach.
 
+What separates a useful `CLAUDE.md` from a generic one — what to put in, what to leave out, how big it should get, how it changes when the repo has 30+ other markdown files competing for attention — is the subject of its own detail guide: [`claude-md-guide.md`](claude-md-guide.md). Read that one before writing your project's `CLAUDE.md` from scratch; the difference between a "wall of text" and a hub that routes the agent's attention well is mostly about the rules in that guide.
+
 ### Floor: 3 files (do not go lower)
 
 1. **`CLAUDE.md`** — conventions, what NOT to do, pointers to other docs. The agent's instruction hub.
