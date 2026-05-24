@@ -654,49 +654,219 @@ Then `/spec-new add rate limiting to the orders endpoint` does the whole setup i
 
 ### Subagents
 
-**What they are:** delegated agents that handle a contained task in their own context window, then return a single result to the main session. Spawned via the Agent tool. Used for work that would bloat the main session if done inline.
+**What they are:** delegated agents that handle a contained task in their own context window, then return a single result to the main session. Spawned via the `Agent` (a.k.a. `Task`) tool. The main session sees the delegated agent's final report — *not* its intermediate tool calls — which keeps the main context clean and the main session's token budget intact.
+
+Subagents come in two flavors:
+
+1. **Ad-hoc subagents** — spawned with a one-off prompt: *"Spawn a subagent with this prompt: …"* The prompt is the entire briefing; you get one shot.
+2. **Configured subagents** — defined as files in `.claude/agents/<name>.md` (project) or `~/.claude/agents/<name>.md` (user). Each file has a `description` (when the agent should be used), a `tools` list (which tools it gets), and a prompt body. The main agent invokes them by name when the description matches the user's request.
+
+Configured subagents are the right pattern when you'll use the same delegated workflow more than 2–3 times. Ad-hoc is fine for one-off explorations.
 
 **Where they fit in SDD:**
 
-- **Audit tasks.** *"Audit `docs/runbooks/` for staleness against current `src/`."* The audit reads dozens of files; you don't want them in your main context.
+- **Audit tasks.** Reading dozens of files to summarize state. The main session never sees the raw scan; it just gets the summary.
 - **Cross-file research.** *"Find every reference to ADR-007 in specs and code; report which are still valid."*
-- **Parallel investigation.** Multiple subagents working independently. One audits docs, one runs the test suite, one drafts the PR description.
-- **Pre-implementation review.** *"Before I implement spec `2026-05-x`, spawn a subagent to read the spec + the affected code and identify gaps in the plan."*
+- **Parallel investigation.** Multiple subagents working independently — one audits docs, one runs the test suite, one drafts the PR description, all in their own contexts.
+- **Pre-implementation review.** Before implementing a spec, spawn a subagent to identify gaps in the plan.
+- **Bounded code review.** Specialized review tasks (security, performance, accessibility) with their own toolset and prompt.
 
-**Example: a doc-audit subagent**
+#### Example subagents (configured, in `.claude/agents/`)
+
+**1. `doc-auditor.md` — staleness check across guides and runbooks**
+
+```yaml
+---
+name: doc-auditor
+description: Audit guides, runbooks, and CLAUDE.md for staleness against the
+  current codebase. Use when the user asks "are our docs still accurate?",
+  during quarterly reviews, or after a major refactor.
+tools: Read, Grep, Glob, Bash
+---
+
+Walk docs/runbooks/, guides/, and CLAUDE.md. For each entry:
+1. Check whether referenced service names, file paths, and commands still
+   exist (verify against src/, config/, infra/).
+2. Check whether any referenced ADRs are now Superseded.
+3. Note the "Last verified" date; flag anything older than 6 months.
+
+Return a markdown table: file, last verified, stale items, suggested action.
+Do not modify any files. Return only the report.
+```
+
+**2. `spec-gap-finder.md` — pre-implementation sanity check**
+
+```yaml
+---
+name: spec-gap-finder
+description: Before implementing a spec, read it together with the affected
+  source code and identify gaps in the plan. Use when the user is about to
+  start implementing a spec.
+tools: Read, Grep, Glob
+---
+
+The user gives you a spec folder path. Read spec.md, plan.md, and tasks.md
+in that folder. Then read the source files referenced in plan.md.
+
+Identify:
+- Tasks that look incomplete or under-specified
+- Dependencies on code that doesn't exist yet
+- Conventions in CLAUDE.md the plan appears to violate
+- Test coverage gaps not mentioned in tasks.md
+
+Return a numbered list of concerns. Do not propose code changes — just flag.
+```
+
+**3. `adr-archaeologist.md` — find unwritten decisions worth ADR'ing**
+
+```yaml
+---
+name: adr-archaeologist
+description: Search the codebase for implicit decisions (custom implementations
+  where a library exists, unusual workarounds, deliberate-looking patterns)
+  that should probably be captured as ADRs. Use during SDD migration or
+  quarterly.
+tools: Read, Grep, Glob
+---
+
+Scan src/ for code that looks like a deliberate decision: custom code where
+a standard library exists, workarounds with explanatory comments, unusual
+structure, deliberate-looking patterns.
+
+For each candidate:
+1. Describe what was decided (one sentence)
+2. Best guess at why (cite comments / commit messages where possible)
+3. Mark whether this is worth a new ADR
+
+Return a list. Don't draft the ADRs themselves — the human will pick which
+to formalize.
+```
+
+**4. `test-coverage-scout.md` — find untested paths**
+
+```yaml
+---
+name: test-coverage-scout
+description: Identify functions or branches in a module that lack test
+  coverage. Use before merging a non-trivial change, or when introducing
+  a regression test for a bug.
+tools: Read, Grep, Glob, Bash
+---
+
+The user gives you a module path. Read the source files and the matching
+test files.
+
+For each public function, identify:
+- Whether it has any tests at all
+- Whether error/edge-case branches are exercised
+- Whether the happy-path tests actually assert what the function does
+
+Return a table: function, has_tests, edge_cases_covered, suggested test
+additions. Don't write the tests — just list them.
+```
+
+**5. `dependency-auditor.md` — check what's still used and what's outdated**
+
+```yaml
+---
+name: dependency-auditor
+description: Check whether dependencies in package.json / requirements.txt /
+  *.csproj are still imported and whether outdated versions exist. Use
+  before quarterly dependency-update windows.
+tools: Read, Grep, Glob, Bash
+---
+
+Read the project's dependency manifest. For each dependency:
+1. Grep src/ for imports — is it still actually used?
+2. Check for known major-version updates (Bash to query the package
+   registry if needed).
+3. Flag: unused, outdated by 2+ major versions, security advisories.
+
+Return a markdown table. Don't modify the manifest.
+```
+
+#### Ad-hoc subagent example: bounded research
+
+For one-off research that doesn't justify a permanent agent file:
 
 ```
 Spawn a subagent with this prompt:
 
-> Read every file in docs/runbooks/ and every file in src/. For each runbook,
-> check whether referenced service names, file paths, and commands still match
-> the current codebase. Return a markdown table: runbook, last verified date,
-> stale items found, suggested action.
+> Find every place in src/ where we call the external acme-bank API.
+> For each call site, return:
+> - File and line number
+> - Which endpoint is being called
+> - Whether the call has retry logic
+> - Whether errors are logged
 >
-> Do not modify any files. Return only the report.
+> Return a markdown table. Don't modify anything.
 
-After the subagent reports back, I'll decide which runbooks to update.
+I'll use the report to plan a refactor.
 ```
 
-The main session stays focused; the audit happens in parallel.
+**Anti-pattern:** spawning a subagent for short tasks. Each subagent costs ~1–2k tokens just to set up its own context and tool registry. For anything under ~5 tool calls, inline is cheaper *and* faster.
 
-**Anti-pattern:** spawning a subagent for short tasks. The handoff has overhead — context setup, tool authorization, result transmission. For anything under ~5 tool calls, just do it inline.
+### When the agent skips spawning a subagent
+
+A common frustration: you write a prompt that clearly *would* benefit from delegation, the agent reads it, agrees with the plan, and then does the work inline anyway. The `.claude/agents/` file you carefully crafted sits unused.
+
+This isn't random — there are predictable reasons.
+
+**1. The model judged inline cheaper.** Subagents have setup overhead: a separate context window, a fresh tool registry, the prompt-to-subagent handoff, the return summary. If the model estimates the task is small (under ~5–10 tool calls), it usually skips delegation. From its perspective, that's the right call most of the time.
+
+**2. The prompt didn't match any agent's `description`.** Configured subagents trigger on description matches. If your `.claude/agents/doc-auditor.md` says *"Use when the user asks 'are our docs still accurate?'"* but you wrote *"check if the runbooks are still good,"* the match may fail. Descriptions need to cover the phrasings you actually use, not the formal ones.
+
+**3. The user prompt didn't suggest delegation.** Phrasing matters more than people expect. *"Spawn the `doc-auditor` subagent to audit the docs"* is a strong signal. *"Audit the docs"* leaves it open — and the model often interprets ambiguity as *"just do it in the main session"* because that's the lower-friction path.
+
+**4. Path dependency from earlier tool calls.** If the model has been working in the main session for a while — reading files, making edits — it tends to continue in that mode. Switching mid-task to a subagent feels like a context break, so it often doesn't happen. Set the expectation at the *start* of a task, not in the middle.
+
+**5. The `subagent_type` is ambiguous.** Claude Code's `Agent` tool takes a `subagent_type` argument (`general-purpose`, `Explore`, `Plan`, plus any project-defined ones). If your prompt doesn't make the right type obvious, the model may default to `general-purpose` — or skip the spawn entirely if no type fits cleanly.
+
+**6. Permission scoping.** If the `Agent` tool isn't in the allowed-tools list for the current session (project `settings.json` or user `settings.json`), the model can't spawn it. You won't see an error; the spawn just silently doesn't happen.
+
+**7. Agent definitions exist but aren't discoverable.** Some setups need an explicit pointer in `CLAUDE.md` or in the session start (*"Available subagents: doc-auditor, spec-gap-finder, …"*). If the agent file is in `.claude/agents/` but the main agent never sees a list, configured subagents stay invisible.
+
+#### How to nudge it
+
+- **Be explicit.** *"Spawn the `doc-auditor` subagent to handle this."* Naming the subagent by name forces the tool call.
+- **Set expectations up front.** *"This is going to be a long audit — delegate to a subagent from the start. Don't read these files inline."*
+- **Use slash commands.** A `.claude/commands/audit-docs.md` that says *"Spawn the doc-auditor subagent with the following prompt: …"* makes the delegation explicit every time the user types `/audit-docs`.
+- **Tune the `description` field.** If your subagent isn't triggering, expand its description to cover more phrasings of how users actually ask for it. Test with the real prompt you'd type, not the one you'd write in a guide.
+- **Verify tool availability.** Ask *"list the tools currently available to you"* mid-session — if `Agent` is missing, fix permissions, not the prompt.
+- **List subagents in `CLAUDE.md`.** A small section: *"Available subagents (in `.claude/agents/`): doc-auditor (staleness check), spec-gap-finder (pre-implementation review), …"* — gives the main agent a discovery surface.
+
+The general principle: subagents are an option the model considers, not an obligation. If you want them used consistently, remove the ambiguity from the prompt.
 
 ### Hooks
 
-**What they are:** automation triggered by events, configured in `settings.json` (project or user). Common events: `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `Stop`, `SubagentStop`. Hooks run shell commands or scripts; the harness executes them, not the agent itself. They can block actions, inject context, or run side effects.
+**What they are:** automation triggered by events, configured in `.claude/settings.json` (project) or `~/.claude/settings.json` (user). The *harness* runs them, not the agent. Hooks can **block** actions (return non-zero exit), **inject context** (output goes back to the model), or **run side effects** (lint, build, regenerate artifacts, log).
 
-**Where they fit in SDD:**
+#### Events
 
-- **Enforce conventions.** A `PreToolUse` hook on `Edit|Write` for `.md` files runs `markdownlint`; commits to malformed docs get blocked at the source.
-- **Automate doc maintenance.** A `PostToolUse` hook on `Edit|Write` for `guides/*.md` regenerates the PDF via pandoc + Prince. The agent edits markdown; the PDF stays in sync without anyone remembering.
-- **Inject context.** A `UserPromptSubmit` hook prepends a reminder (*"the active ADR list is in `CLAUDE.md` § Active Decisions"*). The agent gets the pointer for free.
-- **End-of-session discipline.** A `Stop` hook checks for uncommitted spec changes, missing PR references in shipped specs, or stale ADRs not updated this session.
-- **Pre-commit gates.** Block commits that touch `src/` without a corresponding spec update, or that modify an ADR with `Status: Accepted` (only headers may be edited).
+| Event | Fires when | Typical use |
+|-------|------------|------------|
+| `PreToolUse` | Before any tool call | Block destructive actions, gate edits, lint inputs |
+| `PostToolUse` | After a tool call completes | Trigger side effects (rebuild, regenerate, notify) |
+| `UserPromptSubmit` | User submits a new prompt | Inject context, log session |
+| `Stop` | Session ends normally | Session summary, cleanup, commit reminder |
+| `SubagentStop` | A subagent finishes | Capture subagent output, validate report |
+| `Notification` | Agent emits a notification | Forward to chat, log to file |
 
-**Example: PDF auto-regen on guide changes**
+Each event accepts a `matcher` (which tool name or pattern triggers it — supports regex like `Edit|Write`) and a list of `hooks` (each with `type: command` and the shell command).
 
-`.claude/settings.json`:
+#### Where they fit in SDD
+
+- **Enforce conventions.** A `PreToolUse` hook on `Edit|Write` for `.md` files runs `markdownlint`; malformed docs blocked at the source.
+- **Automate doc maintenance.** A `PostToolUse` hook on `Edit|Write` for `guides/*.md` regenerates the PDF via pandoc + Prince. Agent edits markdown; PDF stays in sync without anyone remembering.
+- **Inject context.** A `UserPromptSubmit` hook prepends *"the active ADR list is in `CLAUDE.md` § Active Decisions."* Agent gets the pointer for free.
+- **End-of-session discipline.** A `Stop` hook checks for uncommitted spec changes, missing PR references in shipped specs, stale ADRs not updated this session.
+- **Pre-commit gates.** Block commits that touch `src/` without a corresponding spec update, or modify ADRs with `Status: Accepted`.
+- **Block dangerous tools.** A `PreToolUse` hook on `Bash` that catches `rm -rf` or `git push --force`.
+- **Inject conventions just-in-time.** A `PreToolUse` hook on `Edit` for `*.cs` files prepends the team's C# style guide before the edit.
+
+#### Several example hooks
+
+**1. PDF auto-regen on guide changes**
 
 ```json
 {
@@ -716,9 +886,134 @@ The main session stays focused; the audit happens in parallel.
 }
 ```
 
-Now any time the agent edits a guide, the PDF rebuilds automatically.
+Any time the agent edits a guide, the PDF rebuilds automatically.
 
-**Anti-pattern:** hooks that fail silently. A broken hook that swallows errors is worse than no hook — the agent thinks the convention is enforced, your repo says otherwise. Always log to a file or print to stderr.
+**2. Block edits to ADRs already marked `Status: Accepted`**
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_FILE_PATHS\" == *docs/adr/* ]] && grep -q '^Status: Accepted' \"$CLAUDE_FILE_PATHS\" 2>/dev/null; then echo 'Blocked: ADR is Accepted — only the Status header may change. Create a new ADR with Supersedes instead.' >&2; exit 1; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The agent tries to edit the ADR; the hook stops it; the agent sees the message on stderr and reconsiders.
+
+**3. Inject the active ADR list on every prompt**
+
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Active ADRs:' && grep -l '^Status: Accepted$' docs/adr/*.md 2>/dev/null | sed 's|docs/adr/||'"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The agent sees the active ADR list before every prompt; the human stops having to remember to include it.
+
+**4. Markdown lint after every doc edit**
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$CLAUDE_FILE_PATHS\" in *.md) markdownlint \"$CLAUDE_FILE_PATHS\" >&2 || true ;; esac"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The `|| true` keeps the hook from blocking — issues just surface to stderr where the agent can read them. Drop `|| true` and ensure `markdownlint` exits non-zero to make it blocking.
+
+**5. End-of-session checklist**
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if git status --porcelain specs/ docs/adr/ | grep -q .; then echo 'Reminder: uncommitted changes in specs/ or docs/adr/.' >&2; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Surfaces the *"did you commit the spec / ADR?"* nudge at session end.
+
+**6. Block `rm -rf` and `git push --force`**
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'rm[[:space:]]+-rf|git[[:space:]]+push.*--force'; then echo 'Blocked: destructive command. If intended, run manually.' >&2; exit 1; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Catches the most common ways to lose work; bypassing requires explicit human action outside the agent.
+
+#### Operational notes
+
+- **Exit code = blocking behavior.** A hook that exits non-zero stops the tool call. Use this for gates; use stderr to communicate to the agent.
+- **Hooks must be fast.** A hook that takes 5 seconds adds 5 seconds to every matching tool call. Aim for sub-100 ms. Push slow work into subagents or slash commands instead.
+- **Hooks log to stderr by default.** The agent sees stderr output as part of the tool result. For your own debugging, also tee to a file (`>> ~/.claude/hooks.log 2>&1`).
+- **Matchers support regex.** `Edit|Write` matches both. `Bash` matches all bash calls. `""` (empty) matches everything.
+- **Useful environment variables.** Typically `$CLAUDE_FILE_PATHS` (paths from tool input), `$CLAUDE_TOOL_INPUT` (raw input), `$CLAUDE_TOOL_NAME`. Names vary by harness version — check current docs before relying on them.
+- **Project vs user scope.** Hooks in `~/.claude/settings.json` apply only to you; the team doesn't see them. For team-shared invariants, put hooks in project `.claude/settings.json` and commit it.
+
+#### Anti-patterns
+
+- **Silent failures.** A hook that fails without logging is invisible damage. Always log to a file or stderr — the agent thinks the convention is enforced, your repo says otherwise.
+- **Hooks doing real work.** A hook that runs a 30-second test suite is a misuse. Hooks validate / block / notify; for actual work, prefer subagents or slash commands.
+- **Over-restrictive `PreToolUse`.** A hook that blocks all Bash calls except a whitelist will frustrate the agent into asking permission for everything. Block dangerous things, not anything that *could theoretically* be wrong.
+- **Hook configuration not committed.** Hooks that only exist in one developer's `~/.claude/settings.json` aren't a team invariant — they're personal preference. For team-shared rules, commit `.claude/settings.json` to the repo.
+- **No way to bypass.** A hook that absolutely blocks a tool call with no escape (e.g., environment variable to skip it) is painful when you legitimately need the action. Build in `CLAUDE_HOOKS_SKIP=1` or similar for the rare valid case.
 
 ### Which one to reach for
 
