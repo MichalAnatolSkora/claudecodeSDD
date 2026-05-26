@@ -9,18 +9,19 @@
 1. [Core Philosophy](#core-philosophy)
 2. [Who Practices SDD](#who-practices-sdd)
 3. [When SDD Pays Off (and When It's Overhead)](#when-sdd-pays-off-and-when-its-overhead)
-4. [The PRD-First Approach](#the-prd-first-approach)
-5. [PRD vs Spec — Two Layers, Same Question](#prd-vs-spec--two-layers-same-question)
-6. [Writing a Good PLAN.md](#writing-a-good-planmd)
-7. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
-8. [Workflow for Changes](#workflow-for-changes)
-9. [Architecture Decision Records (ADR) in Depth](#architecture-decision-records-adr-in-depth)
-10. [The Absolute Minimum](#the-absolute-minimum)
-11. [Migrating from a Legacy Repo to SDD](#migrating-from-a-legacy-repo-to-sdd)
-12. [Additional Files Worth Adding](#additional-files-worth-adding)
-13. [Repository Organization](#repository-organization)
-14. [Working with the Agent](#working-with-the-agent)
-15. [Golden Rules](#golden-rules)
+4. [The Absolute Minimum](#the-absolute-minimum)
+5. [The PRD Layer](#the-prd-layer)
+6. [Writing a Good spec.md](#writing-a-good-specmd)
+7. [Writing a Good PLAN.md](#writing-a-good-planmd)
+8. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
+9. [Workflow for Changes](#workflow-for-changes)
+10. [SDD in Teams: Roles and Responsibilities](#sdd-in-teams-roles-and-responsibilities)
+11. [Architecture Decision Records (ADR)](#architecture-decision-records-adr)
+12. [Migrating from a Legacy Repo to SDD](#migrating-from-a-legacy-repo-to-sdd)
+13. [Additional Files Worth Adding](#additional-files-worth-adding)
+14. [Repository Organization](#repository-organization)
+15. [Working with the Agent](#working-with-the-agent)
+16. [Golden Rules](#golden-rules)
 
 ---
 
@@ -140,7 +141,69 @@ If the answer to all four is *no* — prompt away. Don't perform documentation t
 
 ---
 
-## The PRD-First Approach
+## The Absolute Minimum
+
+If you're starting today and don't want to overinvest in docs upfront, what's the smallest set of markdown files that still buys you SDD's benefits?
+
+### The single most important file
+
+**`CLAUDE.md`** at the repo root (or `.cursorrules` for Cursor, equivalent files for other agent tools). If you do nothing else from this guide, do this. It's the only file most agents load automatically; without it your conventions don't exist as far as the agent is concerned. One file the agent always reads beats ten files it might never reach.
+
+What separates a useful `CLAUDE.md` from a generic one — what to put in, what to leave out, how big it should get, how it changes when the repo has 30+ other markdown files competing for attention — is the subject of its own detail guide: [`claude-md-guide.md`](claude-md-guide.md). Read that one before writing your project's `CLAUDE.md` from scratch; the difference between a "wall of text" and a hub that routes the agent's attention well is mostly about the rules in that guide.
+
+### Floor: 3 files (do not go lower)
+
+1. **`CLAUDE.md`** — conventions, what NOT to do, pointers to other docs. The agent's instruction hub.
+2. **`README.md`** — what this project is, how to run it. Entry point for humans (and a fallback for agents).
+3. **One spec file** — `specs/<date-slug>/spec.md` for the current change you're working on (see [Writing a Good spec.md](#writing-a-good-specmd) below for what should be in it). Even if it's 20 lines, even if it's for a single PR.
+
+Below three, you're hoping, not specifying.
+
+### Practical minimum: 5 files (recommended starting set)
+
+For any project beyond a weekend hack, add two more:
+
+4. **`ARCHITECTURE.md`** — high-level structure: layers, modules, key boundaries. A diagram plus ~200 words of prose is enough on day one. Grow it as the system grows.
+5. **`DOMAIN.md`** (or `GLOSSARY.md`) — business terminology, abbreviations, the words specific to your problem space. Skip if your domain is generic (CRUD on things); essential if it has jargon (finance, biotech, logistics, regulated industries).
+
+Five files cover most of the SDD benefit for a project in the 0–3 month range.
+
+### Add the rest reactively, not proactively
+
+Beyond the starter set, each new doc should be triggered by something concrete — not by *"the methodology mentions it."*
+
+| File | Trigger to create it |
+|------|----------------------|
+| `docs/adr/ADR-001-*.md` | First non-trivial, hard-to-reverse decision (ORM choice, message broker, auth approach) |
+| `RUNBOOK.md` / `OPERATIONS.md` | First production incident, or first deploy to a real environment |
+| `TESTING.md` | Third time you explain the test conventions to the agent |
+| `.env.example` + `CONFIG.md` | First time onboarding takes > 1 hour |
+| `CONTRIBUTING.md` | First external contributor, or first time you forget your own commit convention |
+| `CHANGELOG.md` | First time a user asks *"what changed in this version?"* |
+| `docs/integrations/<vendor>.md` | First time the agent generates wrong code against an external API |
+| `docs/postmortems/<date>.md` | First incident worth not repeating |
+
+A `RUNBOOK.md` written before you have a system in production is fiction; a `CHANGELOG.md` written before you have users is busywork. Wait for the trigger; the act of writing the doc *while the problem is fresh* is what makes it useful.
+
+### A rule of thumb for any candidate file
+
+If you can't say *who reads this file, and when*, you don't need it yet.
+
+For each candidate doc, answer:
+
+- **Who reads it?** You? New hires? The agent? Auditors?
+- **When?** Daily? On incident? Before a change? Once at onboarding?
+- **What goes stale if you don't update it?**
+
+A file that fails all three is decoration — skip it.
+
+See [Additional Files Worth Adding](#additional-files-worth-adding) for the fuller catalog organized by priority tier, and the first entry in [Golden Rules](#golden-rules) for the related discipline (*"Don't create documents on spec"*).
+
+---
+
+## The PRD Layer
+
+### Why PRDs exist
 
 A **PRD (Product Requirements Document)** is your starting artifact. It captures *what* you're building and *why*, before any code exists.
 
@@ -159,9 +222,7 @@ Treating PRD as living causes two problems:
 
 Keep the original PRD pristine. Archive it in `docs/prd/` with a date. New direction → new PRD or roadmap entry, not edits to the old one.
 
----
-
-## PRD vs Spec — Two Layers, Same Question
+### PRD vs spec — two layers, same question
 
 PRDs and feature specs look similar at a glance — both have "scope" sections, both describe "what we're building." New teams ask: *do we really need both?*
 
@@ -176,7 +237,7 @@ Yes. They live at different layers and have different lifetimes.
 | **Frequency** | Maybe once in the project's life | Dozens or hundreds per year |
 | **Owner** | Product / founder | Engineer driving the change |
 
-### Concrete example
+**Concrete example:**
 
 ```
 PRD (2025-01): "Build an order delivery platform with HDR/DTL
@@ -198,6 +259,94 @@ The PRD answers *why this system exists*. Specs answer *what changed this week*.
 **PRD without specs:** the PRD becomes a Frankenstein document where every change request gets appended. Original v1 intent dilutes, decision history disappears, and after two years the PRD reads like a press release for a product that doesn't exist.
 
 Two artifacts, two lifetimes, two purposes. The overlap in fields is real but cosmetic — the level of detail is completely different.
+
+---
+
+## Writing a Good spec.md
+
+A `spec.md` answers: *what are we building, why, and how do we know it works?* It's the document the agent reads before generating code; the document the human PR reviewer reads before approving; the document future-you reads when wondering *"why is this code shaped this way?"*
+
+A spec is **per-feature** and **frozen after merge** — different from a PRD (whole-product, frozen after v1) and from a plan (the *how*, written alongside the spec — see [the next section](#writing-a-good-planmd)).
+
+### Principles that work
+
+- **Goal in three sentences.** What problem, for whom, in which system. Anything longer means the feature isn't clear in your head yet.
+- **In-scope and out-of-scope, both explicit.** *"What we're NOT doing"* prevents scope creep more reliably than *"what we are doing"* does. The agent reads it; PR reviewers reference it.
+- **Acceptance criteria as checkboxes.** Testable, specific, ideally automatable. *"`POST /api/x` with payload Y returns 201 and a row in `event_log`"* — not *"the endpoint works."*
+- **Impact on existing code.** Which modules touched, which contracts changed. Catches *"ah, this breaks `IBaseHandler<TSelf>`"* before code is written.
+- **Open questions in a dedicated section.** Forces decisions before generation. The agent will fabricate plausible answers if they're missing.
+- **References to relevant ADRs and prior specs.** Show the lineage; help the agent understand the constraints.
+
+### Template
+
+```markdown
+# [Feature name]
+
+> Copy this file to `specs/YYYY-MM-feature-slug/spec.md` and fill in.
+
+## Goal
+
+[1-3 sentences. What problem, for whom, in which system.]
+
+## In scope
+
+- [Concrete, observable outcomes]
+- ...
+
+## Out of scope (deliberately, not now)
+
+- [Things you'd consider but are explicitly excluding from this change]
+- ...
+
+## Acceptance criteria
+
+- [ ] [Concrete, testable. e.g. "POST /api/x with payload Y returns 201 and a row in event_log"]
+- [ ] ...
+
+## Impact on existing code
+
+- [Which files / modules will change]
+- [Which contracts or conventions this touches]
+- [Anything that could break — call it out by name]
+
+## Open questions
+
+- [ ] [Question that must be answered before implementation starts]
+- [ ] ...
+
+## References
+
+- [Link to related ADRs, prior specs, or docs]
+```
+
+A copy-pasteable version lives at [`templates/spec.md`](../templates/spec.md).
+
+### Spec status lifecycle
+
+A spec moves through four states:
+
+1. **Draft** — being written; open questions still listed.
+2. **In implementation** — open questions answered (or moved to ADRs); `plan.md` and `tasks.md` written alongside; engineer is coding.
+3. **Shipped** — PR merged. Append `STATUS: shipped (PR #N, YYYY-MM-DD)` at the top of `spec.md`.
+4. **Frozen** — same as shipped, but emphasized: from this point the spec is *history*. Never edit retroactively. If the feature changes, write a new spec.
+
+The most common rot pattern: specs sitting in *Draft* indefinitely. A spec older than ~2 weeks with unanswered Open Questions should either move forward or be deleted — stale drafts pollute the catalog and erode trust in the discipline.
+
+### Practical tips
+
+**Keep specs short.** A spec longer than ~150 lines is usually two specs in a trenchcoat. Split.
+
+**Spec ships before code.** If you find yourself writing the spec *after* the PR to explain code that already exists, that's documentation, not a spec. File it under `docs/`, not `specs/`. (See [`legacy-to-sdd-migration-guide.md`](legacy-to-sdd-migration-guide.md) § "Phase 2 — Forward-only specs" — this is the migration discipline applied to every change.)
+
+**Open Questions are valuable.** Don't be embarrassed by them. A spec with three Open Questions answered honestly beats a spec with zero questions and three silent assumptions.
+
+**The PR description references the spec.** *"Implements: `specs/2026-05-x/`"*. Bidirectional link: PR → spec, spec → PR (via the shipped status). After a year, traceability is intact.
+
+**Anti-pattern: spec as wishlist.** A spec is what *this PR* will do. If you find yourself listing 12 ideas, that's a roadmap entry — not a spec. Pick one and ship.
+
+### Where to go deeper
+
+The template above plus [`templates/spec.md`](../templates/spec.md) cover ~90% of features. For the per-role ownership of spec lifecycle (who drafts, who reviews, who approves, who updates status), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle." For how the agent reads specs and implements them task-by-task, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation."
 
 ---
 
@@ -376,27 +525,68 @@ In `CLAUDE.md` you add one line in the "Conventions" section: *"Batch compressio
 
 ---
 
-## Architecture Decision Records (ADR) in Depth
+## SDD in Teams: Roles and Responsibilities
 
-ADRs were introduced by Michael Nygard in 2011. The premise: **code shows *what* you did, but not *why*. ADRs fill that gap.**
+The workflow above describes what happens for one engineer working on one feature. In a team — even a team of two — the same workflow becomes a multi-actor protocol. Different artifacts have different owners; different decisions need different sign-offs.
 
-### When to Write an ADR
+### Default ownership matrix
+
+| Artifact | Primary owner | Reviewers | Updated by |
+|----------|---------------|-----------|------------|
+| `PRD.md` | Product / founder | Tech lead, founding team | (frozen after v1) |
+| `CLAUDE.md` | Tech lead (or designated maintainer) | All engineers | Reactive — anyone proposes, owner approves |
+| `ARCHITECTURE.md` | Tech lead / staff engineer | All engineers, security | When boundaries change |
+| `DOMAIN.md` | Domain expert (often PM or senior eng) | Engineers writing in the domain | When new terms enter the codebase |
+| `docs/adr/*.md` | The engineer proposing the decision | Tech lead + relevant team | (immutable from `Accepted`) |
+| `specs/*/spec.md` | The engineer driving the change | PM (for scope), tech lead (for design) | Status updated after merge |
+| `docs/runbooks/*` | On-call team | On-call rotation | Within 24h of any incident |
+| `RUNBOOK.md` / `OPERATIONS.md` | SRE / DevOps | On-call engineers | Continuously |
+| `TESTING.md` | Tech lead or QA lead | All engineers | When conventions change |
+
+The matrix is a *default*, not a law. Small teams collapse rows (founder owns PRD + ARCHITECTURE + CLAUDE.md until the next hire). Large teams split rows (per-service `ARCHITECTURE.md`, per-team `CLAUDE.md` in monorepos).
+
+### Three most common team failure modes
+
+1. **Diffused ownership.** *"Everyone is supposed to update `CLAUDE.md`; nobody does."* Cure: one named maintainer per artifact, not *"the team"*. A name in the header.
+2. **The documentation hero.** One person writes everything; the rest never internalize the discipline; when the hero leaves, the docs die within a quarter. Cure: rotate ownership of `CLAUDE.md` and the quarterly audit; require every PR to update the relevant artifact (spec status, ADR list, CLAUDE.md if a convention changed).
+3. **Stale by Tuesday.** Docs updated Monday; code changes Tuesday; docs lie by Wednesday. Cure: updates ride *with* the PR that motivated the change, not as a follow-up. PR template includes a docs checkbox; review blocks if it's not ticked.
+
+### The solo-developer case
+
+A team of one still benefits — but the SDD discipline serves a different purpose. With no teammate to forget context, the artifacts protect *future you*. Six months from now you won't remember why you picked Dapper; the ADR is for your future self, not for an absent colleague.
+
+Solo SDD collapses the matrix: you own everything; you also "review" your own work (the discipline replaces the second pair of eyes). Specs can be shorter; ADRs are usually still worth the 10 minutes.
+
+### Going deeper
+
+The full treatment — per-role profiles (Engineer / Tech Lead / EM / PM / Founder / QA / SRE / Security / External OSS contributors), artifact lifecycle handoffs, cadence patterns (PR-based vs meeting-based ADR review), multi-team and monorepo specifics, the onboarding flow for new hires, governance for OSS projects, regulated-industry overlays, and a longer list of team failure modes with corrections — lives in [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md).
+
+Read it when your team crosses ~3 engineers; before that, the simpler version above is usually enough.
+
+---
+
+## Architecture Decision Records (ADR)
+
+ADRs were introduced by Michael Nygard in 2011. The premise: **code shows *what* you did, but not *why*. ADRs fill that gap.** Each ADR is a short, dated, immutable document capturing a single decision, its context, and the alternatives rejected.
+
+### When to write an ADR
 
 Write an ADR when a decision:
-- is hard to reverse (ORM choice, message broker, authorization approach)
-- has consequences beyond a single module (logging convention across the system)
-- was made against the obvious choice ("why Dapper when .NET standard is EF?")
-- keeps resurfacing in discussions ("maybe EF after all?") — an ADR ends this permanently
 
-### When NOT to Write an ADR
+- **Is hard to reverse** (ORM choice, message broker, authorization approach)
+- **Has consequences beyond a single module** (logging convention across the system)
+- **Was made against the obvious choice** (*"why Dapper when the .NET standard is EF?"*)
+- **Keeps resurfacing in discussions** (an ADR ends the re-litigation permanently)
 
-- Variable naming, formatting, code style (goes to `CLAUDE.md` or `.editorconfig`)
-- Decisions inside a single feature (goes to `spec.md`)
-- Things obvious from the stack ("we use async/await" — no thanks)
+### When NOT to write an ADR
 
-**Practical test:** if a year from now someone asks "why the hell did we do it this way?" — that's an ADR.
+- **Variable naming, formatting, code style** → `CLAUDE.md` or `.editorconfig`
+- **Decisions inside a single feature** → `spec.md`
+- **Things obvious from the stack** (*"we use async/await"*)
 
-### Structure (Nygard's format, lightly modified)
+**Practical test:** if a year from now someone asks *"why the hell did we do it this way?"* — that's an ADR.
+
+### Minimal structure (Nygard format)
 
 ```markdown
 # ADR-007: Dapper as the Data Access Layer
@@ -405,189 +595,34 @@ Write an ADR when a decision:
 Accepted — 2026-01-15
 
 ## Context
-The system processes orders with HDR/DTL files, where critical needs include:
-- batch query performance (10k+ records per order)
-- full control over SQL (`legacy_import` schema with many joins)
-- debugging simplicity — team knows T-SQL better than LINQ
-
-EF Core would be the natural choice for a new .NET 8 project, but:
-- EF migrations don't align with our existing DDL-diff process
-- LINQ-to-SQL produces unpredictable plans on complex queries
-- our repositories would write raw SQL via FromSqlRaw anyway
+[The forces that made this decision necessary — 3 to 8 sentences.]
 
 ## Decision
-We use Dapper as the sole data access layer.
-Repositories are hand-written, one class per aggregate (`OrderImportRepository`,
-`OrderLogRepository`). SQL lives in constants in the repo class, not in .sql files.
+[The choice itself — 3 to 5 sentences. Not a tutorial.]
 
 ## Consequences
-**Positive:**
-- full control over generated SQL
-- easier code review (you see exactly what hits the database)
-- no hidden N+1
-- smaller dependency graph
-
-**Negative:**
-- manual DTO ↔ record mapping (boilerplate)
-- no change tracking — updates require explicit SQL
-- integration tests matter more than with EF (less "free" type validation)
-
-**Neutral:**
-- DDL migrations handled by separate tooling (DbUp or custom scripts)
-- `Dapper.Contrib` only for simple CRUD, never for joins
+**Positive:** [...]
+**Negative:** [...]
+**Neutral:** [...]
 
 ## Alternatives Rejected
-- **EF Core 8** — see Context
-- **NHibernate** — abandoned by community, younger devs don't know it
-- **Linq2Db** — interesting, but smaller community and less familiar to team
-
-## References
-- Spike: PR #87 (EF vs Dapper comparison on order_log query)
-- Discussion: architecture meeting notes 2026-01-10
+- [Option A] — [one-sentence reason]
+- [Option B] — [one-sentence reason]
 ```
 
-For smaller decisions, use **MADR** (Markdown ADR) — a trimmed template with just Status / Context / Decision / Consequences.
+For smaller decisions, **MADR** (Markdown ADR) trims to just Status / Context / Decision / Consequences.
 
-### ADR Lifecycle and the Supersedes Pattern
+### The Supersedes pattern (the rule that makes ADRs work)
 
-Standard statuses:
-- **Proposed** — proposal, not yet accepted, under discussion
-- **Accepted** — in force, we follow it
-- **Deprecated** — discouraged, but no replacement yet
-- **Superseded by ADR-XXX** — replaced by a newer decision
+You **never edit the body of an Accepted ADR.** When the decision changes, you write a new ADR with `Supersedes: ADR-NNN` in its Status, and you update *only the status header* of the original to `Superseded by ADR-NNN — YYYY-MM-DD`. The body of the old ADR stays intact as history.
 
-**Key rule: you never edit the content of an old ADR.** You change only the status header and add a link. The full history must remain reconstructible.
+This is what makes ADRs valuable a year later: someone reading the repo can trace the decision lineage by following Supersedes links. Editing old ADRs to "keep them current" destroys the artifact.
 
-Example: imagine ADR-002 said *"Quartz.NET with configuration in appsettings.json"*. A year later you need per-environment configuration from a database. You create **ADR-014**:
+### Going deeper
 
-```markdown
-# ADR-014: Quartz Configuration from Database Instead of appsettings
+The full how-to — Nygard format section-by-section, alternative formats (MADR, Y-statements), four worked examples (Accepted, Superseded pair before/after, Proposed under discussion, Deprecated), the lifecycle in depth, numbering conventions, cross-referencing patterns, review process, agent-assisted drafting prompts, anti-patterns with corrections, edge cases (sub-ADRs, retroactive, monorepos), tooling, maintenance discipline, golden rules — lives in [`adr-guide.md`](adr-guide.md).
 
-## Status
-Accepted — 2026-05-20
-Supersedes: ADR-002
-
-## Context
-ADR-002 (2025-03-10) established Quartz configuration in appsettings.json.
-Since then new requirements emerged:
-- different schedules per environment (DEV/TEST/PROD)
-- ability to change cron expressions without deployment
-- audit trail of schedule changes
-
-## Decision
-[...]
-
-## Migration
-- Existing jobs stay on config until end of Q3 2026
-- New jobs go to database immediately
-- Full migration: spec 2026-Q3-quartz-db-config
-```
-
-In parallel, you edit **only the header of ADR-002**:
-
-```markdown
-# ADR-002: Quartz.NET with Configuration in appsettings.json
-
-## Status
-Superseded by ADR-014 — 2026-05-20
-
-## Context
-[unchanged — history must stay]
-...
-```
-
-### ADR Anti-Patterns
-
-1. **ADR as post-mortem documentation.** ADRs should be written *at the moment of decision*, not six months later "because we should document it." Late ADRs are okay as exceptions, not the rule.
-
-2. **ADR as a manual.** The "Decision" section should be short — 3-5 sentences. You don't explain how Dapper works. You explain that you choose Dapper, and why *here specifically*.
-
-3. **ADR without an "Alternatives Rejected" section.** This is the most valuable part for future readers. Without it, the ADR reads like "we did X because we did X."
-
-4. **Editing old ADRs.** The temptation is huge ("this is outdated, let me fix it"). Resist it. Create a new ADR with Supersedes.
-
-5. **Numbering with gaps.** Number sequentially from ADR-001. No ADR-002.1, no ADR-002-v2. Decision changes → new number.
-
-6. **ADR for reversible things.** "We use Serilog instead of NLog" — okay, ADR makes sense, changing loggers is work. "Our DTO classes have a `Dto` suffix" — no, that's a convention, goes to `CLAUDE.md`.
-
-### How ADRs Work with AI Agents
-
-ADRs are the **source of truth for the agent** when it makes decisions the spec file doesn't cover.
-
-Practical setup:
-- In `CLAUDE.md`, have a section: *"Before introducing an architectural decision, check `docs/adr/`. Active decisions: ADR-001, ADR-003, ADR-007, ADR-014."* (only Accepted, no Superseded)
-- When the agent proposes something contradicting an ADR — redirect it to the specific file: *"Read ADR-007 and change your approach"*
-- When the agent has a justified suggestion to change direction — that's a signal it might be time for a new ADR with Supersedes
-
-### Tooling
-
-- **adr-tools** (Node/Bash) — simplest, generates numbered skeletons: `adr new "Database choice"`
-- **log4brains** — generates a static site from ADRs, nice to browse
-- **MADR template** — Markdown template alone, no tooling, closest to how most teams actually work
-
-For a solo or small team — a `docs/adr/` folder and numbering convention is enough. Add tooling only when you have 30+ ADRs and need search.
-
-**Golden rule:** a short ADR written today is better than a perfect one written never. Your first five ADRs will be imperfect. By the tenth you'll have developed a style that fits how you work.
-
----
-
-## The Absolute Minimum
-
-If you're starting today and don't want to overinvest in docs upfront, what's the smallest set of markdown files that still buys you SDD's benefits?
-
-### The single most important file
-
-**`CLAUDE.md`** at the repo root (or `.cursorrules` for Cursor, equivalent files for other agent tools). If you do nothing else from this guide, do this. It's the only file most agents load automatically; without it your conventions don't exist as far as the agent is concerned. One file the agent always reads beats ten files it might never reach.
-
-What separates a useful `CLAUDE.md` from a generic one — what to put in, what to leave out, how big it should get, how it changes when the repo has 30+ other markdown files competing for attention — is the subject of its own detail guide: [`claude-md-guide.md`](claude-md-guide.md). Read that one before writing your project's `CLAUDE.md` from scratch; the difference between a "wall of text" and a hub that routes the agent's attention well is mostly about the rules in that guide.
-
-### Floor: 3 files (do not go lower)
-
-1. **`CLAUDE.md`** — conventions, what NOT to do, pointers to other docs. The agent's instruction hub.
-2. **`README.md`** — what this project is, how to run it. Entry point for humans (and a fallback for agents).
-3. **One spec file** — `specs/<date-slug>/spec.md` for the current change you're working on. Even if it's 20 lines, even if it's for a single PR.
-
-Below three, you're hoping, not specifying.
-
-### Practical minimum: 5 files (recommended starting set)
-
-For any project beyond a weekend hack, add two more:
-
-4. **`ARCHITECTURE.md`** — high-level structure: layers, modules, key boundaries. A diagram plus ~200 words of prose is enough on day one. Grow it as the system grows.
-5. **`DOMAIN.md`** (or `GLOSSARY.md`) — business terminology, abbreviations, the words specific to your problem space. Skip if your domain is generic (CRUD on things); essential if it has jargon (finance, biotech, logistics, regulated industries).
-
-Five files cover most of the SDD benefit for a project in the 0–3 month range.
-
-### Add the rest reactively, not proactively
-
-Beyond the starter set, each new doc should be triggered by something concrete — not by *"the methodology mentions it."*
-
-| File | Trigger to create it |
-|------|----------------------|
-| `docs/adr/ADR-001-*.md` | First non-trivial, hard-to-reverse decision (ORM choice, message broker, auth approach) |
-| `RUNBOOK.md` / `OPERATIONS.md` | First production incident, or first deploy to a real environment |
-| `TESTING.md` | Third time you explain the test conventions to the agent |
-| `.env.example` + `CONFIG.md` | First time onboarding takes > 1 hour |
-| `CONTRIBUTING.md` | First external contributor, or first time you forget your own commit convention |
-| `CHANGELOG.md` | First time a user asks *"what changed in this version?"* |
-| `docs/integrations/<vendor>.md` | First time the agent generates wrong code against an external API |
-| `docs/postmortems/<date>.md` | First incident worth not repeating |
-
-A `RUNBOOK.md` written before you have a system in production is fiction; a `CHANGELOG.md` written before you have users is busywork. Wait for the trigger; the act of writing the doc *while the problem is fresh* is what makes it useful.
-
-### A rule of thumb for any candidate file
-
-If you can't say *who reads this file, and when*, you don't need it yet.
-
-For each candidate doc, answer:
-
-- **Who reads it?** You? New hires? The agent? Auditors?
-- **When?** Daily? On incident? Before a change? Once at onboarding?
-- **What goes stale if you don't update it?**
-
-A file that fails all three is decoration — skip it.
-
-See [Additional Files Worth Adding](#additional-files-worth-adding) for the fuller catalog organized by priority tier, and the first entry in [Golden Rules](#golden-rules) for the related discipline (*"Don't create documents on spec"*).
+Read it before writing your first few ADRs; the difference between an ADR that survives a year and one that rots in three months is mostly about the rules in that guide.
 
 ---
 

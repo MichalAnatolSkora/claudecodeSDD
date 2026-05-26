@@ -161,6 +161,8 @@ Honesty about retroactive documentation > pretending it was written at decision 
 
 Add `ADR-001` to `CLAUDE.md`'s "Active Decisions" section.
 
+(For the full format — Nygard sections, alternatives, lifecycle — see [`adr-guide.md`](adr-guide.md). The retroactive-context note above is standard practice during migration; that guide has more on it under "Edge cases.")
+
 ---
 
 ## Phase 2 — Forward-only specs (Week 2+)
@@ -190,6 +192,8 @@ ADRs accumulate when triggered by:
 You will accumulate ADRs slowly. Target: ~1 ADR per month for the first 6 months. By month 6 you'll have 5–10 ADRs, each earning its keep.
 
 **Anti-pattern:** writing 20 ADRs in week 1 to *"document the architecture."* Most of them are wrong, some are obvious, all of them rot.
+
+For ADR-writing mechanics — format, lifecycle, Supersedes pattern, anti-patterns with corrections, worked examples — see [`adr-guide.md`](adr-guide.md).
 
 ---
 

@@ -12,9 +12,12 @@ A collection of practical guides for structuring your repository so AI coding ag
 │   ├── runbook-operations-guide.md
 │   ├── working-with-agents-guide.md
 │   ├── claude-md-guide.md             # how to write a good CLAUDE.md (incl. many-docs repos)
+│   ├── adr-guide.md                   # full ADR how-to: format, lifecycle, examples, anti-patterns
+│   ├── sdd-in-teams-guide.md          # roles, ownership, handoffs, OSS, regulated industries
 │   ├── legacy-to-sdd-migration-guide.md   # retrofitting SDD onto an existing repo
 │   └── sdd-in-the-wild.md             # who actually practices SDD principles
 └── templates/                         # copy-pasteable starting points
+    ├── CLAUDE.md                      # agent instruction hub (behavioral + project layer)
     ├── PRD.md
     ├── spec.md
     ├── plan.md
@@ -28,6 +31,8 @@ A collection of practical guides for structuring your repository so AI coding ag
 - **[Runbook / Operations Documentation Guide](guides/runbook-operations-guide.md)** — companion guide for the operational layer: what to do when things break, how to write entries that pass the 3 a.m. test, and how the agent reads runbooks when generating diagnostic scripts.
 - **[Working with AI Coding Agents](guides/working-with-agents-guide.md)** — how the agent actually reads your repo, when it loads a file (and why it sometimes doesn't), how many docs is too many before things break down, plus the practical prompting patterns for specs, ADRs, refactors, and runbook work.
 - **[Writing a Good CLAUDE.md](guides/claude-md-guide.md)** — the deep-dive on the single most important file in an SDD repo: what goes in (and what doesn't), good-vs-bad example lines, how to size it by project scale, and what changes when your repo has 30+ docs competing for the agent's attention.
+- **[Writing Good ADRs](guides/adr-guide.md)** — the full how-to for Architecture Decision Records: Nygard format section-by-section, alternative formats (MADR, Y-statements), four worked examples (Accepted, Superseded pair, Proposed, Deprecated), the Supersedes pattern in depth, numbering, cross-referencing, anti-patterns, tooling, maintenance.
+- **[SDD in Teams](guides/sdd-in-teams-guide.md)** — running SDD with more than one engineer: per-role profiles (Engineer / Tech Lead / EM / PM / Founder / QA / SRE / Security / OSS contributors), artifact ownership in depth, lifecycle handoffs, cadence patterns, monorepo specifics, the OSS case, regulated-industry overlays, onboarding flow, team failure modes, a RACI matrix.
 - **[Migrating a Legacy Repo to SDD](guides/legacy-to-sdd-migration-guide.md)** — the one-time process of retrofitting SDD onto an existing codebase: 30-minute audit, week-1 foundation, forward-only specs, reactive ADRs, reusable agent prompts, anti-patterns (the big-bang sprint, fabricated-history ADRs), and worked examples (Python web app, .NET monorepo, C# legacy, OSS project).
 - **[SDD in the Wild](guides/sdd-in-the-wild.md)** — notes on which teams and companies publicly practice spec-driven (or spec-adjacent) engineering: GitHub spec-kit, Anthropic Claude Code, Amazon's PR-FAQ, Google design docs, Stripe RFCs, Basecamp Shape Up, and the methodologies that pre-date the SDD label.
 
@@ -35,6 +40,7 @@ A collection of practical guides for structuring your repository so AI coding ag
 
 Minimal starting points. Copy into your project and fill in the brackets:
 
+- **[CLAUDE.md](templates/CLAUDE.md)** — agent instruction hub with two layers: literal-copied behavioral guidelines (from [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md), kept verbatim with attribution) + bracketed project-specific sections you fill in
 - **[PRD.md](templates/PRD.md)** — product requirements document (problem, users, success criteria, constraints) — the *starting* artifact, freezes after v1
 - **[spec.md](templates/spec.md)** — feature specification (goal, scope, acceptance criteria, open questions)
 - **[plan.md](templates/plan.md)** — implementation plan (decisions, file structure, tasks, constraints)

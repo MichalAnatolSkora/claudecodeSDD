@@ -8,18 +8,19 @@
 
 1. [Core Philosophy](#core-philosophy)
 2. [How the Agent Reads Your Repo](#how-the-agent-reads-your-repo)
-3. [When the Agent Loads a File — and Why It Sometimes Doesn't](#when-the-agent-loads-a-file--and-why-it-sometimes-doesnt)
-4. [How Many Files Is Too Many](#how-many-files-is-too-many)
-5. [Token Economy](#token-economy)
-6. [Starting and Ending Sessions](#starting-and-ending-sessions)
-7. [Working on Specs, ADRs, and Refactors](#working-on-specs-adrs-and-refactors)
-8. [Working on Runbooks and Operational Tasks](#working-on-runbooks-and-operational-tasks)
-9. [Universal Prompting Patterns](#universal-prompting-patterns)
-10. [Claude Code Building Blocks](#claude-code-building-blocks)
-11. [When the Agent Drifts](#when-the-agent-drifts)
-12. [Maintaining Documentation Proactively](#maintaining-documentation-proactively)
-13. [Anti-Patterns](#anti-patterns)
-14. [Golden Rules](#golden-rules)
+3. [The Agent's Toolset](#the-agents-toolset)
+4. [When the Agent Loads a File — and Why It Sometimes Doesn't](#when-the-agent-loads-a-file--and-why-it-sometimes-doesnt)
+5. [How Many Files Is Too Many](#how-many-files-is-too-many)
+6. [Token Economy](#token-economy)
+7. [Starting and Ending Sessions](#starting-and-ending-sessions)
+8. [Working on Specs, ADRs, and Refactors](#working-on-specs-adrs-and-refactors)
+9. [Working on Runbooks and Operational Tasks](#working-on-runbooks-and-operational-tasks)
+10. [Universal Prompting Patterns](#universal-prompting-patterns)
+11. [Claude Code Building Blocks](#claude-code-building-blocks)
+12. [When the Agent Drifts](#when-the-agent-drifts)
+13. [Maintaining Documentation Proactively](#maintaining-documentation-proactively)
+14. [Anti-Patterns](#anti-patterns)
+15. [Golden Rules](#golden-rules)
 
 ---
 
@@ -77,6 +78,225 @@ The agent has exactly four ways to find a file:
 There is no fifth path. The agent does **not** "scan the repo to understand the project" the way you would on day one. If you don't point at it, name it, link to it, or rule-mention it — the agent may never read it.
 
 This is why `CLAUDE.md` matters disproportionately. It's the only file the agent reliably loads without being asked, and it's the only place where you can register meta-rules that fire automatically.
+
+---
+
+## The Agent's Toolset
+
+The previous section described *what* the agent reads. This one describes *how* — the concrete tools it uses to read, search, run, write, and delegate. The examples are Claude Code's default toolset; Cursor, Aider, Continue.dev, and others ship analogous tools under different names, with the same shapes.
+
+### How the agent learns its tools
+
+The agent doesn't memorize a fixed toolset. At the start of each session, the harness sends it a list of available tools, each with a **name**, a **description**, a **parameter schema**, and (sometimes) **examples** of correct and incorrect use. The model reads those descriptions and decides — for each step of the task — which tool to reach for.
+
+This has a consequence most users don't see: **a tool's description shapes its use as much as its capabilities do.** If the description says *"prefer `Read` over `Bash cat`"*, the agent prefers `Read`. If the description omits that hint, the agent defaults to whatever pattern its training reinforced (often `Bash`). Customizing tool descriptions — via MCP servers or harness settings — is one of the highest-leverage ways to steer agent behavior.
+
+### The core toolset (Claude Code default)
+
+Roughly grouped by purpose. Tool names are exact (case matters).
+
+**File operations**
+
+- **`Read`** — read a file at a known path. Returns numbered lines. Used when the agent already knows what file to look at; offset/limit supported for partial reads.
+- **`Edit`** — exact string replacement in a file. Cheap (only the diff is sent) and the right default for any modification of an existing file. Requires the file to have been `Read` first in the session.
+- **`Write`** — create a new file, or overwrite an existing one completely. Higher token cost than `Edit` (sends the whole file). Reserve for new files or full rewrites.
+- **`NotebookEdit`** — edit Jupyter `.ipynb` cells specifically; the JSON structure of notebooks makes raw `Edit` brittle.
+- **`Glob`** — find files by path pattern (`src/**/*.cs`, `docs/**/README.md`). Returns the list of matching paths.
+
+**Search**
+
+- **`Grep`** — search file contents for a pattern (regex or literal). Returns matching lines with paths. The right default for *"find where X is defined / referenced."*
+- **`Glob`** — already mentioned; also a search tool when you want files by name pattern.
+- **`WebSearch`** — search the public web. Returns titles, URLs, snippets. Used when the agent doesn't know which URL to fetch.
+
+**Execution**
+
+- **`Bash`** — run shell commands. Used for git operations, build/test commands, anything not covered by a dedicated tool. Supports `timeout` and `run_in_background`. Most powerful and most dangerous tool — restrict aggressively in `settings.json` for shared repos.
+
+**Web**
+
+- **`WebFetch`** — fetch a specific URL and return content (typically converted to markdown). Used when the URL is known. Authenticated URLs (Confluence, private GitHub, Google Docs) require an MCP equivalent — `WebFetch` falls back gracefully but won't see protected content.
+
+**Delegation**
+
+- **`Agent`** (a.k.a. **`Task`**) — spawn a subagent for a contained task. The subagent has its own context window; the main session sees only the final report. Two modes: ad-hoc (one-off prompt) or configured (named agent file in `.claude/agents/`). See [Claude Code Building Blocks § Subagents](#subagents).
+
+**Task tracking**
+
+- **`TaskCreate`** — start a new tracked task with a subject and description.
+- **`TaskUpdate`** — change status (`pending` → `in_progress` → `completed`), update subject, set owner, add dependencies.
+- **`TaskList`** — list all current tasks; useful to find what's pending or claim the next available.
+- **`TaskGet`** — view full details of a single task.
+
+Used for multi-step work (3+ distinct steps); skip for trivial single-step tasks.
+
+**User interaction**
+
+- **`AskUserQuestion`** — show 1–4 multi-choice questions with options to the user. Use when the agent genuinely needs a decision before continuing; don't use for trivial questions ("which file?") or to defer thinking.
+
+**Scheduling**
+
+- **`ScheduleWakeup`** — schedule the agent to wake up after a delay (used in self-paced loops).
+- **`CronCreate` / `CronList` / `CronDelete`** — manage scheduled recurring agents.
+
+**Skills**
+
+- **`Skill`** — invoke a named skill from `.claude/skills/` (project) or `~/.claude/skills/` (user). The skill's instructions are loaded as the current prompt context. See [Claude Code Building Blocks § Skills](#skills).
+
+**Plan mode**
+
+- **`EnterPlanMode` / `ExitPlanMode`** — explicit modes for "plan-only" sessions where the agent drafts a plan without touching files, then exits the mode (committed or canceled) before doing anything destructive.
+
+**MCP extensions (variable per setup)**
+
+MCP (Model Context Protocol) servers add tools beyond the default set. The most common categories:
+
+- **Browser tools** — `Claude in Chrome`, `Claude Preview`: navigate, click, screenshot, read DOM, fill forms. Used when the task involves a running web app.
+- **Design / project-management tools** — Figma, Linear, Asana, Jira, Notion, Slack: read/write artifacts in those systems. The agent uses them when the task explicitly references one (`"add a Linear ticket for…"`).
+- **Database tools** — Supabase, Snowflake, BigQuery MCPs: query the DB directly without going through code.
+- **Repository / directory access** — additional codebases the agent can read alongside the active one.
+
+MCP tools appear in the same toolset list as built-ins; the agent treats them identically. The user enables them per project in `.claude/settings.json` or `~/.claude/settings.json`.
+
+### How the agent chooses between similar tools
+
+Multiple tools often *could* satisfy a request. The agent's choice depends on what its tool descriptions tell it to prefer. The most common decisions:
+
+**Reading file content: `Read` vs `Grep` vs `Glob` vs `Bash cat`**
+
+- **Known path, full file** → `Read`
+- **Known path, partial** → `Read` with `offset` + `limit`
+- **Don't know path; know a symbol/string** → `Grep` first, then `Read` on matches
+- **Don't know path; know name pattern** → `Glob` first, then `Read` on matches
+- **`Bash cat`** → almost never (more expensive, no numbered lines, worse fallback). Most tool descriptions explicitly forbid it.
+
+**Modifying a file: `Edit` vs `Write` vs `Bash sed`**
+
+- **Small change to existing file** → `Edit` (cheap, surgical)
+- **Multiple edits at once** → multiple `Edit` calls (or a tool like `MultiEdit` if available)
+- **New file, or replacing the whole file** → `Write`
+- **`Bash sed/awk`** → almost never. Same reasoning as `cat`.
+
+**Running shell vs dedicated tool**
+
+- **`ls`, `find`, `cat`, `head`, `tail`** → use `Read` / `Glob` / `Grep` instead
+- **`grep`** → use `Grep` (faster, returns structured results)
+- **`git`, `gh`, `npm`, `pytest`, deploy scripts, anything else** → `Bash`
+- **`echo`** for communication → never. Output text directly in the response.
+
+**Inline vs delegated: when to spawn a subagent**
+
+- **Under ~5 tool calls expected** → inline
+- **Long-running audit, cross-repo research, parallel investigation** → `Agent`
+- **Repeated workflow with stable shape** → configured subagent in `.claude/agents/`
+- **One-off exploration** → ad-hoc `Agent` call with the prompt embedded
+
+**Searching vs fetching a URL**
+
+- **Know the URL** → `WebFetch`
+- **Don't know the URL** → `WebSearch` first, then `WebFetch` on the result
+- **Authenticated URL** → check for an MCP-provided fetch tool before falling back to `WebFetch` (which can't see private content)
+
+**Asking the user vs inferring**
+
+- **Genuinely ambiguous** (multiple valid interpretations) → `AskUserQuestion`
+- **Stalled on a single missing fact** → ask in plain prose, not via `AskUserQuestion`
+- **The user *just* told you and you forgot** → re-read the prompt, don't re-ask
+
+### The tool-use loop
+
+Inside one of the agent's turns, the loop is:
+
+1. **Read context.** System prompt + `CLAUDE.md` + the user's prompt + recent tool results.
+2. **Plan.** Decide what tools to call and in what order. Multiple independent calls are batched; dependent ones are sequenced.
+3. **Call.** Send tool calls. The harness runs them and returns results.
+4. **Read results.** Each tool returns text (file contents, search hits, command output). Errors come back with messages.
+5. **Decide.** Either (a) reply to the user with prose, (b) call more tools, or (c) both.
+6. **Loop.** Steps 2–5 repeat until the agent decides the task is done or needs the user.
+
+The agent doesn't see *every* tool result — long outputs are sometimes truncated or summarized before reaching the model. This is one reason a 2,000-line `find` output is wasteful: most of it never influences the agent's reasoning.
+
+### Parallel vs sequential calls
+
+Modern Claude Code (and similar tools) supports multiple tool calls in a single response. The agent batches calls that are *independent of each other*:
+
+- **Parallel** — three `Read` calls for three different files; the order doesn't matter.
+- **Sequential** — `Grep` for `processOrder` → read the file with the most hits → propose an edit. Each step needs the previous result.
+
+Batching speeds up sessions significantly. A 10-call task done sequentially takes ~10× the round-trip time of the same task done with calls batched in groups of 3–4. The agent decides based on whether outputs depend on each other; you can nudge it with prompts like *"read X, Y, Z in parallel."*
+
+### Permissions and gating
+
+Each tool can be allowed, denied, or gated via `.claude/settings.json` (project) or `~/.claude/settings.json` (user). Common patterns:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Grep",
+      "Glob",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(npm test:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Write(/etc/**)"
+    ],
+    "ask": [
+      "Bash(deploy.sh:*)",
+      "WebFetch"
+    ]
+  }
+}
+```
+
+- **`allow`** — auto-execute, no prompt
+- **`deny`** — hard-blocked; agent gets an error
+- **`ask`** — prompt the user before executing
+
+The patterns support glob-like wildcards on tool inputs. Granular gating (allow `Bash(git status:*)` but not `Bash(rm:*)`) is the right default for shared repos; blanket-allow of `Bash` is the most common mistake.
+
+The agent sees its current allow/deny list as part of system context, so it knows in advance which tool calls will need permission. You can verify mid-session by asking: *"list the tools currently available to you."*
+
+### MCP extensions
+
+MCP servers extend the toolset for a specific project. Setup is one of:
+
+- **Per project** — `.claude/settings.json` declares which MCP servers to load.
+- **Per user** — `~/.claude/settings.json` for personal tools (e.g., your Linear account, your Figma access).
+- **Built into the harness** — Claude Code ships some MCPs by default; others install via `npm` or a CLI command.
+
+Typical install signals:
+
+- Working on a web app → install a browser MCP (Claude in Chrome / Claude Preview)
+- Doing UI design handoff → install Figma MCP
+- Coordinating tickets → install Linear / Jira / Asana MCP
+- Database-heavy work → install Supabase / Snowflake / BigQuery MCP
+
+Don't install MCPs preemptively. Each adds tools to the agent's context list, taking tokens and adding decision overhead. Install reactively when a task genuinely needs the integration.
+
+### When the agent picks the wrong tool
+
+Common failures and how to steer:
+
+**1. `Bash cat` instead of `Read`.** Older models default to shell habits. Steer via `CLAUDE.md`: *"Always prefer `Read` over `Bash cat` / `head` / `tail`."*
+
+**2. `Write` for a one-line change.** The agent regenerates the whole file when an `Edit` would do. Steer: *"Show the change as a diff via `Edit`; do not regenerate the file."*
+
+**3. Spawning no subagent when one was warranted.** The agent reads ten files inline that a subagent should have summarized. See [When the agent skips spawning a subagent](#when-the-agent-skips-spawning-a-subagent) for the predictable reasons and nudges.
+
+**4. Running tests inline when the user wanted a plan.** *"Don't run tests; outline what you'd do first."* Or use Plan Mode.
+
+**5. Excessive `Bash` for filesystem ops.** Find with `find`, list with `ls`, read with `cat` — when `Glob`, the harness-listing tool, and `Read` are cheaper. Steer in `CLAUDE.md`.
+
+**6. `WebFetch` to an authenticated URL.** Returns a marketing page or a login wall, not the content. If you have an MCP-provided authenticated tool (`mcp__atlassian__fetch_page`, etc.), instruct the agent to use it explicitly.
+
+**7. `AskUserQuestion` when the agent should just decide.** Excessive prompting fragments the conversation. *"Don't ask me which file; pick the most likely one and tell me what you chose."*
+
+The general principle: the agent picks tools based on tool descriptions and prompt hints. If it consistently picks wrong, the fix is usually a line in `CLAUDE.md` (*"always prefer X over Y"*) rather than re-prompting in every session.
 
 ---
 
@@ -171,6 +391,85 @@ Tokens are the agent's currency. Every file read, every prompt, every tool outpu
 
 The goal isn't to *minimize* tokens — it's to spend them where they earn back the most. Most teams over-pay in three or four predictable places.
 
+### What a token is, and how they're counted
+
+A **token** is the unit the model processes. It's not a character, not a byte, not a word — it's a sub-word piece chosen by the model's tokenizer. *"Hello"* is usually one token; *"tokenization"* is often two or three (e.g. `token` + `ization`). Whitespace and punctuation count too.
+
+**Rough ratios you can rely on (English):**
+
+| Unit | Approximate token count |
+|------|------------------------|
+| 1 token | ~4 characters |
+| 1 token | ~0.75 words |
+| 100 tokens | ~75 words ≈ 400 characters ≈ 1 short paragraph |
+| 1,000 tokens | ~750 words ≈ 1.5 pages of prose |
+| 10,000 tokens | ~7,500 words ≈ 15 pages, or a small source file |
+| 100,000 tokens | ~75,000 words ≈ a short novel, or a large module |
+
+**Code, JSON, and structured text** tokenize less efficiently than prose — roughly 3 to 4 characters per token, sometimes lower if the language is punctuation-heavy. **CJK and other non-Latin scripts** are often closer to 1 character per token.
+
+Practical feel for SDD artifacts:
+
+| Artifact | Typical token count |
+|----------|---------------------|
+| A 150-line `CLAUDE.md` | ~2,000–4,000 tokens |
+| A 400-line `ARCHITECTURE.md` | ~6,000–10,000 tokens |
+| A 500-line source file | ~5,000–10,000 tokens (more if punctuation-heavy) |
+| A typical user prompt | ~50–500 tokens |
+| The system prompt + tool descriptions in Claude Code | ~5,000–15,000 tokens (you don't control this; it's part of the harness) |
+| A whole mid-sized codebase | 500,000+ tokens (won't fit; that's why selective context matters) |
+
+#### Four kinds of tokens to know about
+
+Tokens are charged differently depending on what kind they are:
+
+1. **Input tokens** — everything sent *to* the model: system prompt, tool descriptions, `CLAUDE.md`, conversation history, your prompt, and the results of any tool calls so far in the turn.
+2. **Output tokens** — everything the model writes *back*: prose responses plus the JSON of any tool calls. Output is more expensive than input (typically ~5× the input rate, model-dependent).
+3. **Cached input tokens** — input tokens served from a prompt cache, when the conversation prefix matches a recent cache. Roughly **10% of the cost** of an uncached input token. See [Prompt caching](#prompt-caching) below.
+4. **Reasoning tokens** (extended thinking) — internal "thinking" tokens generated before the visible response when extended-thinking mode is enabled. These count separately and are billed at the output rate. Often 2–10× the visible output for hard tasks.
+
+The bill at the end of a session is: `input × rate + output × rate + reasoning × rate − (cached × 90% discount)`. In Claude Code, the harness handles most of this transparently; you can see it summarized via `/cost`-style commands or by asking the agent.
+
+#### What "context window" means in tokens
+
+The **context window** is the total token budget for *one model call* — input plus output combined. Current Claude models give you about **200,000 tokens** per call (a few support more in beta tiers). Once you approach the limit, the harness either truncates older messages, summarizes the conversation, or refuses to proceed.
+
+Two things to know:
+
+- **The hard limit is rarely the binding constraint.** Models start losing attention well before they run out of window. Dropping from 200k filled to 60k filled often improves output quality even though there was "room."
+- **Each prompt replays the full history.** Long sessions don't just *sit* at 80k tokens — every new prompt re-sends those 80k as input. Token cost grows superlinearly with session length, which is why ending sessions early (see "End sessions early" above) is one of the highest-leverage saves.
+
+#### Where input tokens come from in a typical session
+
+Roughly, on a fresh turn:
+
+```
+System prompt                          ~3,000–5,000 tokens   (harness-defined; you don't control this)
+Tool descriptions                      ~5,000–10,000 tokens  (one per available tool)
+CLAUDE.md (auto-loaded)                ~2,000–5,000 tokens
+Conversation history so far            varies — grows each turn
+Your current prompt                    ~50–500 tokens
+Tool results from this turn            varies — sometimes huge
+---------------------------------
+                              Total input for one call
+```
+
+Output tokens are usually a small fraction of input — most code-assistant work is read-heavy. The exception is generating large files (a 500-line code block can cost 5k+ output tokens on its own).
+
+#### How to inspect token usage
+
+Three ways, in order of cheapness:
+
+1. **Harness-provided commands** — `/cost`, `/usage`, or equivalent. Claude Code surfaces input/output/cache totals per session. Look here first.
+2. **Ask the agent** mid-session — *"how many tokens have we used in this task, and roughly where did they go? Sort largest first."* The agent gives an estimate based on what it can see.
+3. **API logs** (for users hitting the API directly) — every response includes `usage.input_tokens`, `usage.output_tokens`, `usage.cache_creation_input_tokens`, `usage.cache_read_input_tokens`. Aggregate over a session to see the real shape.
+
+The biggest items in a session are almost always:
+
+- One or two oversized file reads
+- Long unfiltered tool outputs (`find`, `git log`, big test runs)
+- Replayed conversation history on every prompt
+
 ### Where tokens get wasted
 
 1. **Re-reading the same files.** A long session that reads `CLAUDE.md` four times is doing the work three times for free (caching helps when the prefix is stable — see below).
@@ -236,16 +535,90 @@ The shell did the filtering; the agent didn't have to. You save the difference.
 
 ### Prompt caching
 
-Modern agent platforms (Anthropic's API, Claude Code) cache stable conversation prefixes. A cache hit is roughly **~10% of the cost** of an uncached read on the same content; sessions can become dramatically cheaper per prompt the longer they run, *if* the prefix stays consistent.
+Long sessions can become **dramatically cheaper** as they go — but only if the conversation prefix stays stable. This is one of the highest-leverage optimizations in the entire Token Economy section, and it's almost free if you understand how it works.
 
-To benefit:
+#### What gets cached
 
-- **Put stable docs at the start.** `CLAUDE.md`, `ARCHITECTURE.md`, reference files — load them first, in the same order, every session.
-- **Don't shuffle file-reading order across prompts.** Cache hits depend on exact prefix matches; reordering reads invalidates the cache.
-- **Keep stable files stable.** Editing `CLAUDE.md` mid-session invalidates the cached prefix for that session.
-- **Be aware of TTL.** Caches expire after a few minutes of inactivity (typically 5 min on default tiers). Long pauses reset the saving.
+The model caches **the prefix** of your conversation — everything from the start up to a marked cache point. On the next request, if the prefix matches an existing cache, the model reads it from cache (cheap) and only processes the *new* suffix from scratch.
 
-In practice: long sessions with consistent context get *cheaper* per prompt as more of the prefix is cached. This rewards a session shape where you front-load context once and then iterate.
+In practice, the cacheable prefix is usually:
+
+```
+[System prompt] + [Tool descriptions] + [CLAUDE.md] + [stable docs you loaded first] + [conversation history]
+                                                                                            ↑
+                                                                              everything up to this point can hit cache
+```
+
+In Claude Code, **you don't set cache breakpoints manually** — the harness adds them automatically at sensible points. Direct-API users place `cache_control` markers explicitly.
+
+#### Pricing (Anthropic, current model family)
+
+The exact numbers shift over time, but the ratios are stable:
+
+| Token kind | Cost relative to standard input |
+|------------|--------------------------------|
+| Standard input (uncached) | **1.00×** (baseline) |
+| Cache write (first time, 5-minute TTL) | ~**1.25×** — small premium to seed the cache |
+| Cache hit (subsequent reads, default TTL) | ~**0.10×** — **90% savings** |
+| Cache write (1-hour TTL, beta tier) | ~**2.00×** — bigger seed cost, much longer reuse |
+| Output tokens | ~**5.00×** (model-dependent) |
+
+A long session with a stable 10k-token prefix saves roughly: `10,000 × (1.00 − 0.10) = 9,000 tokens per prompt` after the first. Across 20 prompts in a session, that's 180,000 cached tokens — about the same as eliminating two large file reads.
+
+#### TTL — how long the cache lives
+
+- **Default**: 5 minutes from last access. Every cache *hit* resets the timer, so an active session keeps the cache warm.
+- **Long pauses kill it.** Step away for lunch, come back, the cache is gone; next prompt pays full input rate to re-warm.
+- **1-hour beta tier** is available on some models for an extra cache-write premium — useful for batch workflows or long-running review sessions.
+
+#### Minimum cacheable size
+
+A prefix must be **at least ~1,024 tokens** to qualify for caching (~2,048 for smaller / faster models like Haiku). Prompts below the threshold are processed fresh every time.
+
+In practice this means: tiny `CLAUDE.md` files (under ~50 lines) may not cache; the threshold is most reliably crossed by *system prompt + tool descriptions + CLAUDE.md combined*, which usually totals well above the limit. You don't have to engineer for this — just know the threshold exists.
+
+#### What invalidates the cache
+
+Each of these makes subsequent reads pay full input rate:
+
+- **Any change before the cache point.** Edit a single word in `CLAUDE.md` mid-session → the cache for that session is gone; the next prompt re-warms it.
+- **Reordering reads.** If session A reads `A.md` then `B.md`, and session B reads `B.md` then `A.md`, the cache won't transfer. Order matters.
+- **TTL expiry.** No activity for 5+ minutes → cache evicted.
+- **Different system prompt or tool list.** Most users don't change these mid-session, but if you switch projects, the new system context is a different cache.
+
+#### How to maximize cache benefit
+
+Three habits cover ~90% of the savings:
+
+1. **Front-load stable docs at session start.** Read `CLAUDE.md` + `ARCHITECTURE.md` + the relevant ADR(s) *first*, in the same order every time. After the second prompt of the session, the cache is paying for itself.
+2. **Don't shuffle the early reads across sessions.** Even small reorderings break the prefix match. If you have a session-start ritual (or a `/start-session` slash command), make it deterministic.
+3. **Don't edit `CLAUDE.md` mid-session unless you need to.** Save edits for the end of a session, or for a brand-new session that needs them.
+
+#### Multiple cache breakpoints (advanced)
+
+Anthropic's API supports multiple `cache_control` markers per request — typically four. The model checks the *longest* matching prefix. Useful structuring:
+
+```
+[Layer 1: system prompt + tool descriptions]  — cache_control: stable
+[Layer 2: project docs (CLAUDE.md, ARCHITECTURE.md)]  — cache_control: stable
+[Layer 3: feature-specific context (active spec, current code)]  — cache_control: stable
+[Layer 4: this turn's prompt + tool results]  — no cache (fresh each turn)
+```
+
+Each layer can hit cache independently. A session that switches features can keep layers 1–2 cached while layer 3 invalidates and re-warms.
+
+In Claude Code the layering is automatic; on the API you set breakpoints by hand.
+
+#### When caching doesn't help
+
+- **One-shot prompts.** No second prompt to amortize the cache-write premium.
+- **Highly variable conversation shape.** Reordering, frequent edits to early context — each session pays full rate.
+- **Sub-threshold prompts** (<1,024 tokens cumulative early context). No cache eligibility.
+- **Very short sessions** (< 5 prompts) where the write cost exceeds the savings.
+
+For a 3-prompt session, caching is roughly break-even. For a 30-prompt session with stable context, it's a 50–70% saving on input tokens.
+
+In practice: long sessions with consistent context get *cheaper* per prompt as more of the prefix is cached. This rewards session shapes that front-load context once and then iterate.
 
 ### Token-burning anti-patterns
 
@@ -343,7 +716,7 @@ This becomes the perfect starter context for your next session — by you or by 
 
 ### After Adding a New ADR
 
-When you add a new ADR (especially `Accepted` or one that `Supersedes` another), the agent doesn't magically know. Tell it explicitly.
+When you add a new ADR (especially `Accepted` or one that `Supersedes` another), the agent doesn't magically know. Tell it explicitly. (For the mechanics of *how to write* the ADR itself — format, lifecycle, anti-patterns, worked examples — see [`adr-guide.md`](adr-guide.md). This section assumes the ADR is already written; it covers the post-write prompts.)
 
 **For a new Accepted ADR:**
 
