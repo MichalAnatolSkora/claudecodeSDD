@@ -234,6 +234,8 @@ engineer     PM (scope)   engineer            engineer
 
 **Where it leaks:** the *Reviewed* step. PMs are busy; tech leads are busy; specs sit in `Proposed` for days. The fix is timeboxing — *"24h to review or it ships as-is"* — combined with a small specs queue, so reviewers aren't drowning.
 
+For the *authoring* side — how engineers actually draft each of `spec.md` / `plan.md` / `tasks.md`, the AI-assisted prompts that speed up each step, and the trio consistency check that catches contradictions before implementation — see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).
+
 ### ADR lifecycle
 
 ```

@@ -49,7 +49,9 @@ Spend half an hour before writing anything. The agent can do this for you.
 
 ### Audit prompt
 
-```
+**Prompt:**
+
+```text
 Audit this repo and report:
 
 1. What .md files currently exist? For each, give:
@@ -81,7 +83,9 @@ The first week produces 3 files (occasionally 4). Don't try to do more.
 
 ### Day 1: Draft `CLAUDE.md`
 
-```
+**Prompt:**
+
+```text
 Based on your audit, draft a CLAUDE.md for this repo.
 
 Include sections:
@@ -107,7 +111,9 @@ Edit ruthlessly. Cut anything generic. Keep only what the agent would otherwise 
 
 ### Day 2–3: Draft `ARCHITECTURE.md`
 
-```
+**Prompt:**
+
+```text
 Read src/ thoroughly. Propose ARCHITECTURE.md with:
 
 1. A high-level Mermaid diagram showing main components/modules and their dependencies
@@ -125,7 +131,9 @@ Heavy review again. The agent will draw boundaries that aren't enforced and miss
 
 ### Day 4: Draft `DOMAIN.md` (skip if domain is generic)
 
-```
+**Prompt:**
+
+```text
 Read src/, README.md, and any existing docs. List every business term,
 abbreviation, or domain-specific noun that appears more than once.
 
@@ -178,6 +186,8 @@ Starting in week 2, every non-trivial change uses spec-driven workflow.
 After 4–6 weeks you have a `specs/` folder with 5–15 entries, all real, all referenced by PRs.
 
 **Edge case:** if you absolutely need a written description of how an *existing* feature works (e.g., to onboard a new team member), that's `ARCHITECTURE.md` content or a dedicated `docs/<feature>.md` — not a `specs/` entry. Specs describe *what changed*, not *what exists*.
+
+For the mechanics of writing each new spec post-migration — the AI-authoring prompts that draft a spec from an idea, the plan from the spec, the tasks from the plan, and the consistency check across the trio — see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). It's the practical companion to this phase.
 
 ---
 
@@ -236,7 +246,7 @@ Reusable prompts you'll use throughout the migration. Paste and adapt.
 
 ### Initial audit prompt
 
-```
+```text
 Audit this repo and report:
 1. Existing .md files (filename, age, one-line description)
 2. 5 most common code patterns in src/
@@ -249,7 +259,7 @@ Markdown report. No proposed changes yet.
 
 ### CLAUDE.md draft prompt
 
-```
+```text
 Draft a CLAUDE.md based on the audit. Sections:
 - Project overview (1 paragraph)
 - Stack
@@ -263,7 +273,7 @@ Under 200 lines. [VERIFY] on anything uncertain.
 
 ### ARCHITECTURE.md draft prompt
 
-```
+```text
 Read src/ thoroughly. Propose ARCHITECTURE.md with:
 - High-level Mermaid diagram
 - 1-paragraph description per major component
@@ -275,7 +285,7 @@ Read src/ thoroughly. Propose ARCHITECTURE.md with:
 
 ### DOMAIN.md draft prompt
 
-```
+```text
 Read src/, README.md, existing docs. List every business term, abbreviation,
 or domain-specific noun appearing more than once.
 
@@ -288,7 +298,7 @@ Mark uncertain entries [VERIFY DOMAIN EXPERT].
 
 ### Find-implicit-decisions prompt
 
-```
+```text
 Search the codebase for code that looks like a deliberate decision
 (custom implementation where a library exists, unusual patterns,
 workarounds with explanatory comments).
@@ -303,7 +313,7 @@ Don't write the ADRs yet. List candidates. I'll pick.
 
 ### Find-undocumented-conventions prompt
 
-```
+```text
 Read 5 random files from each major directory in src/. Look for patterns
 that appear repeatedly but aren't called out in CLAUDE.md.
 
@@ -317,7 +327,7 @@ I'll decide what to add to CLAUDE.md.
 
 ### Migration-progress check prompt
 
-```
+```text
 Compare the current state of this repo to a mature SDD repo
 (CLAUDE.md, ARCHITECTURE.md, DOMAIN.md, ADRs, specs/, runbook).
 

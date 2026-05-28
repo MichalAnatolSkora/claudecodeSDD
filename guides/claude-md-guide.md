@@ -598,9 +598,9 @@ CLAUDE.md without an owner is dead by month 6. Pick a maintainer (usually the en
 
 ### The "agent-suggested" loop
 
-A surprisingly good source of CLAUDE.md content is the agent itself. At the end of a session, ask:
+A surprisingly good source of CLAUDE.md content is the agent itself. At the end of a session, ask. **Prompt:**
 
-```
+```text
 Based on our work today, are there any conventions you noticed me correcting
 you on that should be added to CLAUDE.md? List them — don't edit the file.
 ```

@@ -594,7 +594,9 @@ The agent can do most of the typing; you do the judging. Three reusable prompts.
 
 ### Draft a new ADR from a decision summary
 
-```
+**Prompt:**
+
+```text
 I just decided to use [X] instead of [Y] for [reason].
 
 Draft an ADR following docs/adr/_template.md.
@@ -610,7 +612,9 @@ mark [VERIFY].
 
 ### Draft a Supersedes ADR
 
-```
+**Prompt:**
+
+```text
 ADR-NNN currently says [old approach]. We're changing to [new approach]
 because [reason].
 
@@ -625,7 +629,9 @@ Don't edit ADR-NNN yet. I'll change its Status header after this draft is final.
 
 ### Find implicit decisions worth an ADR
 
-```
+**Prompt:**
+
+```text
 Scan src/ for code that looks like a deliberate decision (custom code
 where a standard library exists, workarounds with explanatory comments,
 unusual patterns).
@@ -665,6 +671,10 @@ The ADR reads as *"we did X because we did X."*
 **Fix:** every ADR has at least 2 alternatives listed. If only one alternative existed, it wasn't really a decision worth recording.
 
 ### 4. Editing old ADRs
+
+*(To mechanically prevent this — block edits to bodies of ADRs with `Status: Accepted` via a pre-commit hook or Claude Code `PreToolUse` hook — see [`quality-gates-guide.md`](quality-gates-guide.md) § "Pattern A" and "Pattern B".)*
+
+
 
 You notice ADR-002 has a typo, or its Context is now inaccurate, and you edit the body.
 

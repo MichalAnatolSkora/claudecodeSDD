@@ -1,5 +1,7 @@
 # Spec-Driven Development with AI Coding Agents
 
+> **Built for the 10-person, billion-dollar company.** A small team wielding AI coding agents can now ship what used to take hundreds of engineers — but raw speed isn't the moat. The moat is keeping the agents aligned with your intent as the codebase grows. Spec-driven development is that discipline; these guides are the playbook.
+
 > A practical guide to structuring your repository so AI coding agents (Claude Code, Copilot, Cursor) produce consistent, maintainable code instead of drifting away from your intent.
 
 ---
@@ -10,18 +12,22 @@
 2. [Who Practices SDD](#who-practices-sdd)
 3. [When SDD Pays Off (and When It's Overhead)](#when-sdd-pays-off-and-when-its-overhead)
 4. [The Absolute Minimum](#the-absolute-minimum)
-5. [The PRD Layer](#the-prd-layer)
-6. [Writing a Good spec.md](#writing-a-good-specmd)
-7. [Writing a Good PLAN.md](#writing-a-good-planmd)
-8. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
-9. [Workflow for Changes](#workflow-for-changes)
-10. [SDD in Teams: Roles and Responsibilities](#sdd-in-teams-roles-and-responsibilities)
-11. [Architecture Decision Records (ADR)](#architecture-decision-records-adr)
-12. [Migrating from a Legacy Repo to SDD](#migrating-from-a-legacy-repo-to-sdd)
-13. [Additional Files Worth Adding](#additional-files-worth-adding)
-14. [Repository Organization](#repository-organization)
-15. [Working with the Agent](#working-with-the-agent)
-16. [Golden Rules](#golden-rules)
+5. [Before the PRD: Research and Discovery](#before-the-prd-research-and-discovery)
+6. [The PRD Layer](#the-prd-layer)
+7. [Writing a Good spec.md](#writing-a-good-specmd)
+8. [Writing a Good PLAN.md](#writing-a-good-planmd)
+9. [Writing a Good tasks.md](#writing-a-good-tasksmd)
+10. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
+11. [Workflow for Changes](#workflow-for-changes)
+12. [SDD in Teams: Roles and Responsibilities](#sdd-in-teams-roles-and-responsibilities)
+13. [Architecture Decision Records (ADR)](#architecture-decision-records-adr)
+14. [Migrating from a Legacy Repo to SDD](#migrating-from-a-legacy-repo-to-sdd)
+15. [Additional Files Worth Adding](#additional-files-worth-adding)
+16. [Runbook vs Postmortem](#runbook-vs-postmortem)
+17. [Repository Organization](#repository-organization)
+18. [Working with the Agent](#working-with-the-agent)
+19. [Enforcing and Evaluating SDD](#enforcing-and-evaluating-sdd)
+20. [Golden Rules](#golden-rules)
 
 ---
 
@@ -201,6 +207,48 @@ See [Additional Files Worth Adding](#additional-files-worth-adding) for the full
 
 ---
 
+## Before the PRD: Research and Discovery
+
+Before you can write a PRD, someone has to figure out *what to build, for whom, why*. That's the **research** phase (also called *discovery* in product/UX vocabulary — same thing). It includes customer interviews and synthesis, competitive analysis, market sizing, problem validation, and opportunity briefs.
+
+The PRD is the *output* of research. Research is what feeds it.
+
+### The principle: humans + agent context, never code source
+
+Research artifacts follow the same rule as PRDs, one layer up: **research is for humans plus the agent's context — the agent never generates code from research**.
+
+Three ways the agent legitimately uses research:
+
+1. **As context when drafting PRDs.** *"Per `docs/research/2025-Q3-interviews.md`, controllers spend 8–12 hours/month on reconciliation."* The PRD's problem statement gets grounded in cited findings.
+2. **As context when interpreting *"for whom"* during implementation.** Helps name variables, write UI copy, match user vocabulary, sanity-check assumptions.
+3. **As a synthesis assistant.** Given anonymized notes already in the repo, the agent can extract themes, identify patterns, or flag contradictions across interviews.
+
+The agent **never** turns research into a feature without a PRD + specs in between. Research is upstream of strategy, not a substitute for it.
+
+### What goes in `docs/research/`
+
+**Yes:**
+- Synthesized interview themes (anonymized; quotes attributed to roles — *"Controller at mid-market SaaS company"* — not names)
+- Competitive analyses with named real competitors and sourced claims
+- Market sizing with assumptions documented
+- Problem validation studies and the conclusions drawn
+- Opportunity briefs (PRD candidates that haven't been ratified)
+- Postmortems from failed pilots or canceled directions
+
+**No:**
+- Raw interview transcripts with PII
+- Customer names, contracts, NDA-protected materials
+- Salary or revenue data identifiable to specific companies
+- Anything you'd be uncomfortable seeing in a leak
+
+### The PII gate
+
+**Anonymization happens before commit, not after.** The discipline: synthesized artifact ≠ raw source. Raw sources stay in your research-ops tool (Dovetail, Grain, Notion, etc.); only synthesized artifacts enter the repo. *"When in doubt, leave it out."*
+
+For the practical mechanics — full folder structure, the artifact-type breakdown, the synthesis discipline (raw → patterns → themes), AI-assisted synthesis prompts, the PRD↔research interface, and research-specific anti-patterns (raw transcripts in repo, opinion-as-research, advocacy disguised as synthesis, research that quietly becomes a PRD by accident) — see [`research-guide.md`](research-guide.md).
+
+---
+
 ## The PRD Layer
 
 ### Why PRDs exist
@@ -214,13 +262,15 @@ A good PRD answers:
 - What is explicitly out of scope?
 - What are the constraints (technical, legal, time)?
 
-**Critical insight:** The PRD is a *starting artifact*, not a living document. Once the project ships its first version, the PRD freezes as history. Subsequent changes live in feature-level specs, not in PRD edits.
+**Critical insight:** The PRD is a *starting artifact*, not a living document. Once an era's initial version ships, that era's PRD freezes as history. Subsequent feature-level changes live in specs, not in PRD edits. Major direction shifts get a *new* PRD (see [Multiple PRDs over time](#multiple-prds-over-time-the-era-pattern) below), never edits to the old one.
 
 Treating PRD as living causes two problems:
 - It becomes a dumping ground for every change request
 - The original intent gets diluted over time
 
-Keep the original PRD pristine. Archive it in `docs/prd/` with a date. New direction → new PRD or roadmap entry, not edits to the old one.
+Keep each PRD pristine. Archive in `docs/prd/` with a date. New direction → new PRD; *never* edits to an old one.
+
+For the practical side — format alternatives (PR-FAQ, lean PRD, one-pager, full template), two complete worked examples, era boundary heuristics, AI-authoring prompts, stakeholder review process, and PRD-specific anti-patterns — see [`prd-guide.md`](prd-guide.md).
 
 ### PRD vs spec — two layers, same question
 
@@ -230,11 +280,12 @@ Yes. They live at different layers and have different lifetimes.
 
 | | PRD | Spec |
 |---|---|---|
-| **Scope** | The whole product/system | A single feature or change |
-| **Lifetime** | Written once, frozen after v1 ships | Written before the PR, frozen after merge |
+| **Scope** | The whole product / an era of the system | A single feature or change |
+| **Lifetime** | Written per era, frozen after that era ships | Written before the PR, frozen after merge |
 | **Granularity** | *"Build an order delivery platform"* | *"Add ZIP-per-batch compression to `BatchXmlMerger`"* |
-| **Audience** | Stakeholders, founding team | Developers, the AI agent about to write code |
-| **Frequency** | Maybe once in the project's life | Dozens or hundreds per year |
+| **Audience** | **Humans only** — stakeholders, founders, product strategists | Developers **and the AI agent** about to write code |
+| **Read by the agent?** | **No** — never used as a code-generation source | **Yes** — first artifact the agent reads to implement |
+| **Frequency** | Once per era (so: rarely; 1–4 over a product's life) | Dozens or hundreds per year |
 | **Owner** | Product / founder | Engineer driving the change |
 
 **Concrete example:**
@@ -252,6 +303,18 @@ spec (2026-03-...): ...
 
 The PRD answers *why this system exists*. Specs answer *what changed this week*.
 
+### The agent doesn't read PRD
+
+A consequence worth stating explicitly: **the AI agent never generates code from a PRD.** The agent reads `spec.md → plan.md → tasks.md`. The PRD lives one layer up — it answers product-level questions (*what are we building, for whom, why*) that the implementation layer takes as given.
+
+Practical implications:
+
+- **Don't feed PRD to the agent and expect a working feature.** It hasn't got the granularity. The agent will fabricate plausible implementation details that may or may not match what you actually want.
+- **Don't write PRD with implementation detail *"for the agent."*** If you find yourself adding *"use Dapper for data access"* or *"implement Y as middleware"* to a PRD, that's a sign the content belongs in `plan.md`, an ADR, or `CLAUDE.md` — not the PRD.
+- **PRD shapes the spec — it doesn't replace it.** When an engineer writes a new spec, they may reference the PRD for context (*"per the original PRD, partner SLA requires < 1% failure rate"*), but the spec itself is what the agent then consumes.
+
+The PRD audience is **humans**: stakeholders, founders, future product strategists. The agent's audience starts at `spec.md`.
+
 ### The trap each avoids
 
 **Specs without a PRD:** six months in, nobody remembers why retries even matter — the partner SLA requires < 1% failure rate, but that requirement lives only in someone's head. New engineers (and the AI agent) propose "simpler" solutions that miss the point.
@@ -260,13 +323,59 @@ The PRD answers *why this system exists*. Specs answer *what changed this week*.
 
 Two artifacts, two lifetimes, two purposes. The overlap in fields is real but cosmetic — the level of detail is completely different.
 
+### Multiple PRDs over time (the era pattern)
+
+A 5-year product won't have the same PRD it had on day 1 — and that's fine. The rule *"PRD freezes after v1"* doesn't mean *"one PRD per project lifetime"*; it means *"one PRD per **era**."*
+
+An **era** is a major strategic chapter — a moment where the product's *what* and *why* change at the top level. Examples:
+
+- Original launch (your first PRD)
+- A pivot in market or audience (B2C → B2B, or vice versa)
+- A major capability set added (dashboard → full platform, single-tenant → multi-tenant)
+- Geographic expansion that changes core assumptions
+- Post-acquisition direction shift
+
+Each era gets its own PRD. Each PRD freezes after that era's initial release. The collection in `docs/prd/` becomes the company's strategic timeline at a glance:
+
+```
+docs/prd/
+├── 2025-12-original.md              # original launch
+├── 2027-Q2-mobile-app.md            # adding mobile as a first-class product
+├── 2029-Q1-platform-shift.md        # B2B → B2C2B pivot
+└── 2030-Q3-european-expansion.md    # geographic expansion
+```
+
+**This is versioning at the directory level**, not at the document level:
+
+- **Each PRD is its own complete document** — not a delta from the previous one.
+- **Each PRD freezes after its era ships** — body never edited again.
+- **The history lives in the directory listing**, not inside any single file.
+
+The pattern preserves the *"freeze after v1"* discipline (no Frankenstein document) while honestly reflecting that long-lived products have multiple strategic chapters.
+
+**When to write a new PRD** (era boundary):
+
+- New market or audience (e.g., adding enterprise customers to a B2C product)
+- Major capability set (e.g., dashboard → full platform; data tool → multi-tenant SaaS)
+- Strategic pivot (e.g., self-service → high-touch sales motion)
+- After a major reorganization that changes how the product is built
+
+**When NOT to write a new PRD** (these are specs or roadmap entries):
+
+- A new feature within the current era's vision → spec
+- A refactor of existing functionality → spec (+ ADR if architectural)
+- A bugfix or polish → spec, or just a PR
+- A "what we're planning next quarter" update → `ROADMAP.md`, not a new PRD
+
+**Sanity check for smaller projects:** the era pattern says *eras exist when strategic chapters change*, not *eras exist on a calendar*. Most projects have **one PRD that lasts years** — that's the normal case. The era pattern matters when a major shift actually happens, which for many products is never.
+
 ---
 
 ## Writing a Good spec.md
 
-A `spec.md` answers: *what are we building, why, and how do we know it works?* It's the document the agent reads before generating code; the document the human PR reviewer reads before approving; the document future-you reads when wondering *"why is this code shaped this way?"*
+A `spec.md` answers: *what are we building, why, and how do we know it works?* It's the **first document the agent reads when implementing** (unlike PRD, which is for humans only — see [The agent doesn't read PRD](#the-agent-doesnt-read-prd)); the document the human PR reviewer reads before approving; the document future-you reads when wondering *"why is this code shaped this way?"*
 
-A spec is **per-feature** and **frozen after merge** — different from a PRD (whole-product, frozen after v1) and from a plan (the *how*, written alongside the spec — see [the next section](#writing-a-good-planmd)).
+A spec is **per-feature** and **frozen after merge** — different from a PRD (whole-product per era, frozen after that era's release) and from a plan (the *how*, written alongside the spec — see [the next section](#writing-a-good-planmd)).
 
 ### Principles that work
 
@@ -346,7 +455,7 @@ The most common rot pattern: specs sitting in *Draft* indefinitely. A spec older
 
 ### Where to go deeper
 
-The template above plus [`templates/spec.md`](../templates/spec.md) cover ~90% of features. For the per-role ownership of spec lifecycle (who drafts, who reviews, who approves, who updates status), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle." For how the agent reads specs and implements them task-by-task, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation."
+The template above plus [`templates/spec.md`](../templates/spec.md) cover ~90% of features. For a full worked example of `spec.md` + `plan.md` + `tasks.md` filled in for one feature, plus AI-authoring prompts (*drafting a spec from an idea*, *reviewing for gaps*, *the trio consistency check*), see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). For the per-role ownership of spec lifecycle (who drafts, who reviews, who approves, who updates status), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle." For how the agent reads specs and implements them task-by-task, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation."
 
 ---
 
@@ -442,6 +551,120 @@ tests/
 Keep `PLAN.md` short — if it exceeds ~200 lines, split into `PLAN.md` (what + acceptance) and `ARCHITECTURE.md` (how). AI agents work better with several focused files than one monolith.
 
 After each iteration, move items from "Open Questions" to "Technical Decisions." The plan is alive, but decision history must stay visible — so the agent (and you, in a month) know *why* something is the way it is.
+
+For a full worked example of plan.md alongside its sibling spec.md and tasks.md (with cross-document references, AI-authoring prompts for drafting `plan.md` from `spec.md`, and the validation prompt that checks the plan against existing ADRs and `ARCHITECTURE.md`), see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).
+
+---
+
+## Writing a Good tasks.md
+
+A `tasks.md` answers: *what's the execution order, and how do we know each step worked?* It's the checklist the engineer (and the agent) walks through to turn `spec.md` + `plan.md` into shipped code.
+
+If `spec.md` is *what + why*, and `plan.md` is *how*, then `tasks.md` is *do, in this order, with verification at each step.*
+
+### When you need a tasks.md
+
+Most non-trivial features benefit from one. Skip it when:
+
+- The change is one or two commits (`tasks.md` becomes overhead for trivial work)
+- The spec is small enough that the order is obvious
+- The work is genuinely exploratory and the order will change as you learn
+
+For everything else — write it. The act of writing tasks down forces you to think about order, verification, and dependencies *before* you start typing code.
+
+### Principles that work
+
+- **One task = one verification.** Each task has a way to confirm it's done before moving on. *"Add validation"* → bad. *"Write tests for invalid inputs (red), then implement validation (green)"* → good.
+- **Order matters.** Tasks are sequential by default. If two are truly parallel, mark them — but the default assumption is that task N depends on N-1.
+- **Test-first when applicable.** Red-green-refactor is the most common discipline; `tasks.md` often opens with the failing test.
+- **Reference acceptance criteria.** Each AC from `spec.md` should map to one or more tasks. If an AC has no matching task, you're missing work; if a task doesn't trace to an AC, it's scope creep.
+- **Atomic enough to checkpoint.** A task should be small enough that you (or the agent) can finish it without losing context, then pause for review.
+- **Updated as work progresses.** Checkboxes flip; notes appended. After merge, the file freezes alongside `spec.md` as historical record.
+
+### Template
+
+```markdown
+# Tasks: [Feature name]
+
+> Order matters. Each task has its own verification. Check off as you go.
+
+## Setup
+
+- [ ] [Any prerequisites — branch, DB migration, env setup]
+
+## Implementation (in execution order)
+
+- [ ] 1. [Task description] → verify: [how to confirm]
+- [ ] 2. [Task description] → verify: [how to confirm]
+- [ ] 3. ...
+
+## Verification (against acceptance criteria)
+
+- [ ] AC1: [from spec.md] → [test / manual check]
+- [ ] AC2: [from spec.md] → [test / manual check]
+
+## Post-merge
+
+- [ ] Append `STATUS: shipped (PR #N, YYYY-MM-DD)` to spec.md
+- [ ] Update relevant docs (CLAUDE.md, ARCHITECTURE.md, etc.) if needed
+- [ ] Close related issues / tickets
+
+## Notes (append as you work)
+
+- [YYYY-MM-DD]: [observation, blocker, decision made on the fly]
+```
+
+A copy-pasteable version lives at [`templates/tasks.md`](../templates/tasks.md).
+
+### Granularity — how big is a task?
+
+Roughly: **one task should be reviewable in 5–15 minutes** of focused attention. Smaller is fine; bigger is a smell.
+
+| Size | Example | Verdict |
+|------|---------|---------|
+| Too small | *"Add a return statement"* | Combine with surrounding work |
+| Right | *"Implement `OrderValidator.Validate`, with tests for 3 invalid-input cases"* | Yes |
+| Right | *"Wire `POST /api/orders` (controller → handler → repository) with 1 happy-path integration test"* | Yes |
+| Too big | *"Implement the entire order processing pipeline"* | Split into 3–5 tasks |
+
+A task that takes more than ~2 hours of focused work is usually two tasks.
+
+### How the agent uses tasks.md
+
+When the agent implements a spec, the standard prompt is *"work through tasks.md one task at a time, with checkpoints."* The agent then:
+
+1. Reads the next unchecked task
+2. Restates what it's about to do (a brief plan)
+3. Implements the task
+4. Runs the verification step
+5. Waits for your confirmation
+6. Moves to the next task
+
+This is why **the verification step matters** — without it, the agent can't tell when it's done. With it, the agent is self-checkpointing.
+
+See [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation" for the full prompt pattern.
+
+### Practical tips
+
+**Update as you work.** Check off completed tasks; append notes when something unexpected happens. The notes are the most underrated part of `tasks.md` — they tell future you (or the post-mortem) what really happened.
+
+**Freezes alongside spec.md after merge.** All checkboxes should be ticked; notes should be readable. Don't tidy up retroactively — leave the messy reality.
+
+**Pause for review at task boundaries, not mid-task.** If the agent is mid-task and you want to interject, finish the current task first. Mid-task interruptions produce broken artifacts.
+
+**Skip for trivial changes.** A 1-task `tasks.md` is just `spec.md` with extra ceremony. If you genuinely have only one thing to do, mention it in `spec.md` and skip the file.
+
+### Anti-patterns
+
+1. **Tasks without verification.** *"- [ ] Implement validation"* gives the agent no way to know when it's done. Always add `→ verify:`.
+2. **Tasks describing the result, not the action.** *"- [ ] Order processing works"* is a vibe, not a task. *"- [ ] Implement `OrderProcessor` with 3 cases (happy + 2 failures)"* is a task.
+3. **`tasks.md` as TODO list for the whole feature lifecycle.** *"- [ ] Decide on logging library"* belongs in `plan.md` or an ADR. `tasks.md` is for *implementation* steps, not pending decisions.
+4. **Rewriting `tasks.md` mid-flight.** If the plan changes, update `plan.md` and add new tasks at the end. Don't retcon the old ones — the history is valuable.
+5. **No checkboxes.** Plain text without `- [ ]` defeats half the point. The checkboxes give a visible progress signal at any moment.
+
+### Where to go deeper
+
+For a full worked example of `tasks.md` alongside its `spec.md` + `plan.md` siblings, the AI prompt for drafting tasks from a plan, and the `/trio-check` consistency audit before implementation, see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). For per-role ownership (who writes `tasks.md`, who reviews, who flips checkboxes), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle". For the agent-side implementation flow with concrete prompts, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation".
 
 ---
 
@@ -675,6 +898,8 @@ Beyond what we've covered (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, sp
 
 **`ROADMAP.md`** — what you plan in the coming quarters. Not details, just direction. Gives the agent (and new joiners) context on *where* we're going, so proposed solutions don't conflict with future plans.
 
+**`docs/research/`** — synthesized research artifacts upstream of PRDs: interview themes, competitive analyses, market sizing, problem validation, opportunity briefs. Lives here as **agent context** (the agent uses it when drafting PRDs and interpreting user vocabulary), never as a code-generation source. **Raw data with PII stays out — synthesis only.** See [Before the PRD: Research and Discovery](#before-the-prd-research-and-discovery) above and [`research-guide.md`](research-guide.md) for the full discipline.
+
 ### Domain-Specific
 
 **`docs/integrations/`** — one file per external integration. `sftp-acme-bank.md`, `carrier-shipping-api.md`, `imagegen-vendor.md`. Each contains: endpoints, auth, limits, quirks, sample payloads, partner-side contacts. Invaluable when the agent generates integration code — without it, it improvises based on general API knowledge.
@@ -697,9 +922,68 @@ Beyond what we've covered (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, sp
 
 **`LICENSE`** — obvious, but often skipped in commercial projects.
 
-**`docs/research/`** — your notes from spikes, experiments, library comparisons. Often contain conclusions that never reach the code but remain valuable. *"PDF generation library comparison, 3 options, 2026-02."*
-
 **`docs/external-resources.md`** — links to partner documentation, articles that inspired decisions, talks. Source attribution = easier verification in the future.
+
+---
+
+## Runbook vs Postmortem
+
+Both `RUNBOOK.md` / `docs/runbooks/` and `docs/postmortems/` were listed above. They cover the same surface area — *incidents* — but operate on different timescales and serve different purposes. New teams routinely confuse them (or pick one assuming it covers what the other does). It's the same kind of confusion as PRD-vs-spec from [The PRD Layer](#the-prd-layer): same domain, different lifetimes.
+
+|  | Runbook | Postmortem |
+|---|---|---|
+| **When read** | During an incident (3 a.m., half awake) | Days or weeks after the incident |
+| **Time frame** | *"What do I do right now?"* | *"What happened, why, and what changes?"* |
+| **Audience** | On-call engineer under stress | Engineering team + management, in a calm review |
+| **Format** | Symptoms → diagnosis → recovery → verification | Summary → timeline → root cause → lessons → action items |
+| **Updated when** | Within 24 h of every incident (plus quarterly audit) | Once, after the incident — then frozen |
+| **Lifetime** | Living (continuously updated) | Frozen artifact, archived |
+| **Lives in** | `docs/runbooks/<symptom-slug>.md` | `docs/postmortems/YYYY-MM-DD-<incident-slug>.md` |
+| **Goal** | Mean-time-to-recovery ↓ | Mean-time-between-incidents ↓ |
+
+### They aren't alternatives — they're a sequence
+
+A postmortem usually *produces* a new runbook entry (or updates an existing one). The sequence per incident:
+
+```
+Incident → resolved
+   ↓
+24 h:    Runbook entry written/updated   (so next on-call doesn't relearn)
+   ↓
+1–7 d:   Postmortem written              (root cause + lessons + follow-ups)
+   ↓
+The postmortem may flag "runbook needs further updating" — feedback loop closes
+```
+
+### The trap each avoids
+
+**Runbook without postmortems:** recovery procedures stay shallow because nobody analyzes *why* incidents keep recurring. The same root cause produces three more incidents over six months; each one gets a runbook update, but the underlying problem is never named.
+
+**Postmortems without runbook:** analyses are excellent, lessons are real — but at 3 a.m. when the next incident hits, the on-call still has to figure out the recovery from scratch. A six-month-old postmortem doesn't help under stress.
+
+### A minimal postmortem template
+
+A copy-pasteable postmortem template lives at [`templates/postmortem.md`](../templates/postmortem.md). The headings:
+
+```
+# Postmortem: [one-line incident summary]
+
+Date / Severity / Duration / Author / Status
+
+## Summary
+## Timeline
+## Root cause
+## What went well
+## What went wrong
+## Lessons learned
+## Action items (each with owner + due date)
+```
+
+**Blameless framing matters.** A postmortem accuses systems and decisions, not individuals. Otherwise the next one isn't written honestly — and the whole discipline collapses within a quarter.
+
+### Where to go deeper
+
+For the runbook side — what makes an entry pass the 3 a.m. test, full templates, anti-patterns, agent prompts for drafting entries after incidents, and how runbook updates trigger off postmortems — see [`runbook-operations-guide.md`](runbook-operations-guide.md). For postmortem discipline at scale (blameless practices, action-item tracking, cultural framing), most teams adopt one of the public templates (Google SRE workbook, Atlassian's incident handbook, Increment magazine articles) and adapt to local practice.
 
 ---
 
@@ -732,14 +1016,22 @@ This is what a *mature* SDD repo looks like — a mid-sized project, ~6–12 mon
 │   ├── adr/                           # architecture decisions — immutable, numbered, append-only
 │   │   ├── ADR-001-dapper.md          # one decision per file, status header on top
 │   │   └── ADR-002-quartz.md
-│   ├── prd/                           # original PRDs — archive, reference only (frozen after v1)
-│   │   └── 2025-12-original-prd.md
+│   ├── prd/                           # PRDs per era — humans only, agent never reads these
+│   │   ├── 2025-12-original-prd.md    # the launch PRD (frozen after v1)
+│   │   ├── 2027-Q2-mobile-app.md      # later era: adding mobile (frozen after that release)
+│   │   └── 2029-Q1-platform-shift.md  # later era: B2B → B2C2B pivot
 │   ├── runbooks/                      # per-incident recovery procedures (the 3 a.m. file)
 │   ├── integrations/                  # one file per external integration — endpoints, quirks, contacts
 │   ├── data-flows/                    # Mermaid diagrams of main flows through the system
 │   ├── schemas/                       # DDL of current schema + ERDs
 │   ├── postmortems/                   # incident analyses — root cause, lessons, follow-ups
-│   ├── research/                      # spike notes, library comparisons, experiments
+│   ├── research/                      # synthesized research — agent context, never code source
+│   │   ├── README.md                  # index — what's here, currency, used-for
+│   │   ├── interviews/                # anonymized interview themes (raw stays in research-ops tool)
+│   │   ├── competitive/               # competitive analyses with named real competitors
+│   │   ├── sizing/                    # TAM / SAM / SOM with assumptions documented
+│   │   ├── validation/                # problem validation studies, failed-pilot postmortems
+│   │   └── opportunity-briefs/        # PRD candidates not yet ratified
 │   ├── templates/                     # PR/issue/spec/ADR templates to copy from
 │   ├── snapshots/                     # point-in-time captures before major refactors (rollback context)
 │   ├── GLOSSARY.md                    # alternative home for DOMAIN.md content if you prefer it under docs/
@@ -764,7 +1056,7 @@ Three lifetimes are mixed together in the same tree:
 
 - **Stable layer** — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`. Updated as the codebase changes, but the *file itself* exists for the life of the project. The agent loads these (or is pointed at them by `CLAUDE.md`) nearly every session.
 - **Append-only layer** — `docs/adr/`, `docs/postmortems/`, `CHANGELOG.md`. Each new entry is added; old entries are never edited (except for ADR status changes via `Supersedes`). The history is the value.
-- **Frozen layer** — `docs/prd/`, `specs/<date-slug>/`. Written once, frozen after their moment passes (PRD: after v1 ships; spec: after the PR merges). Treat as historical artifacts.
+- **Frozen layer** — `docs/prd/`, `specs/<date-slug>/`. Written once, frozen after their moment passes (each PRD: after its era ships; each spec: after the PR merges). Treat as historical artifacts.
 
 A repo that confuses these layers — editing old ADRs, treating PRD as living, leaving specs perpetually unfinished — rots fastest.
 
@@ -811,6 +1103,32 @@ Read it once before you start using the workflow described in this guide on a re
 
 ---
 
+## Enforcing and Evaluating SDD
+
+A practical question that surfaces once a team is several months into SDD: *can we make the discipline stick without depending on every contributor remembering every rule?*
+
+Partially yes. SDD enforcement operates on **three layers**, each with different reach:
+
+| Layer | What it does | Example |
+|-------|-------------|---------|
+| **Mechanical** (regex, hooks, CI) | Hard gate: blocks specific actions | Block edits to bodies of ADRs with `Status: Accepted` |
+| **LLM evaluator** (configured subagent, slash command) | Soft gate: scores quality, surfaces issues | *"Are these acceptance criteria testable?"* |
+| **Human review** (code review, architecture meeting) | Judgment: ensures quality, completeness, intent | *"Is this Out-of-scope list complete enough to prevent drift?"* |
+
+The mistake most teams make is trying to mechanize judgment items (like "is this AC testable") or leave mechanical items (like "is the ADR body unchanged") to vigilance. Neither works at scale.
+
+**The asymmetric-cost rule of thumb:**
+
+- *False positive is cheap, false negative is catastrophic* → mechanical hard gate (PII scan, ADR body lock)
+- *False positive is expensive (blocks legit work), false negative is recoverable* → LLM evaluator that warns, not blocks
+- *Both depend on context* → human review
+
+A working SDD setup typically has: pre-commit hooks for PII and Accepted ADR protection, Claude Code hooks for in-session feedback (active ADR list, end-of-session reminders), a configured subagent (`trio-auditor`) for cross-artifact checks, slash commands (`/spec-check`, `/trio-check`) for user-invoked evaluation, and CI checks that block on mechanical issues but advise on LLM evaluations.
+
+For the full treatment — five implementation patterns (pre-commit hooks, Claude Code hooks, configured subagents, slash commands, CI/CD), what belongs in each category for each SDD artifact, a complete worked example of a setup, and the anti-patterns (over-strict hooks, no escape hatch, mechanical checks of subjective things, alert fatigue) — see [`quality-gates-guide.md`](quality-gates-guide.md).
+
+---
+
 ## Golden Rules
 
 1. **Don't create documents on spec.** Add the next one when:
@@ -823,7 +1141,7 @@ Read it once before you start using the workflow described in this guide on a re
 
 3. **A repo with 30 stale markdown files is worse than a repo with 5 always-fresh ones.** Discipline > completeness.
 
-4. **PRD is a starting artifact, not a living document.** Freeze after v1 ships.
+4. **Research and PRD are both for humans + agent context, never code source.** The agent reads `spec.md → plan.md → tasks.md`. Research lives in `docs/research/` (anonymized — synthesis only, no raw PII); PRDs live in `docs/prd/` (frozen per era; multiple over time = fine, editing old ones = Frankenstein).
 
 5. **ADRs are immutable. Specs freeze after shipping. Only the stable layer evolves continuously.**
 

@@ -24,6 +24,10 @@
 
 ---
 
+> **Convention used in this guide:** code blocks preceded by a **Prompt:** label (and tagged ` ```text`) are messages you would paste / type into the agent. Code blocks with other language tags (` ```json`, ` ```yaml`, ` ```bash`, ` ```markdown`, …) are configuration, scripts, or content artifacts — not prompts. ASCII diagrams and directory trees use plain code fences.
+
+---
+
 ## Core Philosophy
 
 ### The mental model
@@ -482,31 +486,31 @@ The biggest items in a session are almost always:
 
 ### Practical patterns that save tokens
 
-**Be specific about what to read.** Point at file paths and ranges when you can:
+**Be specific about what to read.** Point at file paths and ranges when you can. **Prompt (effective):**
 
-```
+```text
 Read the GetOrders method in src/Repositories/OrderRepository.cs.
 Don't read the rest of the file.
 ```
 
-beats
+beats **prompt (wasteful):**
 
-```
+```text
 Read the order repository and find the relevant method.
 ```
 
 The first costs a few hundred tokens. The second can easily cost 5,000+ on a large file.
 
-**Use `grep` / `glob` before `read`.** Find first, then load only the matches:
+**Use `grep` / `glob` before `read`.** Find first, then load only the matches. **Prompt:**
 
-```
+```text
 Grep src/ for `processBatch`. From the matches, read only the file
 with the most occurrences. Don't load the others.
 ```
 
-**Ask for diffs, not rewrites.** Any prompt that involves changing code should specify:
+**Ask for diffs, not rewrites.** Any prompt that involves changing code should specify it. **Prompt:**
 
-```
+```text
 Show me the change as a diff against the current file.
 Don't reproduce unchanged lines.
 ```
@@ -632,9 +636,9 @@ In practice: long sessions with consistent context get *cheaper* per prompt as m
 
 ### Quick token audit
 
-At any point in a session, ask:
+At any point in a session, ask. **Prompt:**
 
-```
+```text
 How many tool calls have you made so far in this task, and approximately
 how many tokens did each consume? Sort by cost descending.
 ```
@@ -668,9 +672,9 @@ All the documentation in the world is useless if you don't actually use it when 
 
 Begin every non-trivial session by anchoring the agent in the relevant context. Don't assume it remembers anything from before — even in long-running tools like Claude Code, fresh context windows are the norm.
 
-**For a new feature:**
+**For a new feature** — **Prompt:**
 
-```
+```text
 Read CLAUDE.md, ARCHITECTURE.md, and DOMAIN.md.
 Then read specs/_template/spec.md to understand our spec format.
 We're starting a new feature: [short description].
@@ -678,9 +682,9 @@ Before writing any code, draft specs/[date-slug]/spec.md based on the template.
 List open questions at the end — don't fill them in yourself.
 ```
 
-**For modifying an existing feature:**
+**For modifying an existing feature** — **Prompt:**
 
-```
+```text
 Read CLAUDE.md and ARCHITECTURE.md.
 We're modifying [feature]. Read its original spec at specs/[folder]/spec.md
 and the relevant code at [paths].
@@ -697,7 +701,9 @@ The pattern is the same in both: **load context → state intent → propose pla
 
 The last 60 seconds of a session matter more than the first 10 minutes — they decide whether next session has to start from scratch.
 
-```
+**Prompt:**
+
+```text
 We're wrapping up. Please produce a session summary:
 1. What we accomplished (with PR/spec references)
 2. What's left in current tasks.md (with status)
@@ -718,9 +724,9 @@ This becomes the perfect starter context for your next session — by you or by 
 
 When you add a new ADR (especially `Accepted` or one that `Supersedes` another), the agent doesn't magically know. Tell it explicitly. (For the mechanics of *how to write* the ADR itself — format, lifecycle, anti-patterns, worked examples — see [`adr-guide.md`](adr-guide.md). This section assumes the ADR is already written; it covers the post-write prompts.)
 
-**For a new Accepted ADR:**
+**For a new Accepted ADR** — **Prompt:**
 
-```
+```text
 I just added docs/adr/ADR-014-[slug].md.
 Read it carefully. Then:
 1. Update the "Active decisions" list in CLAUDE.md (add ADR-014)
@@ -729,9 +735,9 @@ Read it carefully. Then:
    — do NOT change code yet, just list the locations.
 ```
 
-**For an ADR that Supersedes another:**
+**For an ADR that Supersedes another** — **Prompt:**
 
-```
+```text
 ADR-014 supersedes ADR-002. I've already updated ADR-002's status header.
 Please:
 1. Update CLAUDE.md's "Active decisions" list — remove ADR-002, add ADR-014
@@ -740,9 +746,9 @@ Please:
    or needs updating to point to ADR-014.
 ```
 
-**For documenting a decision after the fact:**
+**For documenting a decision after the fact** — **Prompt:**
 
-```
+```text
 We just decided to use [X] instead of [Y] for [reason].
 Draft an ADR following the template in docs/adr/_template.md.
 Use the next available number. Status: Accepted, today's date.
@@ -755,7 +761,11 @@ Show me the draft before creating the file.
 
 A spec is ready. Now you want the agent to implement it. Don't just say *"code it up."*
 
-```
+(For *authoring* the spec / plan / tasks themselves with AI help — the prompts that draft each artifact, the trio consistency check, the iteration loops — see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). The patterns below assume the trio is already written and reviewed.)
+
+**Prompt:**
+
+```text
 We're implementing specs/[date-slug]/.
 Read spec.md, plan.md, and tasks.md in that folder.
 Also read CLAUDE.md and the referenced source files in plan.md.
@@ -776,7 +786,9 @@ For smaller specs you can compress this, but the principle holds: **task by task
 
 This is the step most teams skip, and it's why repos rot. After merging code, the agent should help maintain the docs that just became outdated.
 
-```
+**Prompt:**
+
+```text
 We just merged PR #123 implementing specs/[date-slug]/.
 Please:
 1. Append "STATUS: shipped (PR #123, [date])" to spec.md
@@ -792,7 +804,9 @@ This 5-minute habit prevents documentation drift over months.
 
 Refactors invalidate large parts of the agent's mental model. Help it re-orient.
 
-```
+**Prompt:**
+
+```text
 We just completed a major refactor of [subsystem].
 Before we continue work:
 1. Read the current state of [paths]
@@ -812,7 +826,9 @@ The runbook is a different beast from specs and ADRs — it's read under stress,
 
 ### Drafting a new entry after an incident
 
-```
+**Prompt:**
+
+```text
 We just resolved an incident: [one-line summary].
 Root cause was [X]. Recovery steps were [Y, Z].
 
@@ -832,7 +848,9 @@ Show me the draft before saving.
 
 ### Extracting a runbook from a post-mortem
 
-```
+**Prompt:**
+
+```text
 Read docs/postmortems/[file].md.
 
 Identify any *operational* lessons that should become runbook entries.
@@ -846,7 +864,9 @@ List them. I'll pick which to create.
 
 ### Updating after an infrastructure change
 
-```
+**Prompt:**
+
+```text
 We just changed [X]: [description]. Files affected: [paths].
 
 Search OPERATIONS.md and docs/runbooks/ for any:
@@ -859,7 +879,9 @@ List the locations and the proposed update for each — do NOT change docs yet.
 
 ### Generating a diagnostic script from runbook content
 
-```
+**Prompt:**
+
+```text
 Read docs/runbooks/[slug].md.
 
 Generate a single bash script that runs all the diagnostic steps from the
@@ -875,7 +897,9 @@ This pattern — *runbook is the spec, script is the artifact* — is much more 
 
 ### Auditing the runbook for staleness
 
-```
+**Prompt:**
+
+```text
 Read docs/runbooks/ and OPERATIONS.md.
 For each entry, report:
 1. Last verified date (or "not present")
@@ -890,9 +914,9 @@ Run this quarterly. It surfaces rot before it bites.
 
 ### When the agent generates "production-ready" code without a runbook
 
-If the agent proposes adding a feature with non-trivial operational concerns (new external integration, new background job, new persistent state), require:
+If the agent proposes adding a feature with non-trivial operational concerns (new external integration, new background job, new persistent state), require this **Prompt:**
 
-```
+```text
 Before this is "done," propose the runbook entries that need to exist for this
 feature to be operable:
 - What can break?
@@ -911,14 +935,18 @@ This is the operational equivalent of *"tests must accompany the feature."* A ne
 
 These work across all situations, regardless of whether you're writing a spec, drafting a runbook, or fixing a bug.
 
+All six are **prompts** — paste them verbatim or adapt to your situation.
+
 **"Plan before code":**
-```
+
+```text
 Don't write code yet. First, outline what you'll do in 5-10 bullet points.
 I'll approve or correct before you start implementing.
 ```
 
 **"Cite your source":**
-```
+
+```text
 For each decision in your proposal, cite the document that supports it
 (CLAUDE.md section, ADR number, spec path).
 If a decision isn't grounded in any document, mark it as [ASSUMPTION]
@@ -926,26 +954,30 @@ and we'll discuss before proceeding.
 ```
 
 **"Diff, don't replace":**
-```
+
+```text
 Show me proposed changes as diffs against the current file,
 not as a full rewrite. I want to see exactly what changes.
 ```
 
 **"Question before assumption":**
-```
+
+```text
 If anything in this task is ambiguous, list your questions before starting.
 I'd rather answer 5 questions now than refactor 50 lines later.
 ```
 
 **"Stay in scope":**
-```
+
+```text
 The spec is specs/[date-slug]/. Do not modify any file outside the paths
 listed in plan.md. If you think a change outside scope is necessary,
 stop and propose extending the spec — don't silently expand.
 ```
 
 **"List what you read":**
-```
+
+```text
 Before continuing, list every file you've read in this task and one sentence
 on why. If any of them are stale or wrong-source, tell me before you proceed.
 ```
@@ -1160,9 +1192,9 @@ Return a markdown table. Don't modify the manifest.
 
 #### Ad-hoc subagent example: bounded research
 
-For one-off research that doesn't justify a permanent agent file:
+For one-off research that doesn't justify a permanent agent file, paste this in the main session. **Prompt:**
 
-```
+```text
 Spawn a subagent with this prompt:
 
 > Find every place in src/ where we call the external acme-bank API.
@@ -1213,6 +1245,8 @@ The general principle: subagents are an option the model considers, not an oblig
 ### Hooks
 
 **What they are:** automation triggered by events, configured in `.claude/settings.json` (project) or `~/.claude/settings.json` (user). The *harness* runs them, not the agent. Hooks can **block** actions (return non-zero exit), **inject context** (output goes back to the model), or **run side effects** (lint, build, regenerate artifacts, log).
+
+For SDD-specific hook recipes — blocking edits to Accepted ADRs, scanning PII in research files, injecting the active ADR list, end-of-session reminders, and how to choose between hooks and other patterns (pre-commit, subagent, slash command, CI) — see [`quality-gates-guide.md`](quality-gates-guide.md). This subsection covers the mechanics; that guide covers the full discipline.
 
 #### Events
 
@@ -1427,25 +1461,25 @@ The decision is mostly about *who triggers it* and *how isolated it should be*:
 
 The agent will eventually propose something that contradicts your conventions. This is not a failure; it's a fact of life. The fix is simple but requires discipline.
 
-**Surgical correction:**
+**Surgical correction** — **Prompt:**
 
-```
+```text
 Stop. What you're proposing contradicts ADR-007 (we use Dapper, not EF).
 Re-read ADR-007 and revise your approach.
 ```
 
-**When the agent persists:**
+**When the agent persists** — **Prompt:**
 
-```
+```text
 You're still suggesting EF patterns. Two possibilities:
 1. You forgot ADR-007 — re-read it now and confirm you understand
 2. You think ADR-007 should change — if so, make the case for a new ADR
    that supersedes it. Don't sneak EF in via the back door.
 ```
 
-**When the agent has a point:**
+**When the agent has a point** — **Prompt:**
 
-```
+```text
 You're right that ADR-007 doesn't cover this case.
 Draft an ADR-015 that extends ADR-007 for [specific scenario].
 Don't supersede ADR-007 — extend it. Show me the draft.
@@ -1471,9 +1505,9 @@ When working on any task, if you encounter:
 Always propose, never edit docs without explicit approval.
 ```
 
-Then in sessions, occasionally ask:
+Then in sessions, occasionally ask. **Prompt:**
 
-```
+```text
 Based on our work today, what documentation gaps did you notice?
 List them with priority (critical / nice-to-have).
 ```

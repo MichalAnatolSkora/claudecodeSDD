@@ -1,8 +1,13 @@
 # PRD: [Project / Product name]
 
 > Starting artifact. Captures *what* and *why* before any code exists.
-> Freeze after v1 ships and archive to `docs/prd/YYYY-MM-original-prd.md`.
-> New direction → new PRD or `ROADMAP.md` entry, never edits to this one.
+> **PRD is for humans only — the agent reads `spec.md`, not this.**
+> Freeze after this era's initial release ships; archive to `docs/prd/YYYY-MM-<era-slug>.md`.
+> New direction → new PRD (per the era pattern), never edits to this one.
+>
+> Lean PRD format below. For PR-FAQ, full PRD, one-pager alternatives,
+> two complete worked examples, AI-authoring prompts, and the review process,
+> see [`guides/prd-guide.md`](../guides/prd-guide.md).
 
 ## Problem
 

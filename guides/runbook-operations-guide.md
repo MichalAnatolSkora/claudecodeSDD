@@ -10,15 +10,16 @@
 2. [RUNBOOK vs OPERATIONS — Naming and Scope](#runbook-vs-operations--naming-and-scope)
 3. [The 3 a.m. Test](#the-3-am-test)
 4. [What Belongs in a Runbook (and What Does Not)](#what-belongs-in-a-runbook-and-what-does-not)
-5. [Anatomy of a Runbook Entry](#anatomy-of-a-runbook-entry)
-6. [Full Entry Template](#full-entry-template)
-7. [Common Entry Categories](#common-entry-categories)
-8. [Organization: Single File vs Folder Structure](#organization-single-file-vs-folder-structure)
-9. [Writing for AI Agents](#writing-for-ai-agents)
-10. [Maintenance Discipline](#maintenance-discipline)
-11. [Working with the Agent](#working-with-the-agent)
-12. [Anti-Patterns](#anti-patterns)
-13. [Golden Rules](#golden-rules)
+5. [How Runbooks Relate to Postmortems](#how-runbooks-relate-to-postmortems)
+6. [Anatomy of a Runbook Entry](#anatomy-of-a-runbook-entry)
+7. [Full Entry Template](#full-entry-template)
+8. [Common Entry Categories](#common-entry-categories)
+9. [Organization: Single File vs Folder Structure](#organization-single-file-vs-folder-structure)
+10. [Writing for AI Agents](#writing-for-ai-agents)
+11. [Maintenance Discipline](#maintenance-discipline)
+12. [Working with the Agent](#working-with-the-agent)
+13. [Anti-Patterns](#anti-patterns)
+14. [Golden Rules](#golden-rules)
 
 ---
 
@@ -148,6 +149,56 @@ A runbook attracts unrelated content unless you draw the line clearly.
 - **Post-mortems** → `docs/postmortems/` (the runbook may *link* to them and absorb their lessons, but the analysis itself lives separately)
 
 **Practical test:** if the information is useful only when nothing is broken, it doesn't belong in the runbook. The runbook earns its place by being the first thing you open when something is wrong.
+
+---
+
+## How Runbooks Relate to Postmortems
+
+Runbooks and postmortems both deal with incidents, but on different timescales. The main SDD guide has a full comparison table in [§ "Runbook vs Postmortem"](spec-driven-development-guide.md#runbook-vs-postmortem); this section covers the operational side: when each gets written, and how they feed each other.
+
+### The post-incident sequence
+
+Every non-trivial incident produces two artifacts, in this order:
+
+```
+Incident → resolved
+   ↓
+24 h: write or update the runbook entry          (so next on-call is faster)
+   ↓
+1–7 d: write the postmortem                       (root cause + lessons + action items)
+   ↓
+The postmortem often surfaces "the runbook entry needs more depth here" — close the loop
+```
+
+The **24-hour rule for the runbook entry** is the critical one. Memory of the recovery steps is freshest the day after; a week later, half the *"oh I also had to do X"* details have evaporated. Even a 5-bullet rough draft of the runbook entry at 24h is more valuable than a polished version at 7d.
+
+The **postmortem can wait a few days** because it's analysis, not action. Slowing it down often makes it better — emotions cool, root cause analysis gets more honest.
+
+### What goes where
+
+Per-incident artifact split:
+
+- **Runbook entry** — recovery steps, exact commands, symptoms to match next time, escalation contacts. *"What does the next on-call need to know?"*
+- **Postmortem** — what happened, why (root cause), what we learned, what changes (action items). *"What does the engineering org need to know?"*
+
+If a piece of information is *what to do next time the same symptom appears*, it belongs in the runbook. If it's *why this happened and how we change to prevent recurrence*, it belongs in the postmortem.
+
+### When the postmortem reveals runbook gaps
+
+A common postmortem finding: *"the runbook didn't help because [reason]."* Examples:
+
+- The runbook entry for the symptom existed but commands were stale
+- No runbook entry existed for this symptom shape
+- The runbook entry pointed at a service that no longer exists
+- The runbook was technically correct but unreadable under stress
+
+Each of these is a runbook action item — usually one of the first ones in the postmortem's action-items list. Postmortems are the most consistent source of runbook quality improvements; if your postmortems aren't surfacing runbook gaps, either the postmortems aren't deep enough or the runbook is already exceptional (rare).
+
+### Anti-pattern: collapsing the two
+
+Writing one document that's *"part runbook, part postmortem"* — usually because someone wanted to skip writing both. The result fails at both jobs: too narrative for 3 a.m., too procedural for calm review. Keep them separate; let each be the best version of itself.
+
+A short postmortem template lives at [`templates/postmortem.md`](../templates/postmortem.md).
 
 ---
 
