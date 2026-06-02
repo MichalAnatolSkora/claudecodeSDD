@@ -1,0 +1,2 @@
+# Build artifacts — PDFs are generated from the markdown guides, never committed.
+*.pdf

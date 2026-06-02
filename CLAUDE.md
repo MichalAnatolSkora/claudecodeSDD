@@ -24,6 +24,10 @@ Long-form guides + copy-pasteable templates for spec-driven development with AI 
 
 `guides/spec-driven-development-guide.md` is the **overview / entry-point** guide. Treat it as a high-level introduction that links out to detail files. Keep general principles and workflow framing here; push deep mechanics into separate detail guides.
 
+**The flagship is `guides/spec-plan-tasks-guide.md`** — the spec → plan → tasks core loop, and the most polished guide in the repo. The overview above stays the entry point / map; the trio guide is the heart of the method (both are true). Keep the trio guide deliberately simple: three markdown files and the order discipline, no toolkit / scaffolder / generated-file machinery. (We evaluated GitHub's spec-kit and intentionally stayed lighter — do not import its constitution / clarify / analyze ceremony without explicit instruction.)
+
+**Design target: teams of 1–10.** Default every convention to the lightest form that works for a solo dev; make ceremony opt-in (e.g. optional `Status:` / `Owner:` headers, not required ones). Multi-person depth — ownership, review flow — lives in `guides/sdd-in-teams-guide.md`, which itself stays scoped to 1–10 (RACI, multi-team/monorepo, and regulated-industry gates are named there as "when you outgrow this", not documented). When an edit would add *required* structure, ask whether a one-person team would still want it; if not, make it optional.
+
 When new content needs to land in the docs:
 
 - **High-level principle, workflow framing, or repo-wide convention** → `spec-driven-development-guide.md`
@@ -39,8 +43,8 @@ Existing detail guides:
 - `guides/prd-guide.md` — PRD how-to: formats (PR-FAQ / lean / one-pager / full), anatomy, two worked-example PRDs (era 1 + era 2), era-boundary heuristics, AI-authoring prompts, review process, anti-patterns
 - `guides/research-guide.md` — research artifacts in the repo: PII gating, folder structure for `docs/research/`, the five artifact types (interview synthesis / competitive / sizing / validation / opportunity briefs), synthesis discipline, AI-assisted synthesis prompts, PRD↔research interface, anti-patterns. Research is for humans + agent context; agent never generates code from research.
 - `guides/quality-gates-guide.md` — enforcement + evaluation of SDD: three categories of checks (mechanical / LLM evaluator / human), five implementation patterns (pre-commit / Claude Code hooks / configured subagent / slash command / CI), what to mechanize vs leave human, worked example with full setup, anti-patterns
-- `guides/spec-plan-tasks-guide.md` — the practical companion to the three main-SDD sections on spec/plan/tasks: two full worked-example trios (rate-limit feature + a bugfix), six AI-authoring prompts per artifact, iteration loops, cross-artifact consistency checks, slash-command sketches
-- `guides/sdd-in-teams-guide.md` — running SDD with more than one engineer: role profiles, ownership, lifecycle handoffs, cadence, multi-team/monorepo, OSS, regulated industries, onboarding, failure modes, RACI matrix
+- `guides/spec-plan-tasks-guide.md` — **the flagship guide and centerpiece of the repo: the core spec → plan → tasks loop.** Two full worked-example trios (a feature + a bugfix), six AI-authoring prompts per artifact, iteration loops, cross-artifact consistency checks, slash-command sketches. Deliberately kept simple (no toolkit/scaffolder). Keep this the most polished guide.
+- `guides/sdd-in-teams-guide.md` — running SDD with 2–10 people, kept deliberately light: who owns what (one name per artifact), lightweight PR review, spec lifecycle, ADRs as a shared decision log, the solo case, onboarding, small-team failure modes, and what to add only when you outgrow ~10. No RACI / enterprise ceremony.
 - `guides/legacy-to-sdd-migration-guide.md` — the one-time process of retrofitting SDD onto an existing codebase (audit, foundation, forward-only specs, reactive ADRs, agent prompts, worked examples)
 - `guides/sdd-in-the-wild.md` — companies/teams publicly practicing SDD principles (verified adopters + adjacent methodologies)
 

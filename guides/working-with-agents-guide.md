@@ -18,9 +18,10 @@
 10. [Universal Prompting Patterns](#universal-prompting-patterns)
 11. [Claude Code Building Blocks](#claude-code-building-blocks)
 12. [When the Agent Drifts](#when-the-agent-drifts)
-13. [Maintaining Documentation Proactively](#maintaining-documentation-proactively)
-14. [Anti-Patterns](#anti-patterns)
-15. [Golden Rules](#golden-rules)
+13. [When the Agent Can't Build from the Spec](#when-the-agent-cant-build-from-the-spec)
+14. [Maintaining Documentation Proactively](#maintaining-documentation-proactively)
+15. [Anti-Patterns](#anti-patterns)
+16. [Golden Rules](#golden-rules)
 
 ---
 
@@ -1486,6 +1487,33 @@ Don't supersede ADR-007 — extend it. Show me the draft.
 ```
 
 The pattern across all three: **named documents in your prompts**. *"Per our conventions"* is weak. *"Per ADR-007 section Consequences"* is strong. The agent treats named documents as harder constraints than vague appeals to convention.
+
+---
+
+## When the Agent Can't Build from the Spec
+
+Sometimes the agent stalls, goes in circles, or emits broken or obviously-wrong code *even though* you handed it a finished spec (and a plan, and tasks). The instinct is to drop the discipline and prompt-and-pray your way to something that runs — **vibe coding.** Don't. That failure is almost always a *signal that the spec or plan has a gap*, not a license to abandon them. Vibe coding is the exact thing the spec was protecting you from.
+
+Work the ladder instead, cheapest rung first:
+
+1. **Ask whose gap it is.** A spec the agent "can't implement" is usually underspecified, self-contradictory, or too big. If a competent human would also stop and ask questions here, the gap is in the spec — fix that, not the agent.
+2. **Shrink the unit.** Point it at *one* acceptance criterion or *one* task, not the whole feature. Big asks overwhelm; small ones succeed. This is what `tasks.md` is for — **Prompt:**
+
+   ```text
+   Ignore the rest of the feature. Implement only AC1 from spec.md.
+   Write the failing test first, then the minimum code to pass it. Stop there.
+   ```
+3. **Feed the missing context.** The agent improvises when it lacks the file, convention, or example. Name the thing to mirror — *"follow the pattern in `AuthMiddleware.cs`"*, the relevant ADR, the integration doc. Most "wrong code" is a missing-context problem, not a missing-capability one.
+4. **Resolve the open question it's tripping on.** An unanswered Open Question in the spec makes the agent fabricate — and the fabrication is what's breaking. Decide it, write it down, re-run.
+5. **Listen when it pushes back.** Sometimes *"I can't"* means the agent caught a real contradiction — the plan violates an ADR, an AC is impossible. That's a free spec review; see [When the Agent Drifts](#when-the-agent-drifts) § "When the agent has a point." Fix the spec, not the agent.
+6. **If it's genuinely stuck, write the hard kernel yourself — then feed it back.** When a piece truly exceeds the agent (a gnarly algorithm, subtle concurrency), *you* write that part. That is **targeted manual coding, not vibe coding**: the spec already pinned down what "done" means, and the acceptance criteria are your tests. Fold what you learned back into the spec/plan (a note, a constraint, a new ADR) so the next change isn't blind — then hand the rest back.
+
+**The line that matters:**
+
+- **Vibe coding** — no spec; prompt-and-pray; you accept whatever runs; the intent lived only in your head and is now gone.
+- **Targeted manual coding** — you write the tricky part *because the spec already defined the target*; the spec stays the source of truth; the ACs are still the finish line.
+
+A spec that's hard to implement is the method *working* — it surfaced the ambiguity before that ambiguity shipped as mystery code. The recovery is always to sharpen the spec, shrink the task, or hand-write one kernel with the spec still in charge — never to throw the spec away.
 
 ---
 

@@ -2,6 +2,7 @@
 
 > Copy this file to `specs/YYYY-MM-feature-slug/tasks.md` and fill in.
 > Order matters. Each task has its own verification. Check off as you go.
+> Optional (1–10 people): top with a `Status:` line (Draft → Active → Shipped → Superseded); add `Owner:` only past ~5 people — below that, `git blame` covers it.
 
 ## Setup
 

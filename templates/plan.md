@@ -1,6 +1,7 @@
 # Plan: [Feature name]
 
 > Copy this file next to `spec.md`. The plan answers *how*; the spec answers *what*.
+> Optional (1–10 people): top with a `Status:` line (Draft → Active → Shipped → Superseded); add `Owner:` only past ~5 people — below that, `git blame` covers it.
 
 ## Technical decisions
 

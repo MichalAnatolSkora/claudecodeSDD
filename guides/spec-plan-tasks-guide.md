@@ -1,38 +1,51 @@
-# Writing the Feature Trio: spec → plan → tasks (with AI help)
+# The Feature Trio: spec → plan → tasks
 
-> The companion guide to the principle-level treatment in `spec-driven-development-guide.md`. Here you'll find two full worked examples (a complete feature trio you can copy as a starting point), the AI-assisted authoring prompts for each artifact, the consistency checks that keep the three documents honest, and the anti-patterns specific to writing all three together.
+> **This is the core loop of spec-driven development — the one guide to read if you read only one.** Three short markdown files, written in order: `spec.md` (what & why) → `plan.md` (how) → `tasks.md` (in what order). Each one locks down what the next needs. That's the whole method. No toolkit, no scaffolder, no wall of generated files — the discipline is the *order*, not the tooling. Everything else in this repo exists to support this loop.
 
 ---
 
 ## Table of Contents
 
-1. [What this guide adds](#what-this-guide-adds)
+*Sorted as **what → why → how → examples**.*
+
+**What**
+1. [What this guide is](#what-this-guide-is)
 2. [The trio as a flow](#the-trio-as-a-flow)
-3. [Worked example 1 — Rate limiting on the orders endpoint](#worked-example-1--rate-limiting-on-the-orders-endpoint)
-4. [How the three documents reference each other](#how-the-three-documents-reference-each-other)
-5. [AI-assisted authoring: prompts per artifact](#ai-assisted-authoring-prompts-per-artifact)
-6. [Iteration patterns — sharpening a draft](#iteration-patterns--sharpening-a-draft)
-7. [Cross-artifact consistency checks](#cross-artifact-consistency-checks)
-8. [Worked example 2 — a small change (bugfix shape)](#worked-example-2--a-small-change-bugfix-shape)
-9. [When to skip parts of the trio](#when-to-skip-parts-of-the-trio)
+3. [What sections each file needs](#what-sections-each-file-needs)
+4. [Optional: status and owner](#optional-status-and-owner)
+
+**Why / when**
+5. [When to skip parts of the trio](#when-to-skip-parts-of-the-trio)
+
+**How**
+6. [How the three documents reference each other](#how-the-three-documents-reference-each-other)
+7. [AI-assisted authoring: prompts per artifact](#ai-assisted-authoring-prompts-per-artifact)
+8. [Iteration patterns — sharpening a draft](#iteration-patterns--sharpening-a-draft)
+9. [Cross-artifact consistency checks](#cross-artifact-consistency-checks)
 10. [Cross-trio anti-patterns](#cross-trio-anti-patterns)
 11. [Slash commands and skills worth having](#slash-commands-and-skills-worth-having)
-12. [Golden rules for trio authoring](#golden-rules-for-trio-authoring)
+
+**Examples**
+12. [Worked example 1 — Rate limiting on the orders endpoint](#worked-example-1--rate-limiting-on-the-orders-endpoint)
+13. [Worked example 2 — a small change (bugfix shape)](#worked-example-2--a-small-change-bugfix-shape)
+14. [Worked example 3 — the whole trio in one file](#worked-example-3--the-whole-trio-in-one-file)
+
+15. [Golden rules for trio authoring](#golden-rules-for-trio-authoring)
 
 ---
 
-## What this guide adds
+## What this guide is
 
-The main SDD guide has three sections — *Writing a Good spec.md*, *Writing a Good PLAN.md*, *Writing a Good tasks.md* — covering principles, templates, and brief tips. Each in isolation.
+This is the definitive, hands-on treatment of the trio — the centerpiece of the whole repo. The [overview guide](spec-driven-development-guide.md) sketches the principles as part of the bigger map (`CLAUDE.md`, ADRs, PRDs, the documentation layers); *this* is where you actually learn to write the three documents that drive every change.
 
-This guide adds what doesn't fit there:
+What you get here:
 
-- **Two complete worked examples** showing what all three filled-in documents look like *for the same feature*, with the cross-references explicit
+- **Two complete worked examples** — all three filled-in documents *for the same feature*, with the cross-references explicit, ready to copy as a starting point
 - **AI-assisted authoring prompts** — copy-pasteable prompts for drafting each artifact, reviewing it, refining it, and validating it against the others
 - **Iteration patterns** — how a rough draft becomes a tight spec, then a clear plan, then an executable task list
-- **Cross-artifact consistency checks** — concrete rules to verify the three documents agree (every acceptance criterion has a task; every "out of scope" survives in the plan; every open question resolves into a decision or an ADR)
+- **Cross-artifact consistency checks** — concrete rules that keep the three documents honest (every acceptance criterion has a task; every "out of scope" survives into the plan; every open question resolves into a decision or an ADR)
 
-Read the main SDD's three sections first for principles; come here when you need to actually write the trio for a real feature.
+The method is deliberately small. You don't install anything or generate a dozen scaffolded files — you write three markdown documents in order, and you keep them honest. The rest of this guide is how to do that well.
 
 ---
 
@@ -58,187 +71,121 @@ Each step narrows the option space. Once `spec.md` is accepted, the team has agr
 
 For tiny changes, the trio compresses (see [When to skip parts of the trio](#when-to-skip-parts-of-the-trio)). For most non-trivial work, all three earn their place.
 
+And when code *won't* come cleanly out of a finished trio? That's almost always a gap in the spec or plan — not a cue to abandon them and vibe code. See [`working-with-agents-guide.md` § "When the Agent Can't Build from the Spec"](working-with-agents-guide.md#when-the-agent-cant-build-from-the-spec).
+
 ---
 
-## Worked example 1 — Rate limiting on the orders endpoint
+## What sections each file needs
 
-The scenario: partner integrations occasionally enter retry storms, and the orders endpoint gets pummeled. We need per-partner rate limiting with proper 429 responses and observability.
+Each section in the trio earns its place — none are decoration. Below: the **bare minimum** each file must have (and *why* the agent or a reviewer breaks without it), then the **nice-to-haves** worth adding as a change grows. Start minimal; add a section the moment its absence costs you something.
 
-Below: all three documents, fully filled in, for this single feature. Read them as one continuous piece — notice how each references the previous ones.
+### `spec.md` — the *what & why*
 
-### `specs/2026-05-orders-rate-limit/spec.md`
+**Bare minimum**
 
-```markdown
-# Rate limiting for the orders API
+| Section | Why it's required |
+|---------|-------------------|
+| **Goal** | *What problem, for whom*, in one paragraph. Without it the agent optimises for the wrong thing and a reviewer can't tell done from not-done. |
+| **Acceptance criteria** | The testable definition of done — these become your tests. A spec without them can't be verified, only argued about. |
+| **Out of scope** | The highest-leverage section: *"what we're NOT doing"* stops the agent (and scope creep) from wandering, better than any positive instruction. |
 
-## Goal
+**Nice to have** (add as the change grows)
 
-Add per-partner rate limiting to `POST /api/orders` to prevent partner integrations
-from accidentally flooding the system during retry storms. The limit must be
-configurable per partner and observable in production.
+| Section | Why it helps |
+|---------|--------------|
+| **In scope** | Makes the boundary explicit when the Goal alone is ambiguous. |
+| **Impact on existing code** | Lists the files/contracts touched — catches surprises before code and tells the agent where to look. |
+| **Open questions** | Surfaces what's undecided so the agent doesn't silently guess (and you don't find the guess in the diff). |
+| **References** | ADRs, prior specs, integration docs — the lineage that keeps decisions consistent. |
 
-## In scope
+### `plan.md` — the *how*
 
-- Rate limiting on `POST /api/orders` only
-- Per-partner limits, configurable in `appsettings.json`
-- 429 response with `Retry-After` header on limit breach
-- Metrics for limit breaches (Prometheus counter via existing telemetry)
+**Bare minimum**
 
-## Out of scope (deliberately, not now)
+| Section | Why it's required |
+|---------|-------------------|
+| **Technical decisions** | The stack/pattern choices, each tied to an ADR. Without it the agent picks defaults that may fight your architecture. |
+| **File structure** | Concrete paths to create/modify — what stops the agent inventing a layout, and what `tasks.md` and the consistency check key off. |
+| **Constraints** | The explicit *"do NOT"* list — the known failure modes the agent would otherwise walk into. |
 
-- Rate limiting on GET endpoints (no abuse vector identified)
-- Distributed rate limiting (single-instance is fine for current load)
-- IP-based limits (per-partner is the abuse vector we care about)
-- Sliding-window algorithms (fixed window is enough)
-- Customer-facing UI for limit configuration
+**Nice to have**
 
-## Acceptance criteria
+| Section | Why it helps |
+|---------|--------------|
+| **Data model** | Needed *only* when persistent state is involved — DDL/entities the agent must get exactly right. |
+| **Open questions** | For *how*-level uncertainties left after the spec's are resolved. |
+| **References** | The spec, the relevant ADRs, the existing pattern file to mirror. |
 
-- [ ] AC1: `POST /api/orders` with valid `X-Partner-Id` returns 201 on the first N requests within window W
-- [ ] AC2: Same partner exceeding N requests in window W gets 429 with `Retry-After` header containing seconds-until-reset
-- [ ] AC3: Different partners have independent counters (one partner's burst does not affect another)
-- [ ] AC4: Missing `X-Partner-Id` header → 400 Bad Request (existing behavior preserved)
-- [ ] AC5: Configuration loaded from `appsettings.json` § `RateLimits:Orders`
-- [ ] AC6: Prometheus counter `orders_rate_limit_breaches_total{partner_id}` increments on each 429
-- [ ] AC7: Integration test covers AC1–AC4 against Testcontainers Postgres + in-memory rate-limit store
+### `tasks.md` — the *in what order*
 
-## Impact on existing code
+**Bare minimum**
 
-- `src/Api/Controllers/OrdersController.cs` — wraps `POST` with rate-limit middleware
-- `src/Api/Middleware/` — new `RateLimitMiddleware.cs`
-- `src/Api/Configuration/` — new `RateLimitOptions.cs` bound to `appsettings.json`
-- `appsettings.json` — new `RateLimits:Orders` section
-- No changes to `src/Domain/` or `src/Infrastructure/` (rate limiting is an API concern)
-- No changes to existing controllers (middleware scoped to `OrdersController` only)
+| Section | Why it's required |
+|---------|-------------------|
+| **Implementation (in order)** | The ordered steps, each ending in ` → verify:`. The order *is* the point, and a step with no verification can't tell you (or the agent) when it's done. |
+| **Verification (against ACs)** | Maps every acceptance criterion to the task(s) that prove it — the gate that says "ready to merge." |
 
-## Open questions
+**Nice to have**
 
-- [x] In-memory store sufficient, or do we need Redis? → **Resolved**: single-instance fine for current load; defer Redis to spec `2026-Q3-distributed-rate-limit`
-- [x] Burst allowance (token bucket) vs strict fixed window? → **Resolved**: fixed window for v1
-- [x] What to log on breach beyond Prometheus? → **Resolved**: Serilog Information level with `partner_id`, no body
+| Section | Why it helps |
+|---------|--------------|
+| **Setup** | Branch, migration, env — the prerequisites before step 1. |
+| **Post-merge** | The follow-ups that always get forgotten: flip the spec status, update the runbook, close the ticket. |
+| **Notes (append as you work)** | The running log of gotchas and mid-build decisions — the messy reality the worked examples show. Cheap insurance against *"why did we do that?"* |
 
-## References
+The bare-minimum rows are the sections you'll see filled in across the [worked examples](#worked-example-1--rate-limiting-on-the-orders-endpoint) below; the nice-to-haves are what a multi-module feature accumulates and a bug-fix never needs.
 
-- ADR-001: Repository per aggregate (informs service layer placement)
-- ADR-007: Dapper for data access (no DB change here, but consistent with stack)
-- `docs/runbooks/orders-api-degraded.md` (will get a new diagnostic step)
-- `docs/integrations/sftp-acme-bank.md` (partner contract referenced for retry behavior)
-- Upstream cause: spec `2026-03-partner-retry-backoff`
+---
+
+## Optional: status and owner
+
+Two optional one-liners can sit at the top of any trio doc:
+
+```text
+Status: Active
+Owner:  @ana
 ```
 
-### `specs/2026-05-orders-rate-limit/plan.md`
+Add them only when they earn their place — this method is built for teams of **1–10**, so default to the lightest form.
 
-```markdown
-# Plan: Rate limiting for the orders API
+**Status** — what state the doc is in. A small set: **Draft** (being written) → **Active** (approved, in progress) → **Shipped** (merged) → **Superseded** (a later doc replaces this — link it). It's the same lifecycle the overview spells out for specs (*Draft → In implementation → Shipped → Frozen*), generalized to all three docs.
 
-## Technical decisions
+**Owner** — who to ask. At the small end, skip it: `git blame` and the PR author already say who wrote and merged a doc, more reliably than a hand-kept field that goes stale.
 
-- Stack: .NET 8 ASP.NET Core middleware (per ADR-001)
-- Store: in-memory `MemoryCache`-backed counter (single-instance, per spec § Open Q1 resolution)
-- Algorithm: fixed window, 60-second buckets per `partner_id` (per spec § Open Q2 resolution)
-- Config binding: Options pattern; `RateLimitOptions` bound to `RateLimits:Orders` section
-- Metrics: use existing `IMetricsCollector` interface (avoid adding a new dependency)
-- Logging: Serilog Information on each 429 (per spec § Open Q3 resolution)
+Scale it to your team:
 
-## Data model
+| Team size | Status | Owner |
+|-----------|--------|-------|
+| Solo (1) | skip — unless you juggle several specs at once | skip — it's you |
+| Small (2–5) | useful (Draft / Active / Shipped) | optional — git usually covers it |
+| Toward 10 | useful | add it when *"who do I ask?"* stops being obvious |
 
-No persistent storage. In-memory counter structure:
+For *who drafts / reviews / approves* — the lightweight team ownership model (one name per artifact) — see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md). Don't rebuild that in a doc header.
 
-```
-ConcurrentDictionary<string partnerId, RateLimitBucket>
-  RateLimitBucket: { Count, WindowStart, ResetAt }
-```
+---
 
-Eviction: bucket expires when `ResetAt < UtcNow`; cleaned via `MemoryCache` TTL.
+## When to skip parts of the trio
 
-## File structure
+| Change shape | spec.md | plan.md | tasks.md |
+|--------------|---------|---------|----------|
+| Bugfix, single file, single commit | ✅ short | ❌ skip | ❌ skip |
+| Small feature (1–3 files, ~half day work) | ✅ full | optional | ❌ skip |
+| Non-trivial feature (multiple modules, multi-day) | ✅ full | ✅ full | ✅ full |
+| Refactor (no behavior change, larger code surface) | ✅ short | ✅ full | ✅ full |
+| Spike / research | ✅ heavy on Open Questions | ❌ skip until the spike resolves | ❌ skip |
+| One-line CLAUDE.md or doc update | ❌ skip (PR description suffices) | ❌ | ❌ |
 
-```
-src/Api/
-├── Configuration/
-│   └── RateLimitOptions.cs           # new — Options pattern binding
-├── Middleware/
-│   └── RateLimitMiddleware.cs        # new — the actual middleware
-├── Services/
-│   └── RateLimitService.cs           # new — counter logic, testable in isolation
-├── Controllers/
-│   └── OrdersController.cs           # modified — wire middleware
-└── Startup.cs                         # modified — register middleware + options
+**One file or three?** Those columns are about which *sections* a change needs, not how many *files*. When it needs all three but doesn't warrant three files, keep them as three sections in one file ([Worked example 3](#worked-example-3--the-whole-trio-in-one-file)) and split only if it grows or two people edit it at once.
 
-tests/Api.Integration/
-└── RateLimitTests.cs                 # new — covers AC1–AC4
-```
+The rule: **if you'd struggle to explain the change in a one-paragraph PR description, write the spec.** If the implementation order would change if you were interrupted for a week, write the tasks. The plan emerges in between.
 
-## Constraints
-
-- Do NOT add Redis dependency (single-instance per spec)
-- Do NOT use ASP.NET Core 7's built-in rate limiter (its API is hostile to per-partner keys; we keep custom)
-- Do NOT block on GETs (only `POST /api/orders`)
-- Maintain consistency with existing middleware patterns in `src/Api/Middleware/AuthMiddleware.cs`
-
-## Open questions
-
-None — all resolved during spec review (see `spec.md` § Open questions).
-
-## References
-
-- `spec.md` (this folder)
-- ADR-001 — Repository per aggregate
-- `src/Api/Middleware/AuthMiddleware.cs` — middleware pattern to mirror
-```
-
-### `specs/2026-05-orders-rate-limit/tasks.md`
-
-```markdown
-# Tasks: Rate limiting for the orders API
-
-> Order matters. Each task has its own verification. Check off as you go.
-
-## Setup
-
-- [ ] Create branch `feature/2026-05-orders-rate-limit`
-- [ ] Open `spec.md` + `plan.md` alongside the task list
-
-## Implementation (in execution order)
-
-- [ ] 1. Write the failing integration test for AC1 (happy path: 201 under limit) → verify: test fails with "endpoint exists but no rate-limit logic" output
-- [ ] 2. Add `RateLimitOptions.cs` with bindings for `MaxRequests` and `WindowSeconds` per partner → verify: `dotnet build` succeeds; options bind correctly in a unit test
-- [ ] 3. Add `appsettings.json` § `RateLimits:Orders` with example values → verify: app starts; options injected via DI
-- [ ] 4. Implement `RateLimitService.IsAllowed(partnerId)` with fixed-window logic + unit tests → verify: unit tests cover under-limit / at-limit / just-over-limit / different-partners cases
-- [ ] 5. Implement `RateLimitMiddleware` that calls the service and returns 429 + `Retry-After` on breach → verify: integration test for AC1 now passes
-- [ ] 6. Wire middleware into pipeline scoped to `OrdersController.Post` only → verify: `GET /api/orders` still works; `POST` is gated
-- [ ] 7. Add Prometheus counter `orders_rate_limit_breaches_total{partner_id}` → verify: counter increments observable in `/metrics` endpoint after a forced breach
-- [ ] 8. Add Serilog Information log on each 429 with `partner_id` field → verify: log line appears in test output
-- [ ] 9. Add remaining integration tests (AC2, AC3, AC4) → verify: full test suite green
-
-## Verification (against acceptance criteria)
-
-- [ ] AC1: First N requests within window W return 201 — covered by test in step 1
-- [ ] AC2: N+1 request gets 429 + `Retry-After` — covered by AC2 test (step 9)
-- [ ] AC3: Independent counters per partner — covered by AC3 test (step 9)
-- [ ] AC4: Missing `X-Partner-Id` → 400 — covered by AC4 test (step 9)
-- [ ] AC5: Config from appsettings.json — covered by step 3 + binding test
-- [ ] AC6: Prometheus counter increments — covered by step 7
-- [ ] AC7: Integration test suite green — covered by all tests above
-
-## Post-merge
-
-- [ ] Append `STATUS: shipped (PR #N, YYYY-MM-DD)` to `spec.md`
-- [ ] Update `docs/runbooks/orders-api-degraded.md` with a new "check rate-limit breaches" diagnostic step
-- [ ] Add a line to `CLAUDE.md` § Conventions: *"Per-endpoint middleware → `src/Api/Middleware/` with options bound from `appsettings.json`"*
-- [ ] Close ticket ORDERS-1234
-
-## Notes (append as you work)
-
-- [2026-05-15]: AC4 (missing `X-Partner-Id` → 400) is already enforced by existing `AuthMiddleware`. Step 9's AC4 test is just a regression guard.
-- [2026-05-16]: `MemoryCache` TTL had an eviction-timing edge case in tests — switched to explicit cleanup in service. Documented in `plan.md` Technical decisions.
-```
+When in doubt, write the shorter form. You can always escalate later if the change grows; you can't recover the time spent ceremony-ing a tiny change.
 
 ---
 
 ## How the three documents reference each other
 
-The trio is most useful when each document *visibly* refers to the others. The example above shows it; here are the references made explicit:
+The trio is most useful when each document *visibly* refers to the others — you'll see it throughout [the worked examples](#worked-example-1--rate-limiting-on-the-orders-endpoint) below. The pattern, made explicit (snippets are from Worked example 1):
 
 **From `plan.md` back to `spec.md`:**
 - *"per spec § Open Q1 resolution"* — the plan explicitly cites where the spec decided something
@@ -501,78 +448,6 @@ For mechanizing these checks — as a configured subagent (`trio-auditor`), a sl
 
 ---
 
-## Worked example 2 — a small change (bugfix shape)
-
-Not every change needs a full trio. Below: a bugfix where the trio compresses into one short document.
-
-### `specs/2026-05-orders-422-typo-fix/spec.md`
-
-```markdown
-# Fix: `POST /api/orders` returns 422 instead of 400 on malformed JSON
-
-## Goal
-
-Fix a small response-code regression: the orders endpoint started returning
-422 (Unprocessable Entity) instead of 400 (Bad Request) on malformed JSON
-bodies. Partner integrations log 400 as transient and 422 as terminal; this
-breaks the retry contract.
-
-## In scope
-
-- `POST /api/orders` returns 400 on malformed JSON
-- Existing 422 behavior on valid-JSON-but-invalid-fields preserved
-
-## Out of scope
-
-- Other endpoints (verified unaffected; they use the same middleware which is fine)
-- Changing the 422-on-validation-error behavior
-
-## Acceptance criteria
-
-- [ ] AC1: `POST /api/orders` with `{"foo":` (malformed JSON) → 400 Bad Request
-- [ ] AC2: `POST /api/orders` with `{}` (valid JSON, missing required fields) → 422 (unchanged)
-- [ ] AC3: Integration test added for AC1 (regression guard)
-
-## Impact
-
-- One change in `src/Api/Middleware/JsonErrorMiddleware.cs` — a config flag flip
-- New test in `tests/Api.Integration/OrdersControllerTests.cs`
-
-## References
-
-- Bug report: ORDERS-1257
-- Spec `2026-04-validation-response-codes` (the change that introduced the regression — superseded)
-```
-
-That's the whole spec. No plan.md, no tasks.md.
-
-**Why this compression works for a bugfix:**
-
-- The change is one file, one line, one test. *Plan* is implicit ("flip the flag").
-- The execution order is trivial: write the test, flip the flag, verify. *Tasks* would be three checkboxes that don't deserve their own file.
-- The acceptance criteria are testable directly; no orchestration of multiple steps.
-
-For changes like this, a single `spec.md` is enough. The trio is for non-trivial features; bugfixes get the appropriate compression.
-
----
-
-## When to skip parts of the trio
-
-| Change shape | spec.md | plan.md | tasks.md |
-|--------------|---------|---------|----------|
-| Bugfix, single file, single commit | ✅ short | ❌ skip | ❌ skip |
-| Small feature (1–3 files, ~half day work) | ✅ full | optional | ❌ skip |
-| Non-trivial feature (multiple modules, multi-day) | ✅ full | ✅ full | ✅ full |
-| Refactor (no behavior change, larger code surface) | ✅ short | ✅ full | ✅ full |
-| Spike / research | ✅ heavy on Open Questions | ❌ skip until the spike resolves | ❌ skip |
-| One-line CLAUDE.md or doc update | ❌ skip (PR description suffices) | ❌ | ❌ |
-
-The rule: **if you'd struggle to explain the change in a one-paragraph PR description, write the spec.** If the implementation order would change if you were interrupted for a week, write the tasks. The plan emerges in between.
-
-When in doubt, write the shorter form. You can always escalate later if the change grows; you can't recover the time spent ceremony-ing a tiny change.
-
----
-
 ## Cross-trio anti-patterns
 
 The five most damaging mistakes specific to writing the trio together.
@@ -620,12 +495,13 @@ A repo doing SDD seriously usually has these in `.claude/commands/` and `.claude
 
 **Slash commands** (single-shot, user-invoked):
 
-- **`/spec-new <feature-description>`** — drafts `spec.md` from a one-paragraph description (the prompt from [section 5.1](#1-draft-specmd-from-a-one-paragraph-idea))
-- **`/spec-review <path>`** — runs the audit checklist (prompt 5.2)
-- **`/plan-from-spec`** — drafts `plan.md` from the active spec (prompt 5.3)
-- **`/plan-validate`** — checks `plan.md` against ADRs and ARCHITECTURE.md (prompt 5.4)
-- **`/tasks-from-plan`** — drafts `tasks.md` (prompt 5.5)
-- **`/trio-check`** — final consistency audit (prompt 5.6)
+- **`/spec-new <feature-description>`** — drafts `spec.md` from a one-paragraph description ([prompt 1](#1-draft-specmd-from-a-one-paragraph-idea) above)
+- **`/spec-review <path>`** — runs the audit checklist (prompt 2)
+- **`/plan-from-spec`** — drafts `plan.md` from the active spec (prompt 3)
+- **`/plan-validate`** — checks `plan.md` against ADRs and ARCHITECTURE.md (prompt 4)
+- **`/tasks-from-plan`** — drafts `tasks.md` from scratch (prompt 5)
+- **`/tasks-add <what>`** — appends/inserts task(s) into an existing `tasks.md` (or a one-file trio's Tasks section), in order, each with a verify step
+- **`/trio-check`** — final consistency audit (prompt 6)
 
 **Skills** (multi-step, auto-invoked):
 
@@ -642,6 +518,7 @@ Worked-example placement of these files:
 │   ├── plan-from-spec.md    # /plan-from-spec
 │   ├── plan-validate.md     # /plan-validate
 │   ├── tasks-from-plan.md   # /tasks-from-plan
+│   ├── tasks-add.md         # /tasks-add
 │   └── trio-check.md        # /trio-check
 └── skills/
     ├── trio-author/
@@ -650,7 +527,314 @@ Worked-example placement of these files:
         └── SKILL.md
 ```
 
+**Ready-made copies of all seven commands and both skills live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
+
 See [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks) for the mechanics of writing skills and slash commands.
+
+---
+
+## Worked example 1 — Rate limiting on the orders endpoint
+
+The scenario: partner integrations occasionally enter retry storms, and the orders endpoint gets pummeled. We need per-partner rate limiting with proper 429 responses and observability.
+
+Below: all three documents, fully filled in, for this single feature. Read them as one continuous piece — notice how each references the previous ones.
+
+### `specs/2026-05-orders-rate-limit/spec.md`
+
+```markdown
+# Rate limiting for the orders API
+
+## Goal
+
+Add per-partner rate limiting to `POST /api/orders` to prevent partner integrations
+from accidentally flooding the system during retry storms. The limit must be
+configurable per partner and observable in production.
+
+## In scope
+
+- Rate limiting on `POST /api/orders` only
+- Per-partner limits, configurable in `appsettings.json`
+- 429 response with `Retry-After` header on limit breach
+- Metrics for limit breaches (Prometheus counter via existing telemetry)
+
+## Out of scope (deliberately, not now)
+
+- Rate limiting on GET endpoints (no abuse vector identified)
+- Distributed rate limiting (single-instance is fine for current load)
+- IP-based limits (per-partner is the abuse vector we care about)
+- Sliding-window algorithms (fixed window is enough)
+- Customer-facing UI for limit configuration
+
+## Acceptance criteria
+
+- [ ] AC1: `POST /api/orders` with valid `X-Partner-Id` returns 201 on the first N requests within window W
+- [ ] AC2: Same partner exceeding N requests in window W gets 429 with `Retry-After` header containing seconds-until-reset
+- [ ] AC3: Different partners have independent counters (one partner's burst does not affect another)
+- [ ] AC4: Missing `X-Partner-Id` header → 400 Bad Request (existing behavior preserved)
+- [ ] AC5: Configuration loaded from `appsettings.json` § `RateLimits:Orders`
+- [ ] AC6: Prometheus counter `orders_rate_limit_breaches_total{partner_id}` increments on each 429
+- [ ] AC7: Integration test covers AC1–AC4 against Testcontainers Postgres + in-memory rate-limit store
+
+## Impact on existing code
+
+- `src/Api/Controllers/OrdersController.cs` — wraps `POST` with rate-limit middleware
+- `src/Api/Middleware/` — new `RateLimitMiddleware.cs`
+- `src/Api/Configuration/` — new `RateLimitOptions.cs` bound to `appsettings.json`
+- `appsettings.json` — new `RateLimits:Orders` section
+- No changes to `src/Domain/` or `src/Infrastructure/` (rate limiting is an API concern)
+- No changes to existing controllers (middleware scoped to `OrdersController` only)
+
+## Open questions
+
+- [x] In-memory store sufficient, or do we need Redis? → **Resolved**: single-instance fine for current load; defer Redis to spec `2026-Q3-distributed-rate-limit`
+- [x] Burst allowance (token bucket) vs strict fixed window? → **Resolved**: fixed window for v1
+- [x] What to log on breach beyond Prometheus? → **Resolved**: Serilog Information level with `partner_id`, no body
+- [x] What's the default limit, and can partners negotiate higher? → **Resolved**: default 100 req / 60s; per-partner overrides in `appsettings.json` keyed by `partner_id`; no runtime changes in v1 (config reload deferred)
+
+## References
+
+- ADR-001: Repository per aggregate (informs service layer placement)
+- ADR-007: Dapper for data access (no DB change here, but consistent with stack)
+- `docs/runbooks/orders-api-degraded.md` (will get a new diagnostic step)
+- `docs/integrations/sftp-acme-bank.md` (partner contract referenced for retry behavior)
+- Upstream cause: spec `2026-03-partner-retry-backoff`
+```
+
+### `specs/2026-05-orders-rate-limit/plan.md`
+
+```markdown
+# Plan: Rate limiting for the orders API
+
+## Technical decisions
+
+- Stack: .NET 8 ASP.NET Core middleware (per ADR-001)
+- Store: in-memory `MemoryCache`-backed counter (single-instance, per spec § Open Q1 resolution)
+- Algorithm: fixed window, 60-second buckets per `partner_id` (per spec § Open Q2 resolution)
+- Config binding: Options pattern; `RateLimitOptions` bound to `RateLimits:Orders` section
+- Metrics: use existing `IMetricsCollector` interface (avoid adding a new dependency)
+- Logging: Serilog Information on each 429 (per spec § Open Q3 resolution)
+
+## Data model
+
+No persistent storage. In-memory counter structure:
+
+```
+ConcurrentDictionary<string partnerId, RateLimitBucket>
+  RateLimitBucket: { Count, WindowStart, ResetAt }
+```
+
+Eviction: bucket expires when `ResetAt < UtcNow`; cleaned via `MemoryCache` TTL.
+
+## File structure
+
+```
+src/Api/
+├── Configuration/
+│   └── RateLimitOptions.cs           # new — Options pattern binding
+├── Middleware/
+│   └── RateLimitMiddleware.cs        # new — the actual middleware
+├── Services/
+│   └── RateLimitService.cs           # new — counter logic, testable in isolation
+├── Controllers/
+│   └── OrdersController.cs           # modified — wire middleware
+└── Startup.cs                         # modified — register middleware + options
+
+tests/Api.Integration/
+└── RateLimitTests.cs                 # new — covers AC1–AC4
+```
+
+## Constraints
+
+- Do NOT add Redis dependency (single-instance per spec)
+- Do NOT use ASP.NET Core 7's built-in rate limiter (its API is hostile to per-partner keys; we keep custom)
+- Do NOT block on GETs (only `POST /api/orders`)
+- `Retry-After` MUST be integer seconds, not an HTTP-date — a partner client can't parse the date form (see `docs/integrations/sftp-acme-bank.md`)
+- Counter mutations must be atomic per `partner_id` — naive read-then-increment races under load (added after load test; see `tasks.md` notes)
+- Maintain consistency with existing middleware patterns in `src/Api/Middleware/AuthMiddleware.cs`
+
+## Open questions
+
+None — all resolved during spec review (see `spec.md` § Open questions).
+
+## References
+
+- `spec.md` (this folder)
+- ADR-001 — Repository per aggregate
+- `src/Api/Middleware/AuthMiddleware.cs` — middleware pattern to mirror
+```
+
+### `specs/2026-05-orders-rate-limit/tasks.md`
+
+```markdown
+# Tasks: Rate limiting for the orders API
+
+> Order matters. Each task has its own verification. Check off as you go.
+
+## Setup
+
+- [ ] Create branch `feature/2026-05-orders-rate-limit`
+- [ ] Open `spec.md` + `plan.md` alongside the task list
+
+## Implementation (in execution order)
+
+- [ ] 1. Write the failing integration test for AC1 (happy path: 201 under limit) → verify: test fails with "endpoint exists but no rate-limit logic" output
+- [ ] 2. Add `RateLimitOptions.cs` with bindings for `MaxRequests` and `WindowSeconds` per partner → verify: `dotnet build` succeeds; options bind correctly in a unit test
+- [ ] 3. Add `appsettings.json` § `RateLimits:Orders` with example values → verify: app starts; options injected via DI
+- [ ] 4. Implement `RateLimitService.IsAllowed(partnerId)` with fixed-window logic + unit tests → verify: unit tests cover under-limit / at-limit / just-over-limit / different-partners cases
+- [ ] 5. Implement `RateLimitMiddleware` that calls the service and returns 429 + `Retry-After` on breach → verify: integration test for AC1 now passes
+- [ ] 6. Wire middleware into pipeline scoped to `OrdersController.Post` only → verify: `GET /api/orders` still works; `POST` is gated
+- [ ] 7. Add Prometheus counter `orders_rate_limit_breaches_total{partner_id}` → verify: counter increments observable in `/metrics` endpoint after a forced breach
+- [ ] 8. Add Serilog Information log on each 429 with `partner_id` field → verify: log line appears in test output
+- [ ] 9. Add remaining integration tests (AC2, AC3, AC4) → verify: full test suite green
+
+## Verification (against acceptance criteria)
+
+- [ ] AC1: First N requests within window W return 201 — covered by test in step 1
+- [ ] AC2: N+1 request gets 429 + `Retry-After` — covered by AC2 test (step 9)
+- [ ] AC3: Independent counters per partner — covered by AC3 test (step 9)
+- [ ] AC4: Missing `X-Partner-Id` → 400 — covered by AC4 test (step 9)
+- [ ] AC5: Config from appsettings.json — covered by step 3 + binding test
+- [ ] AC6: Prometheus counter increments — covered by step 7
+- [ ] AC7: Integration test suite green — covered by all tests above
+
+## Post-merge
+
+- [ ] Append `STATUS: shipped (PR #N, YYYY-MM-DD)` to `spec.md`
+- [ ] Update `docs/runbooks/orders-api-degraded.md` with a new "check rate-limit breaches" diagnostic step
+- [ ] Add a line to `CLAUDE.md` § Conventions: *"Per-endpoint middleware → `src/Api/Middleware/` with options bound from `appsettings.json`"*
+- [ ] Close ticket ORDERS-1234
+
+## Notes (append as you work)
+
+- [2026-05-15]: AC4 (missing `X-Partner-Id` → 400) is already enforced by existing `AuthMiddleware`. Step 9's AC4 test is just a regression guard.
+- [2026-05-16]: `MemoryCache` TTL had an eviction-timing edge case in tests — switched to explicit cleanup in service. Documented in `plan.md` Technical decisions.
+- [2026-05-16]: Load test (500 rps, single partner) exposed a race — two threads read-then-incremented the counter and both passed the limit. Switched to a per-`partner_id` lock in `RateLimitService`; added the atomicity constraint to `plan.md`.
+- [2026-05-17]: The AC2 window-boundary test was flaky — it depended on wall-clock and failed when the 60s window rolled mid-test. Injected an `IClock` and froze time in the test, instead of a `Thread.Sleep` hack.
+```
+
+---
+
+## Worked example 2 — a small change (bugfix shape)
+
+Not every change needs a full trio. Below: a bugfix where the trio compresses into one short document.
+
+### `specs/2026-05-orders-422-typo-fix/spec.md`
+
+```markdown
+# Fix: `POST /api/orders` returns 422 instead of 400 on malformed JSON
+
+## Goal
+
+Fix a small response-code regression: the orders endpoint started returning
+422 (Unprocessable Entity) instead of 400 (Bad Request) on malformed JSON
+bodies. Partner integrations log 400 as transient and 422 as terminal; this
+breaks the retry contract.
+
+## In scope
+
+- `POST /api/orders` returns 400 on malformed JSON
+- Existing 422 behavior on valid-JSON-but-invalid-fields preserved
+
+## Out of scope
+
+- Other endpoints (verified unaffected; they use the same middleware which is fine)
+- Changing the 422-on-validation-error behavior
+
+## Acceptance criteria
+
+- [ ] AC1: `POST /api/orders` with `{"foo":` (malformed JSON) → 400 Bad Request
+- [ ] AC2: `POST /api/orders` with `{}` (valid JSON, missing required fields) → 422 (unchanged)
+- [ ] AC3: Integration test added for AC1 (regression guard)
+
+## Impact
+
+- One change in `src/Api/Middleware/JsonErrorMiddleware.cs` — a config flag flip `[VERIFY: confirm malformed JSON actually reaches this middleware]`
+- New test in `tests/Api.Integration/OrdersControllerTests.cs`
+
+## References
+
+- Bug report: ORDERS-1257
+- Spec `2026-04-validation-response-codes` (the change that introduced the regression — superseded)
+```
+
+That's the whole spec. No plan.md, no tasks.md.
+
+**Why this compression works for a bugfix:**
+
+- The change is one file, one line, one test. *Plan* is implicit ("flip the flag").
+- The execution order is trivial: write the test, flip the flag, verify. *Tasks* would be three checkboxes that don't deserve their own file.
+- The acceptance criteria are testable directly; no orchestration of multiple steps.
+
+For changes like this, a single `spec.md` is enough. The trio is for non-trivial features; bugfixes get the appropriate compression.
+
+**What actually happened** (the realistic footnote): that `[VERIFY]` earned its keep. Malformed JSON never reaches `JsonErrorMiddleware` — ASP.NET Core's model binder rejects it first — so the fix really landed in a one-line `InvalidModelStateResponseFactory` tweak in `Startup.cs`. Still one file, still one test; the bugfix shape held. But it's exactly why you mark a guessed path `[VERIFY]` and confirm it against the code before trusting it.
+
+---
+
+## Worked example 3 — the whole trio in one file
+
+Some changes are too big for a bare bugfix spec — they have real *how* and *order* decisions — but too small to deserve three separate files and a folder. Keep all three concerns; just collapse them into one file with three sections.
+
+Here's a small feature — pagination on a list endpoint — written as a single `specs/2026-06-orders-pagination.md`:
+
+```markdown
+# Add pagination to `GET /api/orders`
+
+> Small feature: spec + plan + tasks as three sections in one file.
+> Split into a `specs/2026-06-orders-pagination/` folder with separate files only if it grows.
+
+## Spec — what & why
+
+**Goal.** `GET /api/orders` returns every order in one response; for large partners
+that means multi-megabyte payloads and slow queries. Add offset-based pagination with
+sane defaults.
+
+**In scope**
+- `?page` and `?pageSize` query params on `GET /api/orders`
+- Default `pageSize=50`; reject `pageSize > 200` with a 400
+- Response envelope gains `page`, `pageSize`, `totalCount`
+
+**Out of scope**
+- Cursor / keyset pagination (offset is fine at current scale)
+- Pagination on any other endpoint
+- Sort controls (separate change)
+
+**Acceptance criteria**
+- [ ] AC1: no params → first 50 orders + envelope (`page=1`, `pageSize=50`, `totalCount=N`)
+- [ ] AC2: `?page=2&pageSize=20` → orders 21–40
+- [ ] AC3: `?pageSize=500` → 400, message "pageSize exceeds max of 200"
+- [ ] AC4: `?page=999` past the end → 200 with an empty list (not an error)
+
+## Plan — how
+
+- Bind params via a `PaginationQuery` record with `[Range]` validation (max 200)
+- Page in SQL, never in memory: `ORDER BY created_at DESC, id DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY` (Dapper) — the `id` tiebreaker keeps paging deterministic (see Notes)
+- Get `totalCount` from a second statement in the same Dapper multi-query (one round trip)
+- Wrap the existing `OrderDto[]` in a `PagedResult<OrderDto>` envelope
+- Touch only: new `PaginationQuery.cs` + `PagedResult.cs`; modify `OrdersController.Get` and `OrderRepository.List`
+
+## Tasks — in what order
+
+- [ ] 1. Failing integration test for AC1 → verify: fails (no envelope yet)
+- [ ] 2. Add `PaginationQuery` + `PagedResult` records → verify: build green, range validation unit-tested
+- [ ] 3. `OrderRepository.List(skip, take)` with OFFSET/FETCH + count → verify: repo test returns the right slice and total
+- [ ] 4. Wire `OrdersController.Get` to bind the query and return `PagedResult` → verify: AC1 passes
+- [ ] 5. Tests for AC2–AC4 → verify: suite green
+
+## Notes
+
+- Load test caught it: `ORDER BY created_at DESC` alone isn't deterministic (`created_at` isn't unique), so a boundary row jumped between pages 1 and 2. Added the `id` tiebreaker — folded into the Plan line above.
+- Deep pages (`?page=900`) are slow: OFFSET scans then discards rows. Fine now (partners page shallow); when it bites, switch to the keyset pagination already parked in *Out of scope*.
+```
+
+**Why one file works here:**
+
+- The three sections still appear **in order** — you read top-to-bottom and the discipline holds. The order is the method; the file count isn't.
+- A small feature's plan and tasks are short. Three nearly-empty files cost more attention — a folder, cross-references, open tabs — than three headings in one.
+- Cross-references collapse to *"see the section above"* — no need to cite `plan.md` by name when it's fifteen lines up.
+- It promotes cleanly: if the change grows, move the three sections into `spec.md` / `plan.md` / `tasks.md` in a folder of the same name. Nothing is rewritten, only relocated.
+
+Reach for the one-file trio when a change has genuine *how* and *order* decisions but separate files would just be padding. Reach for the full three-file trio when the plan or tasks get long, or when more than one person edits them at once.
 
 ---
 

@@ -4,6 +4,8 @@
 
 > A practical guide to structuring your repository so AI coding agents (Claude Code, Copilot, Cursor) produce consistent, maintainable code instead of drifting away from your intent.
 
+**This guide is the map. If you read only one guide, make it [The Feature Trio: spec → plan → tasks](spec-plan-tasks-guide.md)** — the core loop everything below supports.
+
 ---
 
 ## Table of Contents
@@ -377,6 +379,8 @@ A `spec.md` answers: *what are we building, why, and how do we know it works?* I
 
 A spec is **per-feature** and **frozen after merge** — different from a PRD (whole-product per era, frozen after that era's release) and from a plan (the *how*, written alongside the spec — see [the next section](#writing-a-good-planmd)).
 
+> **The full method lives in [The Feature Trio: spec → plan → tasks](spec-plan-tasks-guide.md) — the centerpiece of this repo.** The next three sections give you the principles and templates; the trio guide is where you see them filled in for real features, with the AI-authoring prompts and the consistency checks that keep the three documents honest. If you read one guide, read that one.
+
 ### Principles that work
 
 - **Goal in three sentences.** What problem, for whom, in which system. Anything longer means the feature isn't clear in your head yet.
@@ -455,7 +459,7 @@ The most common rot pattern: specs sitting in *Draft* indefinitely. A spec older
 
 ### Where to go deeper
 
-The template above plus [`templates/spec.md`](../templates/spec.md) cover ~90% of features. For a full worked example of `spec.md` + `plan.md` + `tasks.md` filled in for one feature, plus AI-authoring prompts (*drafting a spec from an idea*, *reviewing for gaps*, *the trio consistency check*), see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). For the per-role ownership of spec lifecycle (who drafts, who reviews, who approves, who updates status), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle." For how the agent reads specs and implements them task-by-task, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation."
+The template above plus [`templates/spec.md`](../templates/spec.md) cover ~90% of features. For a full worked example of `spec.md` + `plan.md` + `tasks.md` filled in for one feature, plus AI-authoring prompts (*drafting a spec from an idea*, *reviewing for gaps*, *the trio consistency check*), see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) — the centerpiece guide of this repo. For the per-role ownership of spec lifecycle (who drafts, who reviews, who approves, who updates status), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle." For how the agent reads specs and implements them task-by-task, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation."
 
 ---
 
@@ -782,7 +786,7 @@ Solo SDD collapses the matrix: you own everything; you also "review" your own wo
 
 ### Going deeper
 
-The full treatment — per-role profiles (Engineer / Tech Lead / EM / PM / Founder / QA / SRE / Security / External OSS contributors), artifact lifecycle handoffs, cadence patterns (PR-based vs meeting-based ADR review), multi-team and monorepo specifics, the onboarding flow for new hires, governance for OSS projects, regulated-industry overlays, and a longer list of team failure modes with corrections — lives in [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md).
+Running SDD with 2–10 people — who owns what (one name per artifact), lightweight PR-based review, the spec lifecycle, ADRs as a shared decision log, the solo case, onboarding, and the failure modes that actually hit small teams (plus what to add only once you outgrow ~10) — lives in [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md).
 
 Read it when your team crosses ~3 engineers; before that, the simpler version above is usually enough.
 

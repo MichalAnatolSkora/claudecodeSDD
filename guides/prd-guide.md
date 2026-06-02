@@ -817,4 +817,4 @@ The PRD says *"Status: Draft"* for 18 months. Nobody ratifies it. Engineering bu
 
 ---
 
-*This guide complements [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer) (principles), [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) (translating an accepted PRD into specs, plans, and tasks), and [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "PRD lifecycle" (per-role ownership of PRDs). The PRD is where strategy enters the SDD discipline; everything downstream is its consequence.*
+*This guide complements [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer) (principles), [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) (translating an accepted PRD into specs, plans, and tasks), and [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Who owns what" (who owns the PRD on a small team). The PRD is where strategy enters the SDD discipline; everything downstream is its consequence.*

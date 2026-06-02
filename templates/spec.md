@@ -1,6 +1,7 @@
 # [Feature name]
 
 > Copy this file to `specs/YYYY-MM-feature-slug/spec.md` and fill in.
+> Optional (1–10 people): top with a `Status:` line (Draft → Active → Shipped → Superseded); add `Owner:` only past ~5 people — below that, `git blame` covers it.
 
 ## Goal
 
