@@ -25,7 +25,7 @@ A collection of practical guides for structuring your repository so AI coding ag
 │   ├── legacy-to-sdd-migration-guide.md   # retrofitting SDD onto an existing repo
 │   └── sdd-in-the-wild.md             # who actually practices SDD principles
 └── templates/                         # copy-pasteable starting points
-    ├── .claude/                       # trio slash commands + skills (copy into your project)
+    ├── .claude/                       # trio slash commands (copy into your project)
     ├── CLAUDE.md                      # agent instruction hub (behavioral + project layer)
     ├── PRD.md
     ├── spec.md
@@ -40,7 +40,7 @@ A collection of practical guides for structuring your repository so AI coding ag
 ## Guides
 
 - **[Spec-Driven Development Guide](guides/spec-driven-development-guide.md)** — the entry point and map: PRD, PLAN.md, the three-layer documentation model, ADRs, and the workflow that ties them together.
-- **★ [The Feature Trio: spec → plan → tasks](guides/spec-plan-tasks-guide.md)** — **the core loop of the whole method, and the one guide to read first.** Three short markdown files written in order (`spec.md` → `plan.md` → `tasks.md`) drive every change. Inside: two full worked examples (a feature + a bugfix) filled in for the same change, six AI-authoring prompts (draft/review/validate per artifact), iteration loops, cross-artifact consistency checks, and the slash commands worth turning into shortcuts. Deliberately simple — no toolkit required.
+- **★ [The Feature Trio: spec → plan → tasks](guides/spec-plan-tasks-guide.md)** — **the core loop of the whole method, and the one guide to read first.** Three short markdown files written in order (`spec.md` → `plan.md` → `tasks.md`) drive every change. Inside: two complete worked examples (a feature as the full three-file trio, and a small feature as a one-file trio), what sections each file needs, six AI-authoring prompts (draft/review/validate per artifact), iteration loops, cross-artifact consistency checks, and the slash commands worth turning into shortcuts. Deliberately simple — no toolkit required.
 - **[Runbook / Operations Documentation Guide](guides/runbook-operations-guide.md)** — companion guide for the operational layer: what to do when things break, how to write entries that pass the 3 a.m. test, and how the agent reads runbooks when generating diagnostic scripts.
 - **[Working with AI Coding Agents](guides/working-with-agents-guide.md)** — how the agent actually reads your repo, when it loads a file (and why it sometimes doesn't), how many docs is too many before things break down, plus the practical prompting patterns for specs, ADRs, refactors, and runbook work.
 - **[Writing a Good CLAUDE.md](guides/claude-md-guide.md)** — the deep-dive on the single most important file in an SDD repo: what goes in (and what doesn't), good-vs-bad example lines, how to size it by project scale, and what changes when your repo has 30+ docs competing for the agent's attention.
@@ -59,9 +59,9 @@ Minimal starting points. Copy into your project and fill in the brackets:
 - **[CLAUDE.md](templates/CLAUDE.md)** — agent instruction hub with two layers: literal-copied behavioral guidelines (from [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md), kept verbatim with attribution) + bracketed project-specific sections you fill in
 - **[PRD.md](templates/PRD.md)** — product requirements document (problem, users, success criteria, constraints) — the *starting* artifact, freezes after v1
 - **[spec.md](templates/spec.md)** — feature specification (goal, scope, acceptance criteria, open questions)
-- **[plan.md](templates/plan.md)** — implementation plan (decisions, file structure, tasks, constraints)
+- **[plan.md](templates/plan.md)** — implementation plan (decisions, file structure, constraints)
 - **[tasks.md](templates/tasks.md)** — execution checklist with one verification per step
-- **[.claude/ trio commands & skills](templates/.claude/)** — copy-pasteable Claude Code slash commands (`/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`) and skills (`trio-author`, `trio-consistency`) that drive the spec → plan → tasks loop
+- **[.claude/ trio commands](templates/.claude/)** — copy-pasteable Claude Code slash commands (`/features-from-prd`, `/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`) that take a PRD through the spec → plan → tasks loop
 - **[ADR.md](templates/ADR.md)** — architecture decision record (context, decision, consequences, alternatives)
 - **[runbook.md](templates/runbook.md)** — operational runbook entry (symptoms, diagnosis, recovery, verification)
 - **[postmortem.md](templates/postmortem.md)** — blameless incident analysis (summary, timeline, root cause, lessons, action items)

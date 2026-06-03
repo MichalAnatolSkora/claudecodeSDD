@@ -1,29 +1,47 @@
 # Writing a Good PRD (Per Era, For Humans)
 
-> The practical companion to [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer). That section gives you the principles (why PRDs exist, PRD vs spec, the agent doesn't read PRD, the era pattern, the Frankenstein trap). This guide gives you the *practice*: formats, worked examples, era-boundary heuristics, AI-authoring prompts, and the review process.
+> The practical companion to [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer). That section gives you the principles (PRD vs spec, the agent doesn't read PRD, the era pattern, the Frankenstein trap). This guide gives you the *practice*: formats, worked examples, era-boundary heuristics, AI-authoring prompts, and the review process.
 
 ---
 
 ## Table of Contents
 
-1. [What this guide adds](#what-this-guide-adds)
-2. [PRD formats — pick the right shape](#prd-formats--pick-the-right-shape)
-3. [Anatomy of a PRD, section by section](#anatomy-of-a-prd-section-by-section)
-4. [Worked example 1 — Original launch (B2B billing platform)](#worked-example-1--original-launch-b2b-billing-platform)
-5. [Worked example 2 — Era 2 (multi-currency expansion)](#worked-example-2--era-2-multi-currency-expansion)
-6. [Era boundary heuristics — when do you need a new PRD?](#era-boundary-heuristics--when-do-you-need-a-new-prd)
-7. [AI-assisted PRD authoring](#ai-assisted-prd-authoring)
-8. [Success metrics — defining "what does success look like"](#success-metrics--defining-what-does-success-look-like)
-9. [Stakeholder review process](#stakeholder-review-process)
-10. [Cross-functional handoff — PRD to engineering](#cross-functional-handoff--prd-to-engineering)
-11. [PRD-specific anti-patterns](#prd-specific-anti-patterns)
-12. [Golden rules](#golden-rules)
+1. [Why write a PRD — and when](#why-write-a-prd--and-when)
+2. [What this guide adds](#what-this-guide-adds)
+3. [PRD formats — pick the right shape](#prd-formats--pick-the-right-shape)
+4. [Anatomy of a PRD, section by section](#anatomy-of-a-prd-section-by-section)
+5. [Worked example 1 — Original launch (B2B billing platform)](#worked-example-1--original-launch-b2b-billing-platform)
+6. [Worked example 2 — Era 2 (multi-currency expansion)](#worked-example-2--era-2-multi-currency-expansion)
+7. [Era boundary heuristics — when do you need a new PRD?](#era-boundary-heuristics--when-do-you-need-a-new-prd)
+8. [AI-assisted PRD authoring](#ai-assisted-prd-authoring)
+9. [Success metrics — defining "what does success look like"](#success-metrics--defining-what-does-success-look-like)
+10. [Stakeholder review process](#stakeholder-review-process)
+11. [Cross-functional handoff — PRD to engineering](#cross-functional-handoff--prd-to-engineering)
+12. [PRD-specific anti-patterns](#prd-specific-anti-patterns)
+13. [Golden rules](#golden-rules)
+
+---
+
+## Why write a PRD — and when
+
+**What it's for.** A PRD (Product Requirements Document) is the product-level statement of *what we're building and why* — the problem, who has it, and what success looks like — agreed **before** anyone writes a spec or a line of code. It's the contract between intent and engineering. Humans read it; the agent never does (it reads `spec.md`). One PRD describes a whole product or a whole release *era*, not a single feature.
+
+**Why it's worth the hour or two:**
+
+- **The cheapest place to be wrong is a doc.** Discovering *"we're solving the wrong problem"* in a PRD costs an afternoon; discovering it in shipped code costs weeks.
+- **It aligns everyone on one version of the goal.** PM, engineers, design, founder argue on paper — once — instead of in code review, repeatedly.
+- **It freezes intent so it doesn't drift.** Without a written *what & why*, the goal quietly mutates feature by feature, and six months in nobody agrees what you're building.
+- **It's the root of the SDD chain.** PRD → slice into features → `spec.md` → `plan.md` → `tasks.md`. Skip it and the *codebase* becomes the de-facto spec — a pile of decisions nobody chose on purpose.
+
+**When you actually need one.** A PRD earns its place when **more than one person has to agree**, or the bet is big enough that building the wrong thing is expensive. Skip it — or shrink it to a one-paragraph issue — when you're solo, the change is small, or the *what & why* already fits in your head. (When in doubt, the one-pager format below is the lightest real PRD.)
+
+**When to write a *v2* (a new era).** A PRD **freezes after v1 ships** — you do *not* edit it for every new feature (features get specs, not PRD edits; an ever-edited PRD becomes a Frankenstein). You write a **new** PRD when the product's *direction* shifts materially: a new market or segment, a new core capability, a pivot, or a step-change in scale. Routine features are not a new era. For the concrete test, see [Era boundary heuristics](#era-boundary-heuristics--when-do-you-need-a-new-prd) below; for the layered model (PRD vs spec, the three documentation layers), see [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer).
 
 ---
 
 ## What this guide adds
 
-The main SDD guide explains *why* you'd have a PRD, *when* PRDs freeze (per era), *who* reads them (humans only — agents read `spec.md`), and the main trap (Frankenstein PRDs). That's the theory.
+The section above is the *why* and *when*. The main SDD guide places the PRD in the bigger picture — PRD vs spec, the three documentation layers.
 
 This guide is the practice:
 
@@ -703,6 +721,41 @@ A 60-minute meeting with PM, eng lead, design (if applicable), and 1–2 senior 
 
 The output of the kickoff is *not* the specs themselves. It's the *list* of specs to write next.
 
+### Slicing the PRD into features
+
+The kickoff's output — the spec backlog — is a list of **features**, each sized to its own spec → plan → tasks trio. Getting that list right is mostly one skill: **slicing**. (Solo? You do this on your own; the meeting is optional, the slicing isn't.)
+
+**Slice vertically, not horizontally.** The most common mistake is slicing by layer — "the database work," "the API work," "the UI work." None of those ship anything a user can use, and none can be verified end-to-end. Slice by **capability** instead: a thin path that runs through every layer and delivers one visible outcome. (Standard terms: *vertical slice*, *walking skeleton*.)
+
+**Find the walking skeleton first.** The first feature should be the thinnest end-to-end slice that proves the PRD's core value — even if it hardcodes the boring parts. Ship it, then thicken. This beats building the whole foundation before anything works.
+
+**Derive features from the PRD's success criteria.** Each measurable outcome in the PRD maps to one or a few features. If a success criterion has no feature, you missed one; if a feature serves no criterion, question it — it may be out of scope.
+
+**Prioritize and sequence.** Tag each feature P1/P2/P3 (or MoSCoW). Order by *value × dependency*: build only the foundation the next valuable slice actually needs — not all of it up front. Mark hard dependencies so nothing is scheduled before its prerequisite.
+
+**Right-size to a trio.** Each feature should fit one trio: a `spec.md` under ~150 lines, a few days of work. Too big (multi-week, sprawling spec) → split it. Too small (a one-liner) → fold it into a neighbor or treat it as a bugfix-shape spec.
+
+**The output is a lightweight list, not an artifact.** A prioritized table — feature, the PRD outcome it serves, rough size, dependencies — is enough. It can live in the PRD, an issue tracker, or a short `docs/roadmap.md`. Each row becomes a `specs/YYYY-MM-slug/` when you pick it up. Don't turn the backlog into a second heavy document.
+
+**Let the agent draft it, then you triage.** `/features-from-prd` (or the prompt below) turns the PRD into a candidate breakdown in seconds; you cut and reorder.
+
+**Prompt:**
+
+```text
+Read docs/prd/<name>.md. Propose a feature breakdown as vertical slices —
+each independently shippable and user-visible (NOT "DB layer" / "API layer").
+Size each to ~a few days (a spec under ~150 lines); split anything bigger.
+Flag the walking skeleton (thinnest end-to-end slice that proves the core),
+then order the rest by value × dependency and mark dependencies. Keep every
+feature within the PRD's Out of scope. Output a table:
+feature | PRD outcome it serves | rough size | depends on | P1/P2/P3.
+Don't write specs — just the breakdown.
+```
+
+**Anti-patterns:** horizontal slices (layers that ship nothing); one giant spec for the whole PRD (big-bang); slicing by team or component instead of user value; building all the infrastructure before any user-visible slice; decomposition that never ends (if you're on the third re-slice, pick the obvious P1 and start).
+
+Each feature you pick up becomes a spec — for the mechanics, see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).
+
 ### The first specs
 
 From the backlog identified in the kickoff, the engineering team writes the first 2–3 specs in parallel. These specs:
@@ -817,4 +870,4 @@ The PRD says *"Status: Draft"* for 18 months. Nobody ratifies it. Engineering bu
 
 ---
 
-*This guide complements [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer) (principles), [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) (translating an accepted PRD into specs, plans, and tasks), and [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Who owns what" (who owns the PRD on a small team). The PRD is where strategy enters the SDD discipline; everything downstream is its consequence.*
+*This guide complements [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer) (principles), [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) (writing the spec → plan → tasks trio for each feature you slice out), and [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Who owns what" (who owns the PRD on a small team). The PRD is where strategy enters the SDD discipline; everything downstream is its consequence.*

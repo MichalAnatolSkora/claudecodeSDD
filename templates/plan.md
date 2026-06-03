@@ -1,6 +1,6 @@
 # Plan: [Feature name]
 
-> Copy this file next to `spec.md`. The plan answers *how*; the spec answers *what*.
+> Copy this file next to `spec.md`. The plan answers *how*; the spec answers *what*; `tasks.md` answers *in what order*.
 > Optional (1–10 people): top with a `Status:` line (Draft → Active → Shipped → Superseded); add `Owner:` only past ~5 people — below that, `git blame` covers it.
 
 ## Technical decisions
@@ -23,12 +23,6 @@ tests/
   Integration/
     XHandlerTests.cs
 ```
-
-## Tasks (in execution order)
-
-1. [First task — usually a failing test or a DDL change]
-2. ...
-3. ...
 
 ## Constraints
 

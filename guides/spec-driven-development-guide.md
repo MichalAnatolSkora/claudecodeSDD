@@ -522,20 +522,6 @@ tests/
     XHandlerTests.cs   // Testcontainers + NUnit
 ```
 
-## Tasks (in execution order)
-1. DDL migration script for `app.x`
-2. `XRepository` + unit tests for queries
-3. `XHandler` (pure logic, no I/O in tests)
-4. `POST /api/x` endpoint + FluentValidation
-5. Integration tests with Testcontainers
-6. Quartz job registration (if applicable)
-
-## Acceptance Criteria
-- [ ] `POST /api/x` with valid payload → 201 + row in `x`
-- [ ] Missing required field → 400 with specific message
-- [ ] Integration test covers happy path + 2 error cases
-- [ ] Each test runs against an isolated database
-
 ## Constraints
 - Do NOT use EF Core
 - Do NOT add CQRS/MediatR — handlers called directly
@@ -552,7 +538,7 @@ tests/
 
 ### Practical Tips
 
-Keep `PLAN.md` short — if it exceeds ~200 lines, split into `PLAN.md` (what + acceptance) and `ARCHITECTURE.md` (how). AI agents work better with several focused files than one monolith.
+Keep `PLAN.md` short — if it exceeds ~200 lines, the *how* has outgrown one change: keep this change's decisions in `PLAN.md` and move durable, cross-feature structure into `ARCHITECTURE.md`. AI agents work better with several focused files than one monolith.
 
 After each iteration, move items from "Open Questions" to "Technical Decisions." The plan is alive, but decision history must stay visible — so the agent (and you, in a month) know *why* something is the way it is.
 
@@ -741,8 +727,6 @@ In `CLAUDE.md` you add one line in the "Conventions" section: *"Batch compressio
 ### Practical Workflow Tips
 
 **Context per task.** Don't load all specs into the agent. For a new feature provide: `CLAUDE.md` + `ARCHITECTURE.md` + relevant `DOMAIN.md` fragment + 1-2 old specs of similar features as templates. The rest is noise.
-
-**Snapshot before large refactors.** Before starting a major rewrite, generate `docs/snapshots/2026-02-pre-refactor.md` describing the current state. The agent (and you, three months later) will know where you started.
 
 **Write ADRs after the fact when you must.** Ideally an ADR is written before the decision. In practice you often discover a pattern after 3 similar implementations — then write the ADR retroactively and link future specs to it.
 
@@ -1037,7 +1021,6 @@ This is what a *mature* SDD repo looks like — a mid-sized project, ~6–12 mon
 │   │   ├── validation/                # problem validation studies, failed-pilot postmortems
 │   │   └── opportunity-briefs/        # PRD candidates not yet ratified
 │   ├── templates/                     # PR/issue/spec/ADR templates to copy from
-│   ├── snapshots/                     # point-in-time captures before major refactors (rollback context)
 │   ├── GLOSSARY.md                    # alternative home for DOMAIN.md content if you prefer it under docs/
 │   ├── TESTING.md                     # test strategy, conventions, coverage expectations
 │   ├── ONBOARDING.md                  # git clone → working environment, step by step

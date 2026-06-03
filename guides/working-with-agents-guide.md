@@ -459,7 +459,7 @@ Tool results from this turn            varies — sometimes huge
                               Total input for one call
 ```
 
-Output tokens are usually a small fraction of input — most code-assistant work is read-heavy. The exception is generating large files (a 500-line code block can cost 5k+ output tokens on its own).
+Output tokens are usually a small fraction of input — most code-assistant work is read-heavy. The exception is generating large files (a 500-line code block can cost 5k+ output tokens on its own). That gap quietly rewards spec-first work: a spec is cheap *input* that prevents expensive *output* — a discarded wrong generation bills at the premium output rate, while the spec that would have prevented it is input you write once (and cache thereafter).
 
 #### How to inspect token usage
 
@@ -813,11 +813,7 @@ Before we continue work:
 1. Read the current state of [paths]
 2. Compare against ARCHITECTURE.md — list discrepancies
 3. Propose updates to ARCHITECTURE.md to reflect reality
-4. Create docs/snapshots/[date]-post-refactor.md describing the new state
-   (for future reference and rollback context).
 ```
-
-Snapshots are cheap insurance. You almost never need them, but when you do they're priceless.
 
 ---
 

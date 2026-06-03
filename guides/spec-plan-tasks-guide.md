@@ -12,25 +12,23 @@
 1. [What this guide is](#what-this-guide-is)
 2. [The trio as a flow](#the-trio-as-a-flow)
 3. [What sections each file needs](#what-sections-each-file-needs)
-4. [Optional: status and owner](#optional-status-and-owner)
 
 **Why / when**
-5. [When to skip parts of the trio](#when-to-skip-parts-of-the-trio)
+4. [When to skip parts of the trio](#when-to-skip-parts-of-the-trio)
 
 **How**
-6. [How the three documents reference each other](#how-the-three-documents-reference-each-other)
-7. [AI-assisted authoring: prompts per artifact](#ai-assisted-authoring-prompts-per-artifact)
-8. [Iteration patterns — sharpening a draft](#iteration-patterns--sharpening-a-draft)
-9. [Cross-artifact consistency checks](#cross-artifact-consistency-checks)
-10. [Cross-trio anti-patterns](#cross-trio-anti-patterns)
-11. [Slash commands and skills worth having](#slash-commands-and-skills-worth-having)
+5. [How the three documents reference each other](#how-the-three-documents-reference-each-other)
+6. [AI-assisted authoring: prompts per artifact](#ai-assisted-authoring-prompts-per-artifact)
+7. [Iteration patterns — sharpening a draft](#iteration-patterns--sharpening-a-draft)
+8. [Cross-artifact consistency checks](#cross-artifact-consistency-checks)
+9. [Cross-trio anti-patterns](#cross-trio-anti-patterns)
+10. [Slash commands worth having](#slash-commands-worth-having)
 
 **Examples**
-12. [Worked example 1 — Rate limiting on the orders endpoint](#worked-example-1--rate-limiting-on-the-orders-endpoint)
-13. [Worked example 2 — a small change (bugfix shape)](#worked-example-2--a-small-change-bugfix-shape)
-14. [Worked example 3 — the whole trio in one file](#worked-example-3--the-whole-trio-in-one-file)
+11. [Worked example 1 — Rate limiting on the orders endpoint](#worked-example-1--rate-limiting-on-the-orders-endpoint)
+12. [Worked example 3 — the whole trio in one file](#worked-example-3--the-whole-trio-in-one-file)
 
-15. [Golden rules for trio authoring](#golden-rules-for-trio-authoring)
+13. [Golden rules for trio authoring](#golden-rules-for-trio-authoring)
 
 ---
 
@@ -64,6 +62,8 @@ tasks.md
    ↓
 [code]
 ```
+
+*(Where the **feature** itself comes from — slicing a PRD into features — is one step upstream of this guide: see [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".)*
 
 Each step narrows the option space. Once `spec.md` is accepted, the team has agreed on *what success means*. Once `plan.md` is accepted, the team has agreed on *the shape of the solution*. Once `tasks.md` is set, the engineer (and the agent) just executes.
 
@@ -122,8 +122,8 @@ Each section in the trio earns its place — none are decoration. Below: the **b
 
 | Section | Why it's required |
 |---------|-------------------|
-| **Implementation (in order)** | The ordered steps, each ending in ` → verify:`. The order *is* the point, and a step with no verification can't tell you (or the agent) when it's done. |
-| **Verification (against ACs)** | Maps every acceptance criterion to the task(s) that prove it — the gate that says "ready to merge." |
+| **Implementation (in execution order)** | The ordered steps, each ending in ` → verify:`. The order *is* the point, and a step with no verification can't tell you (or the agent) when it's done. |
+| **Verification (against acceptance criteria)** | Maps every acceptance criterion to the task(s) that prove it — the gate that says "ready to merge." |
 
 **Nice to have**
 
@@ -137,49 +137,22 @@ The bare-minimum rows are the sections you'll see filled in across the [worked e
 
 ---
 
-## Optional: status and owner
-
-Two optional one-liners can sit at the top of any trio doc:
-
-```text
-Status: Active
-Owner:  @ana
-```
-
-Add them only when they earn their place — this method is built for teams of **1–10**, so default to the lightest form.
-
-**Status** — what state the doc is in. A small set: **Draft** (being written) → **Active** (approved, in progress) → **Shipped** (merged) → **Superseded** (a later doc replaces this — link it). It's the same lifecycle the overview spells out for specs (*Draft → In implementation → Shipped → Frozen*), generalized to all three docs.
-
-**Owner** — who to ask. At the small end, skip it: `git blame` and the PR author already say who wrote and merged a doc, more reliably than a hand-kept field that goes stale.
-
-Scale it to your team:
-
-| Team size | Status | Owner |
-|-----------|--------|-------|
-| Solo (1) | skip — unless you juggle several specs at once | skip — it's you |
-| Small (2–5) | useful (Draft / Active / Shipped) | optional — git usually covers it |
-| Toward 10 | useful | add it when *"who do I ask?"* stops being obvious |
-
-For *who drafts / reviews / approves* — the lightweight team ownership model (one name per artifact) — see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md). Don't rebuild that in a doc header.
-
----
-
 ## When to skip parts of the trio
 
-| Change shape | spec.md | plan.md | tasks.md |
-|--------------|---------|---------|----------|
-| Bugfix, single file, single commit | ✅ short | ❌ skip | ❌ skip |
-| Small feature (1–3 files, ~half day work) | ✅ full | optional | ❌ skip |
-| Non-trivial feature (multiple modules, multi-day) | ✅ full | ✅ full | ✅ full |
-| Refactor (no behavior change, larger code surface) | ✅ short | ✅ full | ✅ full |
-| Spike / research | ✅ heavy on Open Questions | ❌ skip until the spike resolves | ❌ skip |
-| One-line CLAUDE.md or doc update | ❌ skip (PR description suffices) | ❌ | ❌ |
+The trio is the default for any real change. The main lever isn't *dropping* spec/plan/tasks — it's how many **files** you spread them across; only for the very smallest changes do you drop documents entirely. Match the weight to the size:
 
-**One file or three?** Those columns are about which *sections* a change needs, not how many *files*. When it needs all three but doesn't warrant three files, keep them as three sections in one file ([Worked example 3](#worked-example-3--the-whole-trio-in-one-file)) and split only if it grows or two people edit it at once.
+| Change shape | How to write it |
+|--------------|-----------------|
+| One-line doc / config tweak | A PR description. No spec. |
+| Bug fix (one file, one commit) | A short `spec.md` — goal + acceptance criteria. Plan and tasks are implicit. |
+| Small feature (1–3 files, ~half a day) | The one-file trio — spec / plan / tasks as three sections in a single file ([Worked example 3](#worked-example-3--the-whole-trio-in-one-file)). |
+| Non-trivial feature (multiple modules, multi-day) | The full three-file trio ([Worked example 1](#worked-example-1--rate-limiting-on-the-orders-endpoint)). |
+| Refactor (no behavior change, larger surface) | Short spec + full plan + tasks — the *how* and *order* matter more than the *what*. |
+| Spike / research | A spec heavy on Open Questions; plan and tasks wait until the spike resolves. |
 
-The rule: **if you'd struggle to explain the change in a one-paragraph PR description, write the spec.** If the implementation order would change if you were interrupted for a week, write the tasks. The plan emerges in between.
+The rule: **if you'd struggle to explain the change in a one-paragraph PR description, write a spec.** If the execution order would change had you been interrupted for a week, write the tasks. Reach for three *separate* files only when the plan or tasks get long, or when more than one person edits them at once — otherwise the one-file trio keeps everything in view.
 
-When in doubt, write the shorter form. You can always escalate later if the change grows; you can't recover the time spent ceremony-ing a tiny change.
+When in doubt, write the shorter form. You can always promote a one-file trio into three files later (nothing is rewritten, only relocated); you can't recover the time spent ceremony-ing a tiny change.
 
 ---
 
@@ -489,12 +462,11 @@ The implementation proceeds anyway. Code reviewer catches the gap. Now you're pa
 
 ---
 
-## Slash commands and skills worth having
+## Slash commands worth having
 
-A repo doing SDD seriously usually has these in `.claude/commands/` and `.claude/skills/`:
+A repo doing SDD seriously usually has these in `.claude/commands/`:
 
-**Slash commands** (single-shot, user-invoked):
-
+- **`/features-from-prd`** — *(upstream of the trio)* slices an accepted PRD into a prioritized, vertically-sliced feature list; each row becomes a spec. See [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".
 - **`/spec-new <feature-description>`** — drafts `spec.md` from a one-paragraph description ([prompt 1](#1-draft-specmd-from-a-one-paragraph-idea) above)
 - **`/spec-review <path>`** — runs the audit checklist (prompt 2)
 - **`/plan-from-spec`** — drafts `plan.md` from the active spec (prompt 3)
@@ -503,33 +475,24 @@ A repo doing SDD seriously usually has these in `.claude/commands/` and `.claude
 - **`/tasks-add <what>`** — appends/inserts task(s) into an existing `tasks.md` (or a one-file trio's Tasks section), in order, each with a verify step
 - **`/trio-check`** — final consistency audit (prompt 6)
 
-**Skills** (multi-step, auto-invoked):
-
-- **`trio-author`** — sequenced workflow that drafts spec, prompts you to review, then drafts plan, prompts review, then tasks. Good for the standard feature flow.
-- **`trio-consistency`** — same as `/trio-check` but invokable from prompts that aren't aware they're trio-related (the agent can auto-call this when it detects spec/plan/tasks edits).
-
 Worked-example placement of these files:
 
 ```
 .claude/
-├── commands/
-│   ├── spec-new.md          # /spec-new
-│   ├── spec-review.md       # /spec-review
-│   ├── plan-from-spec.md    # /plan-from-spec
-│   ├── plan-validate.md     # /plan-validate
-│   ├── tasks-from-plan.md   # /tasks-from-plan
-│   ├── tasks-add.md         # /tasks-add
-│   └── trio-check.md        # /trio-check
-└── skills/
-    ├── trio-author/
-    │   └── SKILL.md
-    └── trio-consistency/
-        └── SKILL.md
+└── commands/
+    ├── features-from-prd.md # /features-from-prd
+    ├── spec-new.md          # /spec-new
+    ├── spec-review.md       # /spec-review
+    ├── plan-from-spec.md    # /plan-from-spec
+    ├── plan-validate.md     # /plan-validate
+    ├── tasks-from-plan.md   # /tasks-from-plan
+    ├── tasks-add.md         # /tasks-add
+    └── trio-check.md        # /trio-check
 ```
 
-**Ready-made copies of all seven commands and both skills live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
+**Ready-made copies of all eight commands live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
 
-See [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks) for the mechanics of writing skills and slash commands.
+See [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks) for the mechanics of writing slash commands.
 
 ---
 
@@ -711,63 +674,6 @@ None — all resolved during spec review (see `spec.md` § Open questions).
 - [2026-05-16]: Load test (500 rps, single partner) exposed a race — two threads read-then-incremented the counter and both passed the limit. Switched to a per-`partner_id` lock in `RateLimitService`; added the atomicity constraint to `plan.md`.
 - [2026-05-17]: The AC2 window-boundary test was flaky — it depended on wall-clock and failed when the 60s window rolled mid-test. Injected an `IClock` and froze time in the test, instead of a `Thread.Sleep` hack.
 ```
-
----
-
-## Worked example 2 — a small change (bugfix shape)
-
-Not every change needs a full trio. Below: a bugfix where the trio compresses into one short document.
-
-### `specs/2026-05-orders-422-typo-fix/spec.md`
-
-```markdown
-# Fix: `POST /api/orders` returns 422 instead of 400 on malformed JSON
-
-## Goal
-
-Fix a small response-code regression: the orders endpoint started returning
-422 (Unprocessable Entity) instead of 400 (Bad Request) on malformed JSON
-bodies. Partner integrations log 400 as transient and 422 as terminal; this
-breaks the retry contract.
-
-## In scope
-
-- `POST /api/orders` returns 400 on malformed JSON
-- Existing 422 behavior on valid-JSON-but-invalid-fields preserved
-
-## Out of scope
-
-- Other endpoints (verified unaffected; they use the same middleware which is fine)
-- Changing the 422-on-validation-error behavior
-
-## Acceptance criteria
-
-- [ ] AC1: `POST /api/orders` with `{"foo":` (malformed JSON) → 400 Bad Request
-- [ ] AC2: `POST /api/orders` with `{}` (valid JSON, missing required fields) → 422 (unchanged)
-- [ ] AC3: Integration test added for AC1 (regression guard)
-
-## Impact
-
-- One change in `src/Api/Middleware/JsonErrorMiddleware.cs` — a config flag flip `[VERIFY: confirm malformed JSON actually reaches this middleware]`
-- New test in `tests/Api.Integration/OrdersControllerTests.cs`
-
-## References
-
-- Bug report: ORDERS-1257
-- Spec `2026-04-validation-response-codes` (the change that introduced the regression — superseded)
-```
-
-That's the whole spec. No plan.md, no tasks.md.
-
-**Why this compression works for a bugfix:**
-
-- The change is one file, one line, one test. *Plan* is implicit ("flip the flag").
-- The execution order is trivial: write the test, flip the flag, verify. *Tasks* would be three checkboxes that don't deserve their own file.
-- The acceptance criteria are testable directly; no orchestration of multiple steps.
-
-For changes like this, a single `spec.md` is enough. The trio is for non-trivial features; bugfixes get the appropriate compression.
-
-**What actually happened** (the realistic footnote): that `[VERIFY]` earned its keep. Malformed JSON never reaches `JsonErrorMiddleware` — ASP.NET Core's model binder rejects it first — so the fix really landed in a one-line `InvalidModelStateResponseFactory` tweak in `Startup.cs`. Still one file, still one test; the bugfix shape held. But it's exactly why you mark a guessed path `[VERIFY]` and confirm it against the code before trusting it.
 
 ---
 

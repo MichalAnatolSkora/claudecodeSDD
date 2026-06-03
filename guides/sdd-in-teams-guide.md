@@ -8,14 +8,15 @@
 
 1. [What changes when you add people](#what-changes-when-you-add-people)
 2. [Who owns what — one name per artifact](#who-owns-what--one-name-per-artifact)
-3. [How review works](#how-review-works)
-4. [Spec lifecycle](#spec-lifecycle)
-5. [ADRs: the shared decision log](#adrs-the-shared-decision-log)
-6. [The solo case (the floor)](#the-solo-case-the-floor)
-7. [Onboarding someone new](#onboarding-someone-new)
-8. [Failure modes that actually hit small teams](#failure-modes-that-actually-hit-small-teams)
-9. [When you outgrow this](#when-you-outgrow-this)
-10. [Golden rules](#golden-rules)
+3. [Status and owner on docs (optional)](#status-and-owner-on-docs-optional)
+4. [How review works](#how-review-works)
+5. [Spec lifecycle](#spec-lifecycle)
+6. [ADRs: the shared decision log](#adrs-the-shared-decision-log)
+7. [The solo case (the floor)](#the-solo-case-the-floor)
+8. [Onboarding someone new](#onboarding-someone-new)
+9. [Failure modes that actually hit small teams](#failure-modes-that-actually-hit-small-teams)
+10. [When you outgrow this](#when-you-outgrow-this)
+11. [Golden rules](#golden-rules)
 
 ---
 
@@ -56,7 +57,34 @@ A rough owner per artifact:
 | `DOMAIN.md` / glossary | whoever knows the domain best |
 | a runbook entry | whoever resolved the incident |
 
-That's the whole ownership model. Put the owner's name in the file header if it isn't obvious — but below ~5 people it usually is, and `git blame` settles the rest (see the trio guide § "Optional: status and owner").
+That's the whole ownership model. Put the owner's name in the file header if it isn't obvious — but below ~5 people it usually is, and `git blame` settles the rest (the next section covers the optional `Owner:` / `Status:` header).
+
+---
+
+## Status and owner on docs (optional)
+
+Two optional one-liners can sit at the top of any spec/plan/tasks doc:
+
+```text
+Status: Active
+Owner:  @ana
+```
+
+Add them only when they earn their place — default to the lightest form.
+
+**Status** — what state the doc is in: **Draft** (being written) → **Active** (approved, in progress) → **Shipped** (merged) → **Superseded** (a later doc replaces it — link it). Same lifecycle the overview spells out for specs (*Draft → In implementation → Shipped → Frozen*), generalized to all three docs.
+
+**Owner** — who to ask. At the small end, skip it: `git blame` and the PR author already say who wrote and merged a doc, more reliably than a hand-kept field that goes stale.
+
+Scale it to your team:
+
+| Team size | Status | Owner |
+|-----------|--------|-------|
+| Solo (1) | skip — unless you juggle several specs at once | skip — it's you |
+| Small (2–5) | useful (Draft / Active / Shipped) | optional — git usually covers it |
+| Toward 10 | useful | add it when *"who do I ask?"* stops being obvious |
+
+This is the doc-header companion to [§ Who owns what](#who-owns-what--one-name-per-artifact) above: that section is *who's on the hook*; this is *how you mark it on the doc* when it's worth the keystrokes.
 
 ---
 
