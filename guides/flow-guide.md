@@ -7,7 +7,7 @@
 ## At a glance
 
 ```
-once:  write CLAUDE.md  +  copy the commands
+set up:  copy the commands  +  start CLAUDE.md  (then keep it updated — see steps 5–6)
                      │
 per change ─▶ /prd-new ─▶ /features-from-prd ─▶ /spec-new … /trio-check ─▶ implement + test ─▶ ADR? ─▶ merge
              (idea→PRD)   (PRD→features)        (the trio)                 (agent, red→green)  (record) (freeze)
@@ -24,11 +24,11 @@ per change ─▶ /prd-new ─▶ /features-from-prd ─▶ /spec-new … /trio-
 
 ---
 
-## Step 0 — Set up once
+## Step 0 — Set up the foundation
 
-The docs the agent reads every session. Do this on day one; grow the rest reactively.
+The docs the agent reads every session. Set them up on day one — then grow them as you go; `CLAUDE.md` especially is **living**, not write-once.
 
-- **`CLAUDE.md`** at the repo root — conventions, stack, what NOT to do. The one file the agent always reads. → [`claude-md-guide.md`](claude-md-guide.md)
+- **`CLAUDE.md`** at the repo root — conventions, stack, what NOT to do. The one file the agent always reads. Start it now, then **add a line every time you correct the agent or accept an ADR** — it grows with the project (steps 5–6 feed back into it). → [`claude-md-guide.md`](claude-md-guide.md)
 - **`README.md`** — what the project is, how to run it.
 - Copy the slash commands into your repo: `npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude`
 - Add `ARCHITECTURE.md`, `DOMAIN.md`, `TESTING.md` **when they earn it** — not before.
@@ -95,8 +95,8 @@ One `spec → plan → tasks` per feature, written **in order** — each locks d
 ## Cheat sheet
 
 ```
-# once
-npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude    # + write CLAUDE.md
+# set up (CLAUDE.md is living — keep adding to it; see steps 5–6)
+npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude    # + start CLAUDE.md
 
 # per change — enter where you start, skip the rest
 /prd-new "<idea>"        # 1  idea → docs/prd/…              (skip if small/solo)
