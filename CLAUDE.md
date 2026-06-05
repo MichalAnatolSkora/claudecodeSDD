@@ -37,6 +37,7 @@ When new content needs to land in the docs:
 Existing detail guides:
 
 - `guides/working-with-agents-guide.md` — how the agent reads files, prompting patterns, anti-patterns, file-count thresholds, token economy, Claude Code building blocks (skills/commands/subagents/hooks)
+- `guides/testing-guide.md` — testing in SDD, built for agent-written tests: acceptance criteria as the test contract, the `TESTING.md` conventions file, TDD red→green with an agent, getting good tests out of it (and the break-the-code check so you don't trust green), pragmatic 1–10 coverage, anti-patterns
 - `guides/runbook-operations-guide.md` — operational / runbook layer
 - `guides/claude-md-guide.md` — how to write a good `CLAUDE.md` itself (what goes in, sizing, the many-docs case, anti-patterns, template)
 - `guides/adr-guide.md` — full ADR how-to: Nygard format, MADR/Y-statements, four worked examples, Supersedes pattern, numbering, cross-referencing, anti-patterns, tooling, maintenance

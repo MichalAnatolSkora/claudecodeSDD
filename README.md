@@ -15,6 +15,7 @@ A collection of practical guides for structuring your repository so AI coding ag
 │   ├── spec-driven-development-guide.md
 │   ├── runbook-operations-guide.md
 │   ├── working-with-agents-guide.md
+│   ├── testing-guide.md              # testing in SDD: agent-written tests, TESTING.md, what to test
 │   ├── claude-md-guide.md             # how to write a good CLAUDE.md (incl. many-docs repos)
 │   ├── adr-guide.md                   # full ADR how-to: format, lifecycle, examples, anti-patterns
 │   ├── prd-guide.md                   # PRD how-to: formats, era pattern, two worked examples, AI prompts
@@ -31,6 +32,7 @@ A collection of practical guides for structuring your repository so AI coding ag
     ├── spec.md
     ├── plan.md
     ├── tasks.md                       # execution checklist with verification per step
+    ├── TESTING.md                     # test conventions the agent reads (framework, mocking, "done")
     ├── ADR.md
     ├── runbook.md
     ├── postmortem.md                   # blameless incident analysis (timeline, root cause, lessons, action items)
@@ -43,6 +45,7 @@ A collection of practical guides for structuring your repository so AI coding ag
 - **★ [The Feature Trio: spec → plan → tasks](guides/spec-plan-tasks-guide.md)** — **the core loop of the whole method, and the one guide to read first.** Three short markdown files written in order (`spec.md` → `plan.md` → `tasks.md`) drive every change. Inside: two complete worked examples (a feature as the full three-file trio, and a small feature as a one-file trio), what sections each file needs, six AI-authoring prompts (draft/review/validate per artifact), iteration loops, cross-artifact consistency checks, and the slash commands worth turning into shortcuts. Deliberately simple — no toolkit required.
 - **[Runbook / Operations Documentation Guide](guides/runbook-operations-guide.md)** — companion guide for the operational layer: what to do when things break, how to write entries that pass the 3 a.m. test, and how the agent reads runbooks when generating diagnostic scripts.
 - **[Working with AI Coding Agents](guides/working-with-agents-guide.md)** — how the agent actually reads your repo, when it loads a file (and why it sometimes doesn't), how many docs is too many before things break down, plus the practical prompting patterns for specs, ADRs, refactors, and runbook work.
+- **[Testing in SDD](guides/testing-guide.md)** — how testing fits the trio and how the AI agent writes tests you can trust: acceptance criteria as the test contract, the `TESTING.md` conventions file, TDD red→green with an agent, getting good tests out of it (and the break-the-code check so you don't trust green), and pragmatic coverage at 1–10.
 - **[Writing a Good CLAUDE.md](guides/claude-md-guide.md)** — the deep-dive on the single most important file in an SDD repo: what goes in (and what doesn't), good-vs-bad example lines, how to size it by project scale, and what changes when your repo has 30+ docs competing for the agent's attention.
 - **[Writing Good ADRs](guides/adr-guide.md)** — the full how-to for Architecture Decision Records: Nygard format section-by-section, alternative formats (MADR, Y-statements), four worked examples (Accepted, Superseded pair, Proposed, Deprecated), the Supersedes pattern in depth, numbering, cross-referencing, anti-patterns, tooling, maintenance.
 - **[Writing a Good PRD (Per Era, For Humans)](guides/prd-guide.md)** — the practice companion to main SDD's "The PRD Layer": format alternatives (PR-FAQ, lean PRD, one-pager, full), anatomy section-by-section, two complete worked PRDs (original launch + era-2 expansion), era-boundary heuristics, five AI-authoring prompts, success-metrics deep-dive, stakeholder review process, PRD-specific anti-patterns.
@@ -61,6 +64,7 @@ Minimal starting points. Copy into your project and fill in the brackets:
 - **[spec.md](templates/spec.md)** — feature specification (goal, scope, acceptance criteria, open questions)
 - **[plan.md](templates/plan.md)** — implementation plan (decisions, file structure, constraints)
 - **[tasks.md](templates/tasks.md)** — execution checklist with one verification per step
+- **[TESTING.md](templates/TESTING.md)** — the test conventions the agent reads before writing tests (framework, where tests live, mocking rules, what "done" means)
 - **[.claude/ trio commands](templates/.claude/)** — copy-pasteable Claude Code slash commands (`/features-from-prd`, `/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`) that take a PRD through the spec → plan → tasks loop
 - **[ADR.md](templates/ADR.md)** — architecture decision record (context, decision, consequences, alternatives)
 - **[runbook.md](templates/runbook.md)** — operational runbook entry (symptoms, diagnosis, recovery, verification)

@@ -13,23 +13,24 @@
 1. [Core Philosophy](#core-philosophy)
 2. [Who Practices SDD](#who-practices-sdd)
 3. [When SDD Pays Off (and When It's Overhead)](#when-sdd-pays-off-and-when-its-overhead)
-4. [The Absolute Minimum](#the-absolute-minimum)
-5. [Before the PRD: Research and Discovery](#before-the-prd-research-and-discovery)
-6. [The PRD Layer](#the-prd-layer)
-7. [Writing a Good spec.md](#writing-a-good-specmd)
-8. [Writing a Good PLAN.md](#writing-a-good-planmd)
-9. [Writing a Good tasks.md](#writing-a-good-tasksmd)
-10. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
-11. [Workflow for Changes](#workflow-for-changes)
-12. [SDD in Teams: Roles and Responsibilities](#sdd-in-teams-roles-and-responsibilities)
-13. [Architecture Decision Records (ADR)](#architecture-decision-records-adr)
-14. [Migrating from a Legacy Repo to SDD](#migrating-from-a-legacy-repo-to-sdd)
-15. [Additional Files Worth Adding](#additional-files-worth-adding)
-16. [Runbook vs Postmortem](#runbook-vs-postmortem)
-17. [Repository Organization](#repository-organization)
-18. [Working with the Agent](#working-with-the-agent)
-19. [Enforcing and Evaluating SDD](#enforcing-and-evaluating-sdd)
-20. [Golden Rules](#golden-rules)
+4. [The whole flow](#the-whole-flow)
+5. [The Absolute Minimum](#the-absolute-minimum)
+6. [Before the PRD: Research and Discovery](#before-the-prd-research-and-discovery)
+7. [The PRD Layer](#the-prd-layer)
+8. [Writing a Good spec.md](#writing-a-good-specmd)
+9. [Writing a Good PLAN.md](#writing-a-good-planmd)
+10. [Writing a Good tasks.md](#writing-a-good-tasksmd)
+11. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
+12. [Workflow for Changes](#workflow-for-changes)
+13. [SDD in Teams: Roles and Responsibilities](#sdd-in-teams-roles-and-responsibilities)
+14. [Architecture Decision Records (ADR)](#architecture-decision-records-adr)
+15. [Migrating from a Legacy Repo to SDD](#migrating-from-a-legacy-repo-to-sdd)
+16. [Additional Files Worth Adding](#additional-files-worth-adding)
+17. [Runbook vs Postmortem](#runbook-vs-postmortem)
+18. [Repository Organization](#repository-organization)
+19. [Working with the Agent](#working-with-the-agent)
+20. [Enforcing and Evaluating SDD](#enforcing-and-evaluating-sdd)
+21. [Golden Rules](#golden-rules)
 
 ---
 
@@ -146,6 +147,41 @@ If you can answer **yes** to two or more of these, the SDD overhead has already 
 - *"Are there decisions here that would be expensive to reverse?"*
 
 If the answer to all four is *no* — prompt away. Don't perform documentation theatre on code that's about to be deleted.
+
+---
+
+## The whole flow
+
+Everything in this guide fits one pipeline — and for a team of **1–10**, you almost never run all of it: **you enter where your change starts and skip the rest.**
+
+```
+research?  →  PRD  →  slice into  →  ┌ spec → plan → tasks ┐ → implement + test → ADR? → merge
+(optional)   (per     features        └──── the trio ──────┘    (agent, red→green)  (record  (freeze
+             era)     (/features-       one per feature                              keepers)  the spec)
+                       from-prd)
+```
+
+**Where you enter** — most small-team work enters late:
+
+| You have… | Start at | Skip |
+|-----------|----------|------|
+| a new product or a real change of direction | a **PRD** (one-pager / lean) | nothing |
+| a rough idea, or an accepted PRD | **slice into features** (`/features-from-prd`) | research |
+| a known single feature | the **trio** (`spec → plan → tasks`) | research, PRD, slicing |
+| a one-line fix | a short `spec.md` — or just a PR | all of the above |
+
+At 2–3 people you'll usually skip formal **research** and a heavy **PRD** (a one-pager, or a paragraph in an issue, is plenty) and enter at *slice* or straight at the *trio*. Add an upstream stage only when **more than one person has to agree**, or the bet is big enough that building the wrong thing is expensive.
+
+**The stages, with their detail guides:**
+
+1. **Research** *(optional)* — [`research-guide.md`](research-guide.md): synthesized research as human + agent context, never a code source.
+2. **PRD** — [`prd-guide.md`](prd-guide.md): the product-level *what & why*, per era.
+3. **Slice → features** — [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features": vertical slices, walking skeleton first.
+4. **The trio** — [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md): the core loop; one `spec → plan → tasks` per feature.
+5. **Implement + test** — [`working-with-agents-guide.md`](working-with-agents-guide.md) (the implementation loop) and [`testing-guide.md`](testing-guide.md) (how the agent writes the tests): the agent works `tasks.md` red→green; the tests come straight from the spec's acceptance criteria.
+6. **Decisions** — [`adr-guide.md`](adr-guide.md): record the ones worth not relitigating.
+
+Under all of it sits the **stable layer** — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md` — the docs the agent reads every session. That's where you actually start on day one ([The Absolute Minimum](#the-absolute-minimum), next), adding the rest reactively.
 
 ---
 
@@ -689,13 +725,15 @@ An old decision never changes. If you change your mind, write a new ADR with `Su
 
 ## Workflow for Changes
 
+Each feature (sliced out of the PRD — see [The whole flow](#the-whole-flow)) goes through the **trio**: `spec.md` → `plan.md` → `tasks.md`. How much of the trio you write scales with the change — you compress small changes, you don't skip the discipline. The full model is in [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) § "When to skip parts of the trio".
+
 ### Small change (bugfix, minor feature)
 
-New folder in `specs/`, one `spec.md`, implementation, done. Don't touch `ARCHITECTURE.md`.
+A **bugfix** is one short `spec.md` (goal + acceptance criteria), implementation, done — no `plan.md` / `tasks.md`, don't touch `ARCHITECTURE.md`. A **small feature** that still has real *how* and *order* decisions fits the **one-file trio** — `spec` / `plan` / `tasks` as three sections in a single file — instead of three separate ones.
 
 ### Medium change (new module, endpoint, integration)
 
-Full `spec.md` + `plan.md` + `tasks.md` in `specs/`. If it changes a layer contract — update `ARCHITECTURE.md`. If it adds a domain concept — update `DOMAIN.md`.
+The full three-file trio — `spec.md` + `plan.md` + `tasks.md` in `specs/`. If it changes a layer contract — update `ARCHITECTURE.md`. If it adds a domain concept — update `DOMAIN.md`.
 
 ### Large change (refactor, stack change, new pattern)
 
@@ -880,7 +918,7 @@ Beyond what we've covered (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, sp
 
 **`API.md` or OpenAPI/Swagger spec in the repo** — contract with the outside world. If you have a public API, generate `openapi.yaml` and keep it in the repo. The agent reads it before adding an endpoint and doesn't invent new conventions.
 
-**`TESTING.md`** — testing strategy. What's tested in unit, what in integration, where Testcontainers, naming conventions, coverage expectations. Stops the agent from writing tests in its "own" style.
+**`TESTING.md`** — testing strategy. What's tested in unit, what in integration, where Testcontainers, naming conventions, coverage expectations. Stops the agent from writing tests in its "own" style. → See [`testing-guide.md`](testing-guide.md) for the practice (acceptance criteria as the test contract, TDD with an agent, what to test), and [`templates/TESTING.md`](../templates/TESTING.md) for a starting point.
 
 **`CHANGELOG.md`** — in Keep a Changelog format. Client, developer, agent — everyone sees what changed between versions. Written manually or generated from Conventional Commits.
 

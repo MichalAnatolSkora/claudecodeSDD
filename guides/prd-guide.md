@@ -60,14 +60,12 @@ For the underlying principles, go back to [`spec-driven-development-guide.md` §
 
 ## PRD formats — pick the right shape
 
-There's no single PRD format. Pick by *audience* and *stage*:
+There's no single PRD format. For a team of **1–10**, two shapes cover almost everything — pick by *audience* and *stage*, and default to the one your readers will *actually read*:
 
-| Format | When to use | Length | Strength | Weakness |
-|--------|-------------|--------|----------|----------|
-| **One-pager** | Internal alignment for a small team, pre-decision | 1 page | Forcing function: must fit on a page | Skips nuance |
-| **Lean PRD** | Most modern startups, mid-stage features, fast-moving teams | 2–4 pages | Concrete enough to act on, short enough to read | Light on rationale |
-| **Amazon-style PR-FAQ** | Major product decisions, customer-facing launches | 3–6 pages | Customer-first framing, anticipates pushback | Slow to write, heavy ceremony |
-| **Full PRD** | Regulated industries, enterprise products, multi-team coordination | 8–20 pages | Comprehensive, audit-friendly | Easy to bloat; can take weeks |
+| Format | When to use | Length | Watch out for |
+|--------|-------------|--------|---------------|
+| **One-pager** | Internal alignment for a small team, decision mostly made | 1 page | Can't carry rationale that outlives turnover |
+| **Lean PRD** | The default for most features and most teams | 2–4 pages | Light on rationale if you rush it |
 
 ### One-pager
 
@@ -87,44 +85,24 @@ Pioneered (under various names) by startup PMs — Lenny Rachitsky, Marty Cagan'
 
 Best default for most modern teams. The discipline of "one paragraph each" prevents bloat.
 
-### Amazon-style PR-FAQ
+### Borrow the PR-FAQ trick for big bets
 
-Famous from Amazon's "Working Backwards" methodology. Structure:
+You rarely need the full Amazon "Working Backwards" PR-FAQ at 1–10, but its forcing function is worth stealing for an era-defining decision: **write the press release first** — headline, a hypothetical customer quote, what the product does — *as if it already shipped*. If you can't write a compelling one, the product isn't well-conceived yet. Drop it in as one extra section of a lean PRD; you don't need the whole ceremony (press release + full FAQ).
 
-- **Press release** — written as if the product just launched. Headline, sub-headline, quote from a hypothetical customer, quote from an executive, body explaining the product, call to action.
-- **FAQ** — anticipated questions and answers, both customer-facing and internal.
+### When you outgrow this
 
-Forcing function: if you can't write a compelling press release, the product isn't well-conceived. Famously used at Amazon for new initiatives.
-
-Heavy ceremony — best for major launches, era-defining decisions, products where customer framing matters most.
-
-### Full PRD
-
-Traditional enterprise/waterfall PRD. Structure (rough):
-
-- Executive summary
-- Problem statement (with user research)
-- Solution overview
-- Functional requirements
-- Non-functional requirements (performance, scalability, security, compliance)
-- Success metrics
-- Timeline and resourcing
-- Risks and dependencies
-- Out of scope
-- Appendices (research, competitor analysis, etc.)
-
-Often required in regulated industries or large organizations where audit trails matter. The cost is significant — full PRDs can take weeks to write and review.
+Regulated industries, enterprise products, and multi-team coordination eventually want a **full PRD** — 8–20 pages with functional/non-functional requirements, compliance, timelines, and appendices for the audit trail. It's comprehensive but costs weeks, and it's deliberately out of scope here: for 1–10 people it's almost always more document than the decision needs. Reach for it only when an auditor or a dozen stakeholders force your hand — and trim it as far as compliance allows.
 
 ### Picking between formats
 
-A rough rule:
+A rough rule for 1–10:
 
-- **Solo / very small team, fast iteration** → one-pager or lean PRD
-- **Mid-size team, mainstream product** → lean PRD (default)
-- **Major launch or pivot** → PR-FAQ
-- **Regulated / enterprise / multi-team** → full PRD (with as much trimming as compliance allows)
+- **Solo / decision mostly made** → one-pager
+- **Most features, most teams** → lean PRD (the default)
+- **Era-defining bet** → lean PRD + the press-release section
+- **Forced into enterprise / regulated** → see *When you outgrow this* above
 
-The format isn't sacred. Many teams mix and match — a lean PRD with a press-release section, or a one-pager with a longer FAQ. Pick what your audience will *actually read*.
+The format isn't sacred. Mix and match — a lean PRD with a press-release section, a one-pager with a longer FAQ. Pick what your audience will *actually read*.
 
 ---
 
