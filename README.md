@@ -59,13 +59,19 @@ A collection of practical guides for structuring your repository so AI coding ag
 
 Minimal starting points. Copy into your project and fill in the brackets:
 
-**Bootstrap all the slash commands into a new repo** — one command, from this repo's root:
+**Bootstrap all the slash commands into a new repo** — run this *from inside your new repo* to pull them from the SDD repo:
 
 ```bash
-cp -r templates/.claude /path/to/your-new-repo/
+npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude
 ```
 
-That drops all nine commands (`/prd-new`, `/features-from-prd`, `/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`) into `your-new-repo/.claude/commands/`, ready to use.
+That drops all nine commands (`/prd-new`, `/features-from-prd`, `/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`) into `.claude/commands/`, ready to use.
+
+No Node handy? Same result with plain git:
+
+```bash
+git clone --depth 1 https://github.com/MichalAnatolSkora/claudecodeSDD /tmp/sdd && cp -r /tmp/sdd/templates/.claude . && rm -rf /tmp/sdd
+```
 
 - **[CLAUDE.md](templates/CLAUDE.md)** — agent instruction hub with two layers: literal-copied behavioral guidelines (from [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md), kept verbatim with attribution) + bracketed project-specific sections you fill in
 - **[PRD.md](templates/PRD.md)** — product requirements document (problem, users, success criteria, constraints) — the *starting* artifact, freezes after v1
