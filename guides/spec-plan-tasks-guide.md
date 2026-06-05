@@ -475,6 +475,7 @@ A repo doing SDD seriously usually has these in `.claude/commands/`:
 - **`/tasks-from-plan`** — drafts `tasks.md` from scratch (prompt 5)
 - **`/tasks-add <what>`** — appends/inserts task(s) into an existing `tasks.md` (or a one-file trio's Tasks section), in order, each with a verify step
 - **`/trio-check`** — final consistency audit (prompt 6)
+- **`/implement`** — *(downstream of the trio)* works `tasks.md` task-by-task red→green, commits each green task, then runs the break-the-code check. See [`flow-guide.md`](flow-guide.md) (Step 4) and [`testing-guide.md`](testing-guide.md).
 
 Worked-example placement of these files:
 
@@ -489,10 +490,11 @@ Worked-example placement of these files:
     ├── plan-validate.md     # /plan-validate
     ├── tasks-from-plan.md   # /tasks-from-plan
     ├── tasks-add.md         # /tasks-add
-    └── trio-check.md        # /trio-check
+    ├── trio-check.md        # /trio-check
+    └── implement.md         # /implement
 ```
 
-**Ready-made copies of all nine commands live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
+**Ready-made copies of all ten commands live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
 
 See [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks) for the mechanics of writing slash commands.
 

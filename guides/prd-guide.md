@@ -713,7 +713,7 @@ The kickoff's output — the spec backlog — is a list of **features**, each si
 
 **Right-size to a trio.** Each feature should fit one trio: a `spec.md` under ~150 lines, a few days of work. Too big (multi-week, sprawling spec) → split it. Too small (a one-liner) → fold it into a neighbor or treat it as a bugfix-shape spec.
 
-**The output is a lightweight list, not an artifact.** A prioritized table — feature, the PRD outcome it serves, rough size, dependencies — is enough. It can live in the PRD, an issue tracker, or a short `docs/roadmap.md`. Each row becomes a `specs/YYYY-MM-slug/` when you pick it up. Don't turn the backlog into a second heavy document.
+**The output is a lightweight list, not an artifact.** A prioritized table — feature, the PRD outcome it serves, rough size, dependencies — is enough. It can live in the PRD or an issue tracker. Each row becomes a `specs/YYYY-MM-slug/` when you pick it up. Don't turn the backlog into a second heavy document.
 
 **Let the agent draft it, then you triage.** `/features-from-prd` (or the prompt below) turns the PRD into a candidate breakdown in seconds; you cut and reorder.
 

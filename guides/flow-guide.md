@@ -48,7 +48,7 @@ That's the floor. Everything below is per change.
 ## Step 2 — PRD → features
 
 - **Do:** `/features-from-prd` — slices the PRD into **vertical, independently-shippable features**, prioritized, walking-skeleton first.
-- **Get:** a short prioritized list (in the PRD, an issue tracker, or `docs/roadmap.md`). Each row becomes one feature → one trio.
+- **Get:** a short prioritized list (in the PRD or an issue tracker). Each row becomes one feature → one trio.
 - **Skip if:** you already know the single feature you're building.
 
 → [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features"
@@ -70,7 +70,7 @@ One `spec → plan → tasks` per feature, written **in order** — each locks d
 
 ## Step 4 — Implement + test
 
-- **Do:** the agent works `tasks.md` task by task, **red→green** — write the failing test (from the AC) first, implement the minimum, run, green. **Commit at each green task** — a cheap rollback point.
+- **Do:** `/implement` — the agent works `tasks.md` task by task, **red→green** (write the failing test from the AC first, implement the minimum, run, green) and **commits at each green task** (a cheap rollback point). It ends with the break-the-code check below.
 - **Don't trust green:** break the code on purpose; the test must go red. Review the agent's tests, especially the assertions.
 - **Stuck?** If the agent can't build from a finished trio, that's a *spec gap*, not a cue to vibe-code — shrink the task, feed the missing context, or resolve an open question.
 
@@ -107,7 +107,7 @@ npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude    # + start
 /plan-validate           #     check vs ADRs + ARCHITECTURE.md
 /tasks-from-plan         #     → tasks.md (ordered, verify per step)
 /trio-check              #     gate: every AC has a task, no surprises
-# implement: red→green, commit per green task, break-the-code check
+/implement               # 4  work tasks.md red→green, commit per task, break-the-code
 # write an ADR if a real decision shows up; add it to CLAUDE.md
 # merge: link the spec, update the stable layer if it changed, freeze the spec
 ```
