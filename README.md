@@ -22,9 +22,10 @@ A collection of practical guides for structuring your repository so AI coding ag
 │   ├── research-guide.md              # research in the repo: PII, folder structure, synthesis, agent context
 │   ├── quality-gates-guide.md         # enforcement + evaluation: hooks, subagents, slash commands, CI
 │   ├── spec-plan-tasks-guide.md       # ★ the core loop — worked trio + AI prompts (read first)
+│   ├── flow-guide.md                  # the whole flow end to end: every command, step by step
 │   ├── sdd-in-teams-guide.md          # SDD for 1–10 people: ownership, review, onboarding (light)
 │   ├── legacy-to-sdd-migration-guide.md   # retrofitting SDD onto an existing repo
-│   └── sdd-in-the-wild.md             # who uses SDD and what they call it (plain who-uses-what)
+│   └── who-uses-sdd.md             # who uses SDD and what they call it (plain who-uses-what)
 └── templates/                         # copy-pasteable starting points
     ├── .claude/                       # trio slash commands (copy into your project)
     ├── CLAUDE.md                      # agent instruction hub (behavioral + project layer)
@@ -43,6 +44,7 @@ A collection of practical guides for structuring your repository so AI coding ag
 
 - **[Spec-Driven Development Guide](guides/spec-driven-development-guide.md)** — the entry point and map: PRD, PLAN.md, the three-layer documentation model, ADRs, and the workflow that ties them together.
 - **★ [The Feature Trio: spec → plan → tasks](guides/spec-plan-tasks-guide.md)** — **the core loop of the whole method, and the one guide to read first.** Three short markdown files written in order (`spec.md` → `plan.md` → `tasks.md`) drive every change. Inside: two complete worked examples (a feature as the full three-file trio, and a small feature as a one-file trio), what sections each file needs, six AI-authoring prompts (draft/review/validate per artifact), iteration loops, cross-artifact consistency checks, and the slash commands worth turning into shortcuts. Deliberately simple — no toolkit required.
+- **[The whole flow, end to end](guides/flow-guide.md)** — the complete loop as a runnable sequence: every command and what it produces, from idea → PRD → slice → trio → implement+test → ADR → merge, plus a one-screen cheat sheet. Enter where your change starts; skip the rest.
 - **[Runbook / Operations Documentation Guide](guides/runbook-operations-guide.md)** — companion guide for the operational layer: what to do when things break, how to write entries that pass the 3 a.m. test, and how the agent reads runbooks when generating diagnostic scripts.
 - **[Working with AI Coding Agents](guides/working-with-agents-guide.md)** — how the agent actually reads your repo, when it loads a file (and why it sometimes doesn't), how many docs is too many before things break down, plus the practical prompting patterns for specs, ADRs, refactors, and runbook work.
 - **[Testing in SDD](guides/testing-guide.md)** — how testing fits the trio and how the AI agent writes tests you can trust: acceptance criteria as the test contract, the `TESTING.md` conventions file, TDD red→green with an agent, getting good tests out of it (and the break-the-code check so you don't trust green), and pragmatic coverage at 1–10.
@@ -53,7 +55,7 @@ A collection of practical guides for structuring your repository so AI coding ag
 - **[Quality Gates: Enforcing and Evaluating SDD](guides/quality-gates-guide.md)** — the "how do I make SDD stick?" guide: three categories of checks (mechanical / LLM evaluator / human), five implementation patterns (pre-commit hooks, Claude Code hooks, configured subagents, slash commands, CI/CD), what to mechanize vs leave human, a complete worked-example setup, and the anti-patterns of over-automation (alert fatigue, no escape hatch, mechanical checks of subjective things).
 - **[SDD in Teams (1–10 People)](guides/sdd-in-teams-guide.md)** — what changes when SDD goes from solo to a small team, kept deliberately light: who owns what (one name per artifact), lightweight PR-based review, the spec lifecycle, ADRs as a shared decision log, the solo case, onboarding, the failure modes that actually hit small teams, and what to add only once you outgrow ~10.
 - **[Migrating a Legacy Repo to SDD](guides/legacy-to-sdd-migration-guide.md)** — the one-time process of retrofitting SDD onto an existing codebase: 30-minute audit, week-1 foundation, forward-only specs, reactive ADRs, reusable agent prompts, anti-patterns (the big-bang sprint, fabricated-history ADRs), and worked examples (Python web app, .NET monorepo, C# legacy, OSS project).
-- **[Who uses SDD (and what they call it)](guides/sdd-in-the-wild.md)** — plain "who uses what" tables: AI-coding tools (GitHub spec-kit, Claude Code + `CLAUDE.md`, Cursor `.cursorrules`, Aider/Continue/Cline) and the pre-AI crowd (Amazon PR-FAQ, Google design docs, Stripe RFCs, Basecamp Shape Up), plus the older ideas SDD borrows from. Useful when someone calls SDD a fad.
+- **[Who uses SDD (and what they call it)](guides/who-uses-sdd.md)** — plain "who uses what" tables: AI-coding tools (GitHub spec-kit, Claude Code + `CLAUDE.md`, Cursor `.cursorrules`, Aider/Continue/Cline) and the pre-AI crowd (Amazon PR-FAQ, Google design docs, Stripe RFCs, Basecamp Shape Up), plus the older ideas SDD borrows from. Useful when someone calls SDD a fad.
 
 ## Templates
 

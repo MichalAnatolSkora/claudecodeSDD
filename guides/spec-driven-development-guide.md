@@ -70,7 +70,7 @@ These are facets of the same idea. The name matters less than the discipline.
 
 IETF RFCs (1969+), Architecture Decision Records (Michael Nygard, 2011), the C4 model (Simon Brown), the Diátaxis documentation framework (Daniele Procida), and pre-mortems (Gary Klein) — all share DNA with what SDD does today.
 
-For the fuller list, the verified references, and a discussion of adoption depth (vs. depth-of-marketing), see [`sdd-in-the-wild.md`](sdd-in-the-wild.md).
+For the fuller list, the verified references, and a discussion of adoption depth (vs. depth-of-marketing), see [`who-uses-sdd.md`](who-uses-sdd.md).
 
 ---
 
@@ -182,6 +182,8 @@ At 2–3 people you'll usually skip formal **research** and a heavy **PRD** (a o
 6. **Decisions** — [`adr-guide.md`](adr-guide.md): record the ones worth not relitigating.
 
 Under all of it sits the **stable layer** — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md` — the docs the agent reads every session. That's where you actually start on day one ([The Absolute Minimum](#the-absolute-minimum), next), adding the rest reactively.
+
+**For the full step-by-step** — every command and what it produces, with a cheat sheet — see [`flow-guide.md`](flow-guide.md).
 
 ---
 

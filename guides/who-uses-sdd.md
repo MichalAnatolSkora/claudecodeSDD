@@ -21,7 +21,7 @@ Every serious AI-coding tool landed on the same idea: **one file the agent alway
 | Tool / team | What they use | What it is |
 |-------------|---------------|------------|
 | **GitHub** (Microsoft) | [`spec-kit`](https://github.com/github/spec-kit) | A literal "Spec-Driven Development" toolkit: `spec.md → plan.md → tasks.md`, paired with Copilot. Shipped Aug 2025, tens of thousands of stars. The headline if you need to convince someone: *GitHub ships this themselves.* |
-| **Anthropic** | Claude Code + `CLAUDE.md` | A repo-level instruction file the agent reads every session, plus "plan before code" prompting. Maps almost 1:1 to the workflow in this repo. |
+| **Anthropic** | Claude Code + `CLAUDE.md` | A repo-level instruction file the agent reads every session, plus Plan Mode / "plan before code" guidance. These are the **building blocks this repo builds on** — Claude Code ships the primitives (the instruction hub, planning), not the full PRD → spec → plan → tasks → ADR method, which this repo adds on top. |
 | **Cursor** | `.cursorrules` | Same idea as `CLAUDE.md` — a conventions file the agent always reads. The community `awesome-cursorrules` catalog is a de-facto pattern library. |
 | **Aider** | [conventions file](https://aider.chat/docs/usage/conventions.html) | Loaded into every session. |
 | **Continue.dev** | `.continuerules` | Per-repo rules. |
