@@ -464,7 +464,7 @@ Don't fall into the trap of writing a new PRD every quarter to feel productive. 
 
 ## AI-assisted PRD authoring
 
-The agent can speed up PRD drafting and review meaningfully, *as long as you remember the agent can't make the product decisions for you*. Five reusable prompts.
+The agent can speed up PRD drafting and review meaningfully, *as long as you remember the agent can't make the product decisions for you*. Five reusable prompts — and prompt 1 is also packaged as the **`/prd-new`** command (same idea→draft, but interactive: it sketches a lean PRD, then asks you the open questions and fills them in).
 
 ### 1. Draft a PRD from a one-paragraph idea
 

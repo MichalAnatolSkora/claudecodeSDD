@@ -466,6 +466,7 @@ The implementation proceeds anyway. Code reviewer catches the gap. Now you're pa
 
 A repo doing SDD seriously usually has these in `.claude/commands/`:
 
+- **`/prd-new <idea>`** — *(furthest upstream)* turns a 1–3 sentence idea into a lean PRD draft, then fills the gaps by asking you the open questions. See [`prd-guide.md`](prd-guide.md) § "AI-assisted PRD authoring".
 - **`/features-from-prd`** — *(upstream of the trio)* slices an accepted PRD into a prioritized, vertically-sliced feature list; each row becomes a spec. See [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".
 - **`/spec-new <feature-description>`** — drafts `spec.md` from a one-paragraph description ([prompt 1](#1-draft-specmd-from-a-one-paragraph-idea) above)
 - **`/spec-review <path>`** — runs the audit checklist (prompt 2)
@@ -480,6 +481,7 @@ Worked-example placement of these files:
 ```
 .claude/
 └── commands/
+    ├── prd-new.md           # /prd-new
     ├── features-from-prd.md # /features-from-prd
     ├── spec-new.md          # /spec-new
     ├── spec-review.md       # /spec-review
@@ -490,7 +492,7 @@ Worked-example placement of these files:
     └── trio-check.md        # /trio-check
 ```
 
-**Ready-made copies of all eight commands live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
+**Ready-made copies of all nine commands live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
 
 See [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks) for the mechanics of writing slash commands.
 

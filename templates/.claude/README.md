@@ -1,6 +1,6 @@
 # Trio commands (copy into your project's `.claude/`)
 
-Copy-pasteable Claude Code slash commands for the spec → plan → tasks loop (plus `/features-from-prd` to slice a PRD into features). See [`guides/spec-plan-tasks-guide.md`](../../guides/spec-plan-tasks-guide.md) § "Slash commands worth having".
+Copy-pasteable Claude Code slash commands for the spec → plan → tasks loop, plus `/prd-new` (idea → PRD draft) and `/features-from-prd` (slice a PRD into features) at the front. See [`guides/spec-plan-tasks-guide.md`](../../guides/spec-plan-tasks-guide.md) § "Slash commands worth having".
 
 ## How to use
 
@@ -9,6 +9,7 @@ Copy `commands/` into your project's `.claude/` directory:
 ```
 your-project/.claude/
 └── commands/
+    ├── prd-new.md
     ├── features-from-prd.md
     ├── spec-new.md
     ├── spec-review.md
@@ -25,6 +26,7 @@ You invoke each with `/name`:
 
 | Command | Does |
 |---------|------|
+| `/prd-new <1–3 sentences>` | Sketch a lean PRD from a seed idea, then fill the gaps by Q&A |
 | `/features-from-prd [path]` | Slice an accepted PRD into a prioritized, vertically-sliced feature list (read-only — no specs written) |
 | `/spec-new <idea>` | Draft a `spec.md` from a one-paragraph idea |
 | `/spec-review [path]` | Audit a spec for gaps (read-only) |

@@ -24,7 +24,7 @@ A collection of practical guides for structuring your repository so AI coding ag
 │   ├── spec-plan-tasks-guide.md       # ★ the core loop — worked trio + AI prompts (read first)
 │   ├── sdd-in-teams-guide.md          # SDD for 1–10 people: ownership, review, onboarding (light)
 │   ├── legacy-to-sdd-migration-guide.md   # retrofitting SDD onto an existing repo
-│   └── sdd-in-the-wild.md             # who actually practices SDD principles
+│   └── sdd-in-the-wild.md             # who uses SDD and what they call it (plain who-uses-what)
 └── templates/                         # copy-pasteable starting points
     ├── .claude/                       # trio slash commands (copy into your project)
     ├── CLAUDE.md                      # agent instruction hub (behavioral + project layer)
@@ -53,11 +53,19 @@ A collection of practical guides for structuring your repository so AI coding ag
 - **[Quality Gates: Enforcing and Evaluating SDD](guides/quality-gates-guide.md)** — the "how do I make SDD stick?" guide: three categories of checks (mechanical / LLM evaluator / human), five implementation patterns (pre-commit hooks, Claude Code hooks, configured subagents, slash commands, CI/CD), what to mechanize vs leave human, a complete worked-example setup, and the anti-patterns of over-automation (alert fatigue, no escape hatch, mechanical checks of subjective things).
 - **[SDD in Teams (1–10 People)](guides/sdd-in-teams-guide.md)** — what changes when SDD goes from solo to a small team, kept deliberately light: who owns what (one name per artifact), lightweight PR-based review, the spec lifecycle, ADRs as a shared decision log, the solo case, onboarding, the failure modes that actually hit small teams, and what to add only once you outgrow ~10.
 - **[Migrating a Legacy Repo to SDD](guides/legacy-to-sdd-migration-guide.md)** — the one-time process of retrofitting SDD onto an existing codebase: 30-minute audit, week-1 foundation, forward-only specs, reactive ADRs, reusable agent prompts, anti-patterns (the big-bang sprint, fabricated-history ADRs), and worked examples (Python web app, .NET monorepo, C# legacy, OSS project).
-- **[SDD in the Wild](guides/sdd-in-the-wild.md)** — notes on which teams and companies publicly practice spec-driven (or spec-adjacent) engineering: GitHub spec-kit, Anthropic Claude Code, Amazon's PR-FAQ, Google design docs, Stripe RFCs, Basecamp Shape Up, and the methodologies that pre-date the SDD label.
+- **[Who uses SDD (and what they call it)](guides/sdd-in-the-wild.md)** — plain "who uses what" tables: AI-coding tools (GitHub spec-kit, Claude Code + `CLAUDE.md`, Cursor `.cursorrules`, Aider/Continue/Cline) and the pre-AI crowd (Amazon PR-FAQ, Google design docs, Stripe RFCs, Basecamp Shape Up), plus the older ideas SDD borrows from. Useful when someone calls SDD a fad.
 
 ## Templates
 
 Minimal starting points. Copy into your project and fill in the brackets:
+
+**Bootstrap all the slash commands into a new repo** — one command, from this repo's root:
+
+```bash
+cp -r templates/.claude /path/to/your-new-repo/
+```
+
+That drops all nine commands (`/prd-new`, `/features-from-prd`, `/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`) into `your-new-repo/.claude/commands/`, ready to use.
 
 - **[CLAUDE.md](templates/CLAUDE.md)** — agent instruction hub with two layers: literal-copied behavioral guidelines (from [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md), kept verbatim with attribution) + bracketed project-specific sections you fill in
 - **[PRD.md](templates/PRD.md)** — product requirements document (problem, users, success criteria, constraints) — the *starting* artifact, freezes after v1
@@ -65,7 +73,7 @@ Minimal starting points. Copy into your project and fill in the brackets:
 - **[plan.md](templates/plan.md)** — implementation plan (decisions, file structure, constraints)
 - **[tasks.md](templates/tasks.md)** — execution checklist with one verification per step
 - **[TESTING.md](templates/TESTING.md)** — the test conventions the agent reads before writing tests (framework, where tests live, mocking rules, what "done" means)
-- **[.claude/ trio commands](templates/.claude/)** — copy-pasteable Claude Code slash commands (`/features-from-prd`, `/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`) that take a PRD through the spec → plan → tasks loop
+- **[.claude/ trio commands](templates/.claude/)** — copy-pasteable Claude Code slash commands (`/prd-new`, `/features-from-prd`, `/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`) that take an idea from PRD through the spec → plan → tasks loop
 - **[ADR.md](templates/ADR.md)** — architecture decision record (context, decision, consequences, alternatives)
 - **[runbook.md](templates/runbook.md)** — operational runbook entry (symptoms, diagnosis, recovery, verification)
 - **[postmortem.md](templates/postmortem.md)** — blameless incident analysis (summary, timeline, root cause, lessons, action items)
