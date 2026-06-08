@@ -15,10 +15,14 @@ Long-form guides + copy-pasteable templates for spec-driven development with AI 
 │   ├── working-with-agents-guide.md
 │   └── runbook-operations-guide.md
 ├── templates/                         # copy-pasteable starting points
+├── examples/                          # worked end-to-end SDD doc sets (illustrative, docs-only)
+│   └── order-export/                  # one fictional app: PRD → trio → ADR, cross-linked
 ├── pdf-style.html                     # full PDF style (not used by default)
 ├── pdf-style-compact.html             # compact PDF style — DEFAULT
 └── output.pdf                         # built artifact
 ```
+
+`examples/` holds worked, **docs-only** SDD sets (no runnable code) — one folder per fictional app, kept consistent with the guides and the neutral-naming rules below. Currently: `order-export/`.
 
 ## Editorial structure — important
 

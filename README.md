@@ -26,7 +26,7 @@ A collection of practical guides for structuring your repository so AI coding ag
 │   ├── sdd-in-teams-guide.md          # SDD for 1–10 people: ownership, review, onboarding (light)
 │   ├── legacy-to-sdd-migration-guide.md   # retrofitting SDD onto an existing repo
 │   └── who-uses-sdd.md             # who uses SDD and what they call it (plain who-uses-what)
-└── templates/                         # copy-pasteable starting points
+├── templates/                         # copy-pasteable starting points
     ├── .claude/                       # trio slash commands (copy into your project)
     ├── CLAUDE.md                      # agent instruction hub (behavioral + project layer)
     ├── PRD.md
@@ -38,6 +38,8 @@ A collection of practical guides for structuring your repository so AI coding ag
     ├── runbook.md
     ├── postmortem.md                   # blameless incident analysis (timeline, root cause, lessons, action items)
     └── research-synthesis.md           # interview synthesis (anonymized; raw stays outside repo)
+└── examples/                          # worked end-to-end SDD doc sets (illustrative, docs-only)
+    └── order-export/                  # one fictional app: PRD → trio → ADR, all cross-linked
 ```
 
 ## Guides
@@ -61,7 +63,9 @@ A collection of practical guides for structuring your repository so AI coding ag
 
 Minimal starting points. Copy into your project and fill in the brackets:
 
-**Bootstrap all the slash commands into a new repo** — run this *from inside your new repo* to pull them from the SDD repo:
+**Bootstrap into a new repo** — run *from inside your new repo*. Pick based on whether you also want a starter `CLAUDE.md`:
+
+**Just the commands** (fastest, needs `npx`):
 
 ```bash
 npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude
@@ -69,11 +73,13 @@ npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude
 
 That drops all ten commands (`/prd-new`, `/features-from-prd`, `/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`, `/implement`) into `.claude/commands/`, ready to use.
 
-No Node handy? Same result with plain git:
+**Commands + a starter `CLAUDE.md`** (plain git — degit can't grab the single `CLAUDE.md` file):
 
 ```bash
-git clone --depth 1 https://github.com/MichalAnatolSkora/claudecodeSDD /tmp/sdd && cp -r /tmp/sdd/templates/.claude . && rm -rf /tmp/sdd
+git clone --depth 1 https://github.com/MichalAnatolSkora/claudecodeSDD /tmp/sdd && cp -r /tmp/sdd/templates/.claude /tmp/sdd/templates/CLAUDE.md . && rm -rf /tmp/sdd
 ```
+
+That drops `.claude/` (the commands) **and** a bracketed `CLAUDE.md` at your repo root — then fill in the brackets (see [Writing a Good CLAUDE.md](guides/claude-md-guide.md)).
 
 - **[CLAUDE.md](templates/CLAUDE.md)** — agent instruction hub with two layers: literal-copied behavioral guidelines (from [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md), kept verbatim with attribution) + bracketed project-specific sections you fill in
 - **[PRD.md](templates/PRD.md)** — product requirements document (problem, users, success criteria, constraints) — the *starting* artifact, freezes after v1
@@ -86,6 +92,10 @@ git clone --depth 1 https://github.com/MichalAnatolSkora/claudecodeSDD /tmp/sdd 
 - **[runbook.md](templates/runbook.md)** — operational runbook entry (symptoms, diagnosis, recovery, verification)
 - **[postmortem.md](templates/postmortem.md)** — blameless incident analysis (summary, timeline, root cause, lessons, action items)
 - **[research-synthesis.md](templates/research-synthesis.md)** — interview synthesis with themed evidence + role-attributed quotes (anonymized; raw transcripts stay outside the repo)
+
+## Examples
+
+- **[examples/order-export/](examples/order-export/)** — a complete, illustrative SDD paper trail for one fictional app (a B2B order-export platform): a PRD, the stable layer (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, `TESTING.md`), one feature taken through the full `spec → plan → tasks` trio, and the ADR it produced — all cross-linked so you can follow the "golden thread" end to end. Docs only; no runnable code. Start at its [README](examples/order-export/README.md).
 
 ## Who this is for
 
