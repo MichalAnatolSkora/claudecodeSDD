@@ -21,5 +21,5 @@ A prioritized table: *feature | the PRD outcome it serves | rough size | depends
 
 ## Constraints
 
-- **Don't write specs.** This is the breakdown only — I'll pick which features become specs, then run `/spec-new <feature>` per one.
+- **Don't write specs.** This is the breakdown only — I'll pick which features become specs, then run `/sdd-3-spec-new <feature>` per one.
 - Mark anything you're guessing with `[VERIFY]`.

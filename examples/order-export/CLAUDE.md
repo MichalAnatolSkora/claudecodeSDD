@@ -50,11 +50,11 @@ A B2B order export platform. Per partner on a schedule, it exports `RDY` orders 
 | Export format change | `ARCHITECTURE.md` § Components, the formatter classes |
 | Delivery / retry work | `docs/adr/ADR-015-delivery-retry-backoff.md` |
 | Writing tests | `TESTING.md` |
-| A new feature | `specs/` — one folder per feature |
+| A new feature | `specs/` — one trio per feature (a folder, or a one-file trio for small ones) |
 
 ## What to skip
 
-- Spec folders under `specs/` for *shipped* features describe past work — read for context, not as current instructions.
+- Shipped specs under `specs/` (a folder, or a one-file trio) describe past work — read for context, not as current instructions.
 
 ## How to update this file
 

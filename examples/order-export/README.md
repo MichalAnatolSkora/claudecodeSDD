@@ -38,6 +38,7 @@ This is the **golden thread**: a PRD's goals flow into feature slices, one slice
 
 ## Notes
 
+- **The full spec picture** — which PRD features have specs and which are still backlog — is in [`specs/README.md`](specs/README.md).
 - **Only ADR-015 is included in full.** `CLAUDE.md` lists ADR-001/003/007 too — deliberately: it shows *Active decisions* is a curated index of what's in force, not a copy of every ADR.
 - **The stack is illustrative** (.NET / Dapper / Quartz / SFTP) — the patterns transfer to any stack.
 - The product, partners (`acme-bank`), and data are fictional.

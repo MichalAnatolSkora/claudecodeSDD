@@ -10,7 +10,7 @@ If no path is given, use the most recently modified folder under `specs/` and te
 
 ## Before you start
 
-Read `spec.md`, `plan.md`, `tasks.md` in that folder, plus `TESTING.md` and `CLAUDE.md` if present. If the trio clearly hasn't passed `/trio-check` (an unresolved open question, an acceptance criterion with no task), stop and say so — don't build on a broken trio.
+Read `spec.md`, `plan.md`, `tasks.md` in that folder, plus `TESTING.md` and `CLAUDE.md` if present. If the trio clearly hasn't passed `/sdd-6-trio-check` (an unresolved open question, an acceptance criterion with no task), stop and say so — don't build on a broken trio.
 
 ## The loop — one task at a time, in order
 
@@ -23,7 +23,7 @@ Do one task per cycle. Don't batch tasks or skip ahead.
 
 ## If you can't implement a task
 
-Stop — that's a **spec gap, not a cue to improvise.** Name what's missing (an unresolved open question, an underspecified AC, a file not in the plan) and pick one: shrink the task, feed the missing context, or send it back to `/spec-review` / `/tasks-add`. Don't vibe-code past it.
+Stop — that's a **spec gap, not a cue to improvise.** Name what's missing (an unresolved open question, an underspecified AC, a file not in the plan) and pick one: shrink the task, feed the missing context, or send it back to `/sdd-3-spec-review` / `/sdd-5-tasks-add`. Don't vibe-code past it.
 
 ## After the last task — break the code (don't trust green)
 
