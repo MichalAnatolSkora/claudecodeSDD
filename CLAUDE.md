@@ -10,17 +10,19 @@ Long-form guides + copy-pasteable templates for spec-driven development with AI 
 .
 ├── README.md                          # entry point / map
 ├── CLAUDE.md                          # this file — conventions for editing
-├── guides/                            # long-form methodology guides
-│   ├── spec-driven-development-guide.md
-│   ├── working-with-agents-guide.md
-│   └── runbook-operations-guide.md
+├── AGENTS.md                          # thin pointer to this file (cross-tool convention name)
+├── .claude/commands/                  # repo-local slash commands (e.g. /pdf build helper)
+├── guides/                            # long-form methodology guides (full list under "Editorial structure")
 ├── templates/                         # copy-pasteable starting points
+│   └── .claude/commands/              # the sdd-1 … sdd-7 slash-command pipeline for user repos
 ├── examples/                          # worked end-to-end SDD doc sets (illustrative, docs-only)
 │   └── order-export/                  # one fictional app: PRD → trio → ADR, cross-linked
 ├── pdf-style.html                     # full PDF style (not used by default)
 ├── pdf-style-compact.html             # compact PDF style — DEFAULT
-└── output.pdf                         # built artifact
+└── pdf-style-wide.html                # wide variant
 ```
+
+Built PDFs (`output.pdf`, per-guide PDFs) are **gitignored** — generated artifacts, never committed.
 
 `examples/` holds worked, **docs-only** SDD sets (no runnable code) — one folder per fictional app, kept consistent with the guides and the neutral-naming rules below. Currently: `order-export/`.
 

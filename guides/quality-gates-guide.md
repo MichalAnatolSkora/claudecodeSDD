@@ -128,7 +128,7 @@ Implementation: code review, PR reviewer checklist, architecture meeting, retros
 
 ## What belongs in each category
 
-For each SDD artifact, a working split:
+For each SDD artifact, a working split. This is a menu of what *could* be automated, not a list of requirements: a solo dev skips all of it, a 2–5 person team might lift one or two checks into a `/trio-check`-style command, and only toward 10 does wiring any of this into CI start to pay for itself.
 
 ### spec.md
 

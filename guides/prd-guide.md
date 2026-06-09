@@ -788,7 +788,7 @@ The product solves a problem in the abstract but doesn't name the user. *"Financ
 
 ### 5. PRD that reads like a spec
 
-The PRD has acceptance criteria, file paths, API shapes, test strategies. Engineers will treat it as the implementation guide, which it isn't (and the agent will read it… wait, the agent doesn't read PRD).
+The PRD has acceptance criteria, file paths, API shapes, test strategies. Engineers will treat it as the implementation guide, which it isn't.
 
 **Fix:** PRD is *what + why* at the product level. If you find yourself writing *"the endpoint shall…"*, that's a spec.
 

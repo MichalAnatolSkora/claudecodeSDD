@@ -96,7 +96,7 @@ Keep it boring and async:
 - **Author + one reviewer.** You don't need a committee. One other person is enough to catch a missing acceptance criterion or an ADR conflict.
 - **Timebox it.** A spec waiting on review is the most common stall. Rule of thumb: *24 hours to review, or it ships as-is.* A small review queue beats a perfect one nobody gets to.
 
-The one ritual worth enforcing: a **docs checklist in the PR template**, so updates ride *with* the code instead of becoming a someday-follow-up.
+At 2+ people, one opt-in ritual earns its keep: a **docs checklist in the PR template**, so updates ride *with* the code instead of becoming a someday-follow-up. (Solo, skip it — there's no one to hand the follow-up to but you.)
 
 ```markdown
 ## Documentation

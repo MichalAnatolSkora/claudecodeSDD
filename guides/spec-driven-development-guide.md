@@ -503,7 +503,7 @@ A good `PLAN.md` answers questions the agent would otherwise guess at. Every gue
 - **Concrete decisions, not options.** Don't write "consider MediatR or services" — pick one. A plan is not a brainstorm.
 - **Separate what (requirements) from how (architecture).** Mixing them produces code that mixes layers.
 - **Explicit exclusions.** An "out of scope" section prevents the agent from adding features you don't want now.
-- **Testable acceptance criteria.** "Works correctly" → bad. "POST /api/x with payload Y returns 201 and a row in event_log" → good.
+- **Acceptance criteria live in the spec, not here.** The plan inherits them from `spec.md` (see [Writing a Good spec.md](#writing-a-good-specmd)) — don't restate them, and never contradict them.
 - **Open questions in a separate section.** Forces decisions before the agent starts coding (and before it fabricates an answer).
 - **File structure upfront.** Otherwise the agent invents its own and you refactor.
 

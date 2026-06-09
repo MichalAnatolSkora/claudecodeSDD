@@ -1,0 +1,20 @@
+<style>
+  @page {
+    size: A4;
+    margin: 1.5cm 1cm 1.8cm 1cm;  /* top right bottom left — wider content area */
+    @bottom-center {
+      content: counter(page) " / " counter(pages);
+      font-size: 8pt;
+      color: #666;
+    }
+  }
+  body { font-size: 9pt; line-height: 1.4; }
+  h1 { font-size: 15pt; }
+  h2 { font-size: 12pt; }
+  h3 { font-size: 10.5pt; }
+  h4 { font-size: 9.5pt; }
+  p, li { font-size: 9pt; }
+  pre, code { font-size: 7.5pt; }
+  table { font-size: 8pt; }
+  blockquote { font-size: 8.5pt; }
+</style>

@@ -9,8 +9,8 @@
 ```
 set up:  copy the commands  +  start CLAUDE.md  (then keep it updated — see steps 5–6)
                      │
-per change ─▶ /prd-new ─▶ /features-from-prd ─▶ /spec-new … /trio-check ─▶ implement + test ─▶ ADR? ─▶ merge
-             (idea→PRD)   (PRD→features)        (the trio)                 (agent, red→green)  (record) (freeze)
+per change ─▶ research? ─▶ /prd-new ─▶ /features-from-prd ─▶ /spec-new … /trio-check ─▶ implement + test ─▶ ADR? ─▶ merge
+             (optional)    (idea→PRD)   (PRD→features)        (the trio)                 (agent, red→green)  (record) (freeze)
 ```
 
 **Enter where your change starts** — you rarely run the whole thing:
@@ -30,7 +30,7 @@ The docs the agent reads every session. Set them up on day one — then grow the
 
 - **`CLAUDE.md`** at the repo root — conventions, stack, what NOT to do. The one file the agent always reads. Start it now, then **add a line every time you correct the agent or accept an ADR** — it grows with the project (steps 5–6 feed back into it). → [`claude-md-guide.md`](claude-md-guide.md)
 - **`README.md`** — what the project is, how to run it.
-- Copy the slash commands into your repo: `npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude`
+- Copy the slash commands into your repo: `npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude` — the shipped files are namespaced and phase-numbered (`sdd-1-prd-new.md` → `/sdd-1-prd-new`) so they sort in pipeline order; this guide writes the short forms (`/prd-new` etc.) — same commands, keep or drop the `sdd-N-` prefix as you like.
 - Add `ARCHITECTURE.md`, `DOMAIN.md`, `TESTING.md` **when they earn it** — not before.
 
 That's the floor. Everything below is per change.
@@ -39,6 +39,7 @@ That's the floor. Everything below is per change.
 
 ## Step 1 — Idea → PRD
 
+- **Before, optionally:** real user/market research feeds the PRD — see [`research-guide.md`](research-guide.md). Most 1–10 teams skip it.
 - **Do:** `/prd-new "<1–3 sentences>"` — it sketches a lean PRD, then asks you the open questions and fills them in (you make the product calls).
 - **Get:** `docs/prd/YYYY-MM-slug.md` — product-level *what & why*, humans-only (the agent reads specs, not the PRD).
 - **Skip if:** solo, small, or the what/why already fits in your head — a one-paragraph issue is enough.
