@@ -4,7 +4,7 @@
 
 A collection of practical guides for structuring your repository so AI coding agents (Claude Code, Copilot, Cursor) produce consistent, maintainable code instead of drifting away from your intent.
 
-**If you read only one guide, read [The Feature Trio: spec → plan → tasks](guides/spec-plan-tasks-guide.md).** It's the core loop of the whole method — three short markdown files written in order; everything else in this repo exists to support it.
+**New here? Start with [SDD in 5 files](guides/sdd-in-5-files.md) — the entire method on one page.** Most readers never need more than that. When you want depth, the one guide to read is [The Feature Trio: spec → plan → tasks](guides/spec-plan-tasks-guide.md) — the core loop, three short markdown files written in order, that everything else here exists to support.
 
 ## Repository layout
 
@@ -12,6 +12,7 @@ A collection of practical guides for structuring your repository so AI coding ag
 .
 ├── README.md                          # you are here
 ├── guides/                            # long-form methodology guides
+│   ├── sdd-in-5-files.md              # the whole method on one page — the front door
 │   ├── spec-driven-development-guide.md
 │   ├── runbook-operations-guide.md
 │   ├── working-with-agents-guide.md
@@ -44,6 +45,7 @@ A collection of practical guides for structuring your repository so AI coding ag
 
 ## Guides
 
+- **[SDD in 5 files](guides/sdd-in-5-files.md)** — the whole method on one page: the five files you start with, the per-change loop, and when to add more. The front door — start here, and descend into the rest only when a real need fires.
 - **[Spec-Driven Development Guide](guides/spec-driven-development-guide.md)** — the entry point and map: PRD, PLAN.md, the three-layer documentation model, ADRs, and the workflow that ties them together.
 - **★ [The Feature Trio: spec → plan → tasks](guides/spec-plan-tasks-guide.md)** — **the core loop of the whole method, and the one guide to read first.** Three short markdown files written in order (`spec.md` → `plan.md` → `tasks.md`) drive every change. Inside: two complete worked examples (a feature as the full three-file trio, and a small feature as a one-file trio), what sections each file needs, six AI-authoring prompts (draft/review/validate per artifact), iteration loops, cross-artifact consistency checks, and the slash commands worth turning into shortcuts. Deliberately simple — no toolkit required.
 - **[The whole flow, end to end](guides/flow-guide.md)** — the complete loop as a runnable sequence: every command and what it produces, from idea → PRD → slice → trio → implement+test → ADR → merge, plus a one-screen cheat sheet. Enter where your change starts; skip the rest.
@@ -108,7 +110,7 @@ That drops `.claude/` (the commands) **and** a bracketed `CLAUDE.md` at your rep
 
 ## How to read
 
-Start with the [Spec-Driven Development Guide](guides/spec-driven-development-guide.md) for the map. It covers the foundational layers — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, and per-feature specs — and the workflow that ties them together.
+**New here? The one-page [SDD in 5 files](guides/sdd-in-5-files.md) is the front door — most people start there and don't need more.** For the fuller picture, start with the [Spec-Driven Development Guide](guides/spec-driven-development-guide.md) for the map. It covers the foundational layers — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, and per-feature specs — and the workflow that ties them together.
 
 Then read **[The Feature Trio: spec → plan → tasks](guides/spec-plan-tasks-guide.md)** — the core loop and the most important guide here. It's where the method actually lives: three short markdown files, written in order, that drive every change. If you have time for only one guide, make it this one.
 

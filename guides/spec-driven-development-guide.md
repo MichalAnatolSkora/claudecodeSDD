@@ -161,14 +161,7 @@ research?  →  PRD  →  slice into  →  ┌ spec → plan → tasks ┐ → i
                        from-prd)
 ```
 
-**Where you enter** — most small-team work enters late:
-
-| You have… | Start at | Skip |
-|-----------|----------|------|
-| a new product or a real change of direction | a **PRD** (one-pager / lean) | nothing |
-| a rough idea, or an accepted PRD | **slice into features** (`/features-from-prd`) | research |
-| a known single feature | the **trio** (`spec → plan → tasks`) | research, PRD, slicing |
-| a one-line fix | a short `spec.md` — or just a PR | all of the above |
+**Where you enter** — most small-team work enters late; you rarely run the whole pipeline. The entry table (*what you have* → *where to start* → *what to skip*) lives once, in the spine [`flow-guide.md`](flow-guide.md), so the two copies can't drift.
 
 At 2–3 people you'll usually skip formal **research** and a heavy **PRD** (a one-pager, or a paragraph in an issue, is plenty) and enter at *slice* or straight at the *trio*. Add an upstream stage only when **more than one person has to agree**, or the bet is big enough that building the wrong thing is expensive.
 
