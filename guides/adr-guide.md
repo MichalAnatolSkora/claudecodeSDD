@@ -15,13 +15,14 @@
 7. [Worked examples](#worked-examples)
 8. [Numbering, naming, file organization](#numbering-naming-file-organization)
 9. [Cross-referencing ADRs](#cross-referencing-adrs)
-10. [The ADR review process](#the-adr-review-process)
-11. [Agent-assisted drafting](#agent-assisted-drafting)
-12. [Anti-patterns](#anti-patterns)
-13. [Edge cases](#edge-cases)
-14. [Tooling](#tooling)
-15. [Maintenance discipline](#maintenance-discipline)
-16. [Golden rules](#golden-rules)
+10. [ADRs and the trio](#adrs-and-the-trio)
+11. [The ADR review process](#the-adr-review-process)
+12. [Agent-assisted drafting](#agent-assisted-drafting)
+13. [Anti-patterns](#anti-patterns)
+14. [Edge cases](#edge-cases)
+15. [Tooling](#tooling)
+16. [Maintenance discipline](#maintenance-discipline)
+17. [Golden rules](#golden-rules)
 
 ---
 
@@ -91,7 +92,7 @@ Accepted — 2026-05-20
 
 ### `## Context`
 
-Why this decision was necessary. The *forces* that pushed the choice — technical, business, social. 3–8 sentences usually. The future reader uses this section to verify whether your forces still apply.
+Why this decision was necessary. The *forces* that pushed the choice — technical, business, social. 3–6 sentences usually. The future reader uses this section to verify whether your forces still apply.
 
 What belongs here:
 - The system constraint that made the decision necessary
@@ -103,7 +104,7 @@ What does NOT belong: the decision itself. Save that for `Decision`.
 
 ### `## Decision`
 
-What you chose. Should be **short — 3 to 5 sentences**. Not a tutorial; not an explanation of how the chosen tool works. Just the choice, plus enough constraint that the agent (and the future engineer) can act on it.
+What you chose. Should be **short — 2 to 4 sentences**. Not a tutorial; not an explanation of how the chosen tool works. Just the choice, plus enough constraint that the agent (and the future engineer) can act on it.
 
 ```
 ## Decision
@@ -112,7 +113,7 @@ hand-written, one class per aggregate. SQL lives in constants in
 the repo class, not in `.sql` files.
 ```
 
-If you find yourself writing more than ~5 sentences here, you're explaining; explanation lives in `Context` (why) or `Consequences` (what happens).
+If you find yourself writing more than ~4 sentences here, you're explaining; explanation lives in `Context` (why) or `Consequences` (what happens).
 
 ### `## Consequences`
 
@@ -126,7 +127,7 @@ Split into **Positive / Negative / Neutral**:
 
 The Negative section is the one future readers value most. *"We chose X; here's what X cost us"* tells them whether to keep paying that cost.
 
-### `## Alternatives Rejected`
+### `## Alternatives rejected`
 
 The options you considered and chose not to take. One short bullet per alternative: name + one-sentence reason.
 
@@ -140,11 +141,11 @@ Spike PRs, comparison documents, meeting notes, links to specs that prompted the
 
 ## Alternative formats
 
-### MADR (Markdown ADR)
+### MADR (Markdown Any Decision Records)
 
-A trimmed template — just Status / Context / Decision / Consequences. For smaller decisions where Alternatives Rejected and References would feel like ceremony. Closer to how most teams actually work day-to-day.
+A *richer* template than Nygard, not a lighter one: on top of Context and the decision outcome it adds **Decision Drivers**, **Considered Options**, and a **Pros and Cons** subsection per option. Choose MADR when you want the option analysis spelled out inside the record — high-stakes choices where reviewers should see the full comparison, not just the winner and a bullet list of rejects.
 
-Format: same shape, fewer required sections. Document the trim in `CLAUDE.md` so the team is consistent.
+Format: same one-markdown-file-per-decision shape, more required sections. Document the choice in `CLAUDE.md` so the team is consistent.
 
 ### Y-statements
 
@@ -153,6 +154,10 @@ A one-paragraph compressed form:
 > *"In the context of `<scenario>`, facing `<concern>`, we decided for `<option>` and against `<rejected option>`, to achieve `<benefit>`, accepting `<downside>`."*
 
 Y-statements work for very low-stakes decisions, or as a way to draft an ADR fast and expand it later. Bad for any decision worth real archaeology — too compressed to survive.
+
+### The compact variant (this repo's example)
+
+The repo's own worked example, [`ADR-015`](../examples/order-export/docs/adr/ADR-015-delivery-retry-backoff.md), uses a sanctioned compact layout, a good fit for 1–10 teams: title as `# ADR-015 — <title>`, a one-line `**Status:** Accepted · **Date:** 2026-02` instead of a Status section, `## Alternatives considered` instead of "Alternatives rejected", and Consequences as **Good:** / **Cost:** / **Follow-up:** bullets. Same information, less scaffolding. The Nygard layout above stays the default.
 
 ### Custom hybrid
 
@@ -164,13 +169,13 @@ The format matters less than the *consistency*. Pick one; use it everywhere.
 
 ## Status lifecycle in depth
 
-Four standard statuses. Real ADRs move through them in a few common patterns.
+Four standard statuses (plus `Rejected` as the terminal state for abandoned proposals). Real ADRs move through them in a few common patterns.
 
 | From | To | Trigger |
 |------|----|---------|
 | (none) | `Proposed` | Someone drafts the ADR for review |
 | `Proposed` | `Accepted` | Team agrees; status updated, date set |
-| `Proposed` | (deleted/abandoned) | Discussion concludes the proposal isn't a real decision |
+| `Proposed` | `Rejected` | Discussion concludes the proposal isn't a real decision — the file stays, with a one-line note why |
 | `Accepted` | `Superseded by ADR-NNN` | A new ADR replaces this one |
 | `Accepted` | `Deprecated` | We no longer recommend this, but haven't replaced it |
 
@@ -180,7 +185,7 @@ The draft state. The decision hasn't been ratified; the ADR is up for review. An
 
 ### `Accepted`
 
-The decision is in force. From here on, only the **Status header** may change — never the body. If facts change, write a new ADR that supersedes.
+The decision is in force. From here on, only the **Status header** may change — never the body. If facts change, write a new ADR that supersedes. One carve-out: when an ADR later becomes `Deprecated` or `Superseded`, an **append-only, dated note** may be added at the bottom (see the `## Deprecation note` in Example 4) — the original sections stay untouched.
 
 ### `Deprecated`
 
@@ -204,19 +209,19 @@ This is what keeps the history reconstructible. Someone reading the repo in 2030
 
 ### Single supersede
 
-The basic case: ADR-014 replaces ADR-002.
+The basic case: ADR-014 replaces ADR-003.
 
 ```markdown
 # ADR-014: Quartz Configuration from Database
 ## Status
 Accepted — 2026-05-20
-Supersedes: ADR-002
+Supersedes: ADR-003
 ```
 
-And in ADR-002:
+And in ADR-003:
 
 ```markdown
-# ADR-002: Quartz with Configuration in appsettings.json
+# ADR-003: Quartz with Configuration in appsettings.json
 ## Status
 Superseded by ADR-014 — 2026-05-20
 ## Context
@@ -231,7 +236,7 @@ Two header changes total; no body edits.
 When ADR-014 itself gets superseded later by ADR-031:
 
 ```
-ADR-002 (2025-03)  →  ADR-014 (2026-05)  →  ADR-031 (2027-Q2)
+ADR-003 (2025-03)  →  ADR-014 (2026-05)  →  ADR-031 (2027-Q2)
    Superseded         Superseded            Accepted
    by ADR-014         by ADR-031
 ```
@@ -247,7 +252,7 @@ Two acceptable patterns:
 1. **Supersedes ADR-007 partially.** Status: `Supersedes ADR-007 (Dapper.Contrib clause only)`. Body of ADR-019 explains scope. ADR-007 stays largely in force; only the Dapper.Contrib bullet is overridden.
 2. **Extends ADR-007.** Status: `Extends ADR-007`. Body of ADR-019 adds the new permissive rule without contradicting the core decision.
 
-Either works; pick the one that reads more naturally. Document the convention in `CLAUDE.md` if you use both.
+**Default to pattern 1:** a new ADR with `Supersedes: ADR-NNN (partial — <scope>)`. Reserve a full supersede for when the old decision is wholly obsolete, and use `Extends` (pattern 2) only as the exception — when the new ADR adds a rule without overriding anything in the old one. Document the convention in `CLAUDE.md` if you use both.
 
 ---
 
@@ -315,10 +320,10 @@ A few things to notice:
 
 ### Example 2: A Superseded ADR pair
 
-**The original (ADR-002) after supersede — header changed only:**
+**The original (ADR-003) after supersede — header changed only:**
 
 ```markdown
-# ADR-002: Quartz.NET with Configuration in appsettings.json
+# ADR-003: Quartz.NET with Configuration in appsettings.json
 
 ## Status
 Superseded by ADR-014 — 2026-05-20
@@ -347,16 +352,16 @@ Notice: only the Status header changed. The body is exactly as written in 2025-0
 
 ## Status
 Accepted — 2026-05-20
-Supersedes: ADR-002
+Supersedes: ADR-003
 
 ## Context
-ADR-002 (2025-03-10) established Quartz configuration in appsettings.json.
+ADR-003 (2025-03-10) established Quartz configuration in appsettings.json.
 Since then new requirements emerged:
 - Different schedules per environment (DEV / TEST / PROD)
 - Ability to change cron expressions without a deployment
 - Audit trail of schedule changes for compliance
 
-The original rationale in ADR-002 doesn't address these — config flat files
+The original rationale in ADR-003 doesn't address these — config flat files
 can't be changed at runtime, and they aren't auditable.
 
 ## Decision
@@ -377,7 +382,7 @@ for the table follow our standard DDL-diff process.
 - Local dev requires a populated table (handled via seed script)
 
 **Neutral:**
-- ADR-002 stays as historical context; new jobs go to the DB; existing
+- ADR-003 stays as historical context; new jobs go to the DB; existing
   appsettings-based jobs migrate in spec `2026-Q3-quartz-db-migration`
 
 ## Alternatives Rejected
@@ -392,7 +397,7 @@ for the table follow our standard DDL-diff process.
 
 ## References
 - Spike: PR #142 (DB-backed config prototype)
-- Original: ADR-002
+- Original: ADR-003
 ```
 
 Notice the `Migration` section — useful when the supersede has phased rollout. Treat it as optional; include when relevant.
@@ -489,7 +494,7 @@ Notice: the body still isn't edited. A *new section* (`Deprecation note`) is app
 ### Numbering
 
 - Sequential from `001`, zero-padded to 3 digits (`ADR-007`, not `ADR-7`).
-- **No gaps.** If a `Proposed` ADR is abandoned, leave the number assigned; just don't write the ADR. Renumbering breaks every external reference.
+- **No gaps.** If a `Proposed` ADR is abandoned, never delete the file — flip its Status to `Rejected` with a one-line note why. The number stays visible on disk, so "scan `docs/adr/` for the highest number" always gives the right next one, and nothing ever gets silently reused. Renumbering breaks every external reference.
 - **No sub-numbers.** No `ADR-002.1`, no `ADR-002-v2`. Decision changes → new top-level number with `Supersedes`.
 
 ### Filenames
@@ -552,13 +557,23 @@ Do **not** list Superseded or Deprecated ADRs here — the agent should not trea
 
 ---
 
+## ADRs and the trio
+
+How ADRs connect to the spec → plan → tasks loop (see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md)):
+
+- **`plan.md` cites the ADRs that constrain it.** The plan's § Technical decisions lists the Accepted ADRs it must respect (ADR-007 Dapper, ADR-003 Quartz, …); the `/sdd-4-plan-validate` gate checks that those citations are real and current.
+- **Hard decisions graduate into ADRs.** When a genuinely hard call surfaces during spec review or implementation, it leaves the trio: write a new ADR, reference it from the plan, and add it to `CLAUDE.md` § Active decisions. That's exactly how this repo's example [ADR-015](../examples/order-export/docs/adr/ADR-015-delivery-retry-backoff.md) came out of the `delivery-retry` trio.
+- **Solo case:** you accept your own ADR. The value is the written alternatives, not the ceremony.
+
+---
+
 ## The ADR review process
 
 An ADR moves from `Proposed` to `Accepted` through some form of review. Two patterns work well; pick one.
 
 ### Pattern A: PR-based review
 
-The ADR is committed as `Proposed` in a PR. Reviewers comment inline; the author iterates. When the team agrees, a separate small PR flips Status to `Accepted` and adds the date.
+The ADR is committed as `Proposed` in a PR. Reviewers comment inline; the author iterates. When the team agrees, a separate small PR flips Status to `Accepted` and adds the date — the date is the merge date of that status-flip PR.
 
 Pros: standard tooling, async, leaves a trail.
 Cons: can drag on if no one drives the merge.
@@ -577,8 +592,8 @@ Many teams combine: PR-based for routine ADRs, meeting-driven for ADRs touching 
 A working ADR review checklist:
 
 - [ ] **Context** explains *why* this decision is necessary, not just what
-- [ ] **Decision** is short (3–5 sentences)
-- [ ] **Alternatives Rejected** lists realistic alternatives with one-sentence reasons
+- [ ] **Decision** is short (2–4 sentences)
+- [ ] **Alternatives rejected** lists realistic alternatives with one-sentence reasons
 - [ ] **Consequences** includes Negatives by name
 - [ ] No references to `Status: Superseded` ADRs as current authority
 - [ ] No overlap with another active ADR — if there is, supersede it explicitly
@@ -604,7 +619,7 @@ Use the next available number (scan docs/adr/ for the highest).
 Status: Proposed, today's date.
 
 Fill in Context, Decision, Consequences (positive/negative/neutral),
-Alternatives Rejected. Leave References empty — I'll add them.
+Alternatives rejected. Leave References empty — I'll add them.
 
 Show me the draft before saving. Anything you're unsure about,
 mark [VERIFY].
@@ -654,7 +669,7 @@ What goes wrong, and how to fix it.
 
 ### 1. ADR as post-mortem documentation
 
-You write the ADR six months after the decision *"because we should document it."* The Context section is reconstructed; the Alternatives Rejected list is best-guess; the Consequences omit things that turned out badly.
+You write the ADR six months after the decision *"because we should document it."* The Context section is reconstructed; the Alternatives rejected list is best-guess; the Consequences omit things that turned out badly.
 
 **Fix:** write the ADR *at the moment of decision*. If you must write retroactively (during migration to SDD, for example), mark it honestly: *"This ADR documents a decision made ~2022; written 2026 from team recollection and code archaeology."*
 
@@ -662,9 +677,9 @@ You write the ADR six months after the decision *"because we should document it.
 
 The Decision section runs 30 lines, explaining how the chosen tool works.
 
-**Fix:** Decision = 3–5 sentences. *Choice + immediate constraints*. Explanation goes elsewhere (Context for why, Consequences for what follows, external docs for tutorials).
+**Fix:** Decision = 2–4 sentences. *Choice + immediate constraints*. Explanation goes elsewhere (Context for why, Consequences for what follows, external docs for tutorials).
 
-### 3. Missing "Alternatives Rejected"
+### 3. Missing "Alternatives rejected"
 
 The ADR reads as *"we did X because we did X."*
 
@@ -676,7 +691,7 @@ The ADR reads as *"we did X because we did X."*
 
 
 
-You notice ADR-002 has a typo, or its Context is now inaccurate, and you edit the body.
+You notice ADR-003 has a typo, or its Context is now inaccurate, and you edit the body.
 
 **Fix:** body of `Accepted` ADRs is immutable. Fix typos in `Proposed` ADRs only. For factual updates, write a Supersedes. The point of the rule isn't pedantry — it's that the history must be reconstructible.
 
@@ -684,7 +699,7 @@ You notice ADR-002 has a typo, or its Context is now inaccurate, and you edit th
 
 `ADR-002.1`, `ADR-007-v2`, ADR-005 skipped because *"that one wasn't ready yet."*
 
-**Fix:** strictly sequential; gaps allowed only for ADRs that were Proposed and never reached Accepted (and even then, keep the number assigned — don't reuse).
+**Fix:** strictly sequential. An abandoned `Proposed` ADR keeps its file with Status flipped to `Rejected` — that way no number ever disappears from disk and none gets reused.
 
 ### 6. ADR for reversible things
 
@@ -732,7 +747,7 @@ alternative]. Team recollection and code archaeology are the sources;
 some detail is necessarily reconstructed.
 ```
 
-Treat retroactive ADRs as exceptions, not the default. See [`legacy-to-sdd-migration-guide.md` § Phase 1 Day 5](legacy-to-sdd-migration-guide.md#day-5-first-adr).
+Treat retroactive ADRs as exceptions, not the default. See [`legacy-to-sdd-migration-guide.md` § Phase 1 Day 5](legacy-to-sdd-migration-guide.md#day-5--the-first-adr).
 
 ### Sub-ADRs / ADR groups
 
@@ -765,7 +780,7 @@ Hybrid is common: global for cross-cutting (logging, auth, observability), per-s
 In order of how much overhead they add:
 
 - **None.** A `docs/adr/` folder plus discipline. Works fine up to ~30 ADRs. Most teams never need more.
-- **[adr-tools](https://github.com/npryce/adr-tools)** (Node/Bash) — generates numbered skeletons: `adr new "Database choice"`. Minimal; recommended once your team forgets numbers manually.
+- **[adr-tools](https://github.com/npryce/adr-tools)** (shell scripts) — generates numbered skeletons: `adr new "Database choice"`. Minimal; recommended once your team forgets numbers manually.
 - **[log4brains](https://github.com/thomvaill/log4brains)** — generates a static site from your ADR markdown. Nice for browsing; overkill until 30+ ADRs.
 - **MADR template** — just the template, no tooling. Good middle ground.
 - **Custom scripts** — most large teams end up with a 20-line shell script: `new-adr.sh "title"` finds the highest number, copies the template, opens the editor.
@@ -780,7 +795,7 @@ ADRs rot if you don't audit them. A quarterly ritual that takes ~30 minutes for 
 
 1. **List all ADRs by status.** Most easily by running `grep -l '^## Status' docs/adr/*.md` plus a `grep '^Accepted'` pipeline.
 2. **For each `Accepted` ADR**, ask: *do the forces in Context still hold?* If not, candidate for supersede.
-3. **For each `Proposed` ADR older than 1 month**, ask: *is this stalled or about to land?* Stalled `Proposed` ADRs rot the catalog.
+3. **For each `Proposed` ADR older than 1 month**, ask: *is this stalled or about to land?* Stalled `Proposed` ADRs rot the catalog. Don't wait for the quarter on these — the flagship rule is that a `Proposed` ADR more than 1 month old is rot, so check Proposed ADRs as they cross the 1-month mark and accept, reject, or rewrite them then.
 4. **For each `Deprecated` ADR**, ask: *is there a replacement now?* If yes, write the supersede.
 5. **Update CLAUDE.md's Active list** to match.
 
@@ -795,10 +810,10 @@ ADRs need a maintainer. Usually the engineer who runs the architecture-review ca
 ## Golden rules
 
 1. **An ADR is a decision, not a design.** One decision per ADR; keep the Decision section short.
-2. **Immutable from `Accepted`.** Body of an Accepted ADR is never edited. Supersede instead.
-3. **Alternatives Rejected is the most valuable section.** Without it, future readers can't tell whether the decision still deserves to stand.
+2. **Immutable from `Accepted`.** Body of an Accepted ADR is never edited. Supersede instead. (Sole exception: append-only, dated notes on `Deprecated` / `Superseded` ADRs.)
+3. **Alternatives rejected is the most valuable section.** Without it, future readers can't tell whether the decision still deserves to stand.
 4. **Honest about retroactivity.** A retroactive ADR says so in Context. Pretending it was written contemporaneously is fabrication.
-5. **Numbering is sacred.** Sequential, zero-padded, no gaps, no sub-versions.
+5. **Numbering is sacred.** Sequential, zero-padded, no gaps, no sub-versions. Abandoned proposals keep their file (Status flipped to `Rejected`) so the sequence stays visible on disk.
 6. **Cross-reference everywhere.** ADRs are most valuable when findable from code, PRs, other docs.
 7. **The agent drafts; you verify.** Especially Context and Alternatives — those are the parts the agent invents most plausibly.
 8. **Active list = source of truth.** `CLAUDE.md` lists only `Accepted` ADRs. Superseded and Deprecated ADRs stay in `docs/adr/` for history but never as current authority.

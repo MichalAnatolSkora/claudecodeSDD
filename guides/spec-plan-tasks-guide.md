@@ -26,7 +26,7 @@
 
 **Examples**
 11. [Worked example 1 — Rate limiting on the orders endpoint](#worked-example-1--rate-limiting-on-the-orders-endpoint)
-12. [Worked example 3 — the whole trio in one file](#worked-example-3--the-whole-trio-in-one-file)
+12. [Worked example 2 — the whole trio in one file](#worked-example-2--the-whole-trio-in-one-file)
 
 13. [Golden rules for trio authoring](#golden-rules-for-trio-authoring)
 
@@ -38,7 +38,7 @@ This is the definitive, hands-on treatment of the trio — the centerpiece of th
 
 What you get here:
 
-- **Two complete worked examples** — all three filled-in documents *for the same feature*, with the cross-references explicit, ready to copy as a starting point
+- **Two complete worked examples** — a non-trivial feature as the full three-file trio (all three documents filled in, cross-references explicit) and a small feature as a one-file trio, both ready to copy as starting points
 - **AI-assisted authoring prompts** — copy-pasteable prompts for drafting each artifact, reviewing it, refining it, and validating it against the others
 - **Iteration patterns** — how a rough draft becomes a tight spec, then a clear plan, then an executable task list
 - **Cross-artifact consistency checks** — concrete rules that keep the three documents honest (every acceptance criterion has a task; every "out of scope" survives into the plan; every open question resolves into a decision or an ADR)
@@ -145,7 +145,7 @@ The trio is the default for any real change. The main lever isn't *dropping* spe
 |--------------|-----------------|
 | One-line doc / config tweak | A PR description. No spec. |
 | Bug fix (one file, one commit) | A short `spec.md` — goal + acceptance criteria. Plan and tasks are implicit. |
-| Small feature (1–3 files, ~half a day) | The one-file trio — spec / plan / tasks as three sections in a single file ([Worked example 3](#worked-example-3--the-whole-trio-in-one-file)). |
+| Small feature (1–3 files, ~half a day) | The one-file trio — spec / plan / tasks as three sections in a single file ([Worked example 2](#worked-example-2--the-whole-trio-in-one-file)). |
 | Non-trivial feature (multiple modules, multi-day) | The full three-file trio ([Worked example 1](#worked-example-1--rate-limiting-on-the-orders-endpoint)). |
 | Refactor (no behavior change, larger surface) | Short spec + full plan + tasks — the *how* and *order* matter more than the *what*. |
 | Spike / research | A spec heavy on Open Questions; plan and tasks wait until the spike resolves. |
@@ -369,6 +369,17 @@ don't edit.
 
 Run this twice if needed. By the second pass, the spec is usually shippable.
 
+**What sharpening looks like** — the same spec lines, before and after:
+
+| Bad (can't be tested, only argued about) | Good (a test name falls out) |
+|------------------------------------------|------------------------------|
+| Goal: *"Add rate limiting to the API"* | Goal: *"Stop partner retry storms from flooding `POST /api/orders` — per-partner limits, configurable, observable"* |
+| *"The endpoint works correctly under load"* | *"Partner exceeding N requests in window W gets 429 with `Retry-After` in seconds"* |
+| *"Handle errors properly"* | *"Missing `X-Partner-Id` → 400 (existing behavior preserved)"* |
+| Out of scope: *(empty)* | Out of scope: *"GET endpoints, distributed limiting, IP-based limits"* |
+
+Every left-column line is an argument waiting to happen in review; every right-column line is a test.
+
 ### Loop 2: Plan refinement after spec review
 
 If the spec changes (open questions resolved, scope sharpened), the plan needs to follow. **Prompt:**
@@ -429,7 +440,7 @@ The five most damaging mistakes specific to writing the trio together.
 
 Engineer drafts spec, doesn't wait for review, starts writing plan. Plan locks in architectural choices that the spec review then invalidates. Result: plan thrown out and rewritten.
 
-**Fix:** Spec must be in *Reviewed* state (Open Questions resolved, ACs sharpened) before plan starts. Imposing a 24-hour SLA on spec review usually fixes this.
+**Fix:** Spec must be reviewed (Open Questions resolved, ACs sharpened — it stays `Draft` until implementation starts; review is a step, not a status) before plan starts. Imposing a 24-hour SLA on spec review usually fixes this.
 
 ### 2. Tasks written before plan
 
@@ -464,9 +475,10 @@ The implementation proceeds anyway. Code reviewer catches the gap. Now you're pa
 
 ## Slash commands worth having
 
-A repo doing SDD seriously usually has these in `.claude/commands/`:
+A repo doing SDD seriously usually has these in `.claude/commands/`. *(The shipped files in [`templates/.claude/`](../templates/.claude/) are namespaced and phase-numbered — `sdd-3-spec-new.md` → `/sdd-3-spec-new` — so they sort in pipeline order; this guide writes the short forms. Same commands; keep or drop the `sdd-N-` prefix as you like.)*
 
 - **`/prd-new <idea>`** — *(furthest upstream)* turns a 1–3 sentence idea into a lean PRD draft, then fills the gaps by asking you the open questions. See [`prd-guide.md`](prd-guide.md) § "AI-assisted PRD authoring".
+- **`/prd-review <path>`** — audits a draft PRD for gaps (specific users, measurable success criteria, ≥5 out-of-scope items, no implementation leakage) before you slice it. Read-only.
 - **`/features-from-prd`** — *(upstream of the trio)* slices an accepted PRD into a prioritized, vertically-sliced feature list; each row becomes a spec. See [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".
 - **`/spec-new <feature-description>`** — drafts `spec.md` from a one-paragraph description ([prompt 1](#1-draft-specmd-from-a-one-paragraph-idea) above)
 - **`/spec-review <path>`** — runs the audit checklist (prompt 2)
@@ -482,19 +494,20 @@ Worked-example placement of these files:
 ```
 .claude/
 └── commands/
-    ├── prd-new.md           # /prd-new
-    ├── features-from-prd.md # /features-from-prd
-    ├── spec-new.md          # /spec-new
-    ├── spec-review.md       # /spec-review
-    ├── plan-from-spec.md    # /plan-from-spec
-    ├── plan-validate.md     # /plan-validate
-    ├── tasks-from-plan.md   # /tasks-from-plan
-    ├── tasks-add.md         # /tasks-add
-    ├── trio-check.md        # /trio-check
-    └── implement.md         # /implement
+    ├── sdd-1-prd-new.md           # /sdd-1-prd-new
+    ├── sdd-1-prd-review.md        # /sdd-1-prd-review
+    ├── sdd-2-features-from-prd.md # /sdd-2-features-from-prd
+    ├── sdd-3-spec-new.md          # /sdd-3-spec-new
+    ├── sdd-3-spec-review.md       # /sdd-3-spec-review
+    ├── sdd-4-plan-from-spec.md    # /sdd-4-plan-from-spec
+    ├── sdd-4-plan-validate.md     # /sdd-4-plan-validate
+    ├── sdd-5-tasks-from-plan.md   # /sdd-5-tasks-from-plan
+    ├── sdd-5-tasks-add.md         # /sdd-5-tasks-add
+    ├── sdd-6-trio-check.md        # /sdd-6-trio-check
+    └── sdd-7-implement.md         # /sdd-7-implement
 ```
 
-**Ready-made copies of all ten commands live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
+**Ready-made copies of all eleven commands live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
 
 See [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks) for the mechanics of writing slash commands.
 
@@ -574,7 +587,7 @@ configurable per partner and observable in production.
 
 ## Technical decisions
 
-- Stack: .NET 8 ASP.NET Core middleware (per ADR-001)
+- Stack: .NET 8 ASP.NET Core middleware (consistent with the existing middleware in `src/Api/Middleware/` — see `AuthMiddleware`)
 - Store: in-memory `MemoryCache`-backed counter (single-instance, per spec § Open Q1 resolution)
 - Algorithm: fixed window, 60-second buckets per `partner_id` (per spec § Open Q2 resolution)
 - Config binding: Options pattern; `RateLimitOptions` bound to `RateLimits:Orders` section
@@ -613,7 +626,7 @@ tests/Api.Integration/
 ## Constraints
 
 - Do NOT add Redis dependency (single-instance per spec)
-- Do NOT use ASP.NET Core 7's built-in rate limiter (its API is hostile to per-partner keys; we keep custom)
+- Do NOT use ASP.NET Core's built-in rate limiter for v1 — we keep a small custom middleware for consistency with the existing `AuthMiddleware` pattern; revisit if requirements outgrow it
 - Do NOT block on GETs (only `POST /api/orders`)
 - `Retry-After` MUST be integer seconds, not an HTTP-date — a partner client can't parse the date form (see `docs/integrations/sftp-acme-bank.md`)
 - Counter mutations must be atomic per `partner_id` — naive read-then-increment races under load (added after load test; see `tasks.md` notes)
@@ -681,7 +694,7 @@ None — all resolved during spec review (see `spec.md` § Open questions).
 
 ---
 
-## Worked example 3 — the whole trio in one file
+## Worked example 2 — the whole trio in one file
 
 Some changes are too big for a bare bugfix spec — they have real *how* and *order* decisions — but too small to deserve three separate files and a folder. Keep all three concerns; just collapse them into one file with three sections.
 

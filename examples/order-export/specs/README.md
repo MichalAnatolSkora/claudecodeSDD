@@ -4,11 +4,11 @@
 
 | PRD feature | Spec | State |
 |-------------|------|-------|
-| 1 — walking skeleton (XML + SFTP) | [`2026-01-export-skeleton.md`](2026-01-export-skeleton.md) — one-file trio | shipped |
-| 2 — CSV format option | [`2026-02-csv-format.md`](2026-02-csv-format.md) — one-file trio | shipped |
-| 3 — retry failed deliveries | [`2026-02-delivery-retry/`](2026-02-delivery-retry/) — full three-file trio | in progress |
-| 4 — per-partner schedule config | — | not started |
-| 5 — operator batch-status view | — | not started |
+| 1 — walking skeleton (XML + SFTP) | [`2026-01-export-skeleton.md`](2026-01-export-skeleton.md) — one-file trio | Shipped |
+| 2 — CSV format option | [`2026-02-csv-format.md`](2026-02-csv-format.md) — one-file trio | Shipped |
+| 3 — retry failed deliveries | [`2026-02-delivery-retry/`](2026-02-delivery-retry/) — full three-file trio | Active |
+| 4 — per-partner schedule config | — | not started (backlog) |
+| 5 — operator batch-status view | — | not started (backlog) |
 
 **Why 4 and 5 have no spec yet.** SDD is forward-only: you write a spec **when you pick the work up**, not speculatively. Features 4–5 are PRD backlog rows; their trio gets created the day someone starts them. This is also why **live status lives here, not in the PRD** — the PRD froze its slice list, and what's shipped vs in flight is visible from `specs/`.
 

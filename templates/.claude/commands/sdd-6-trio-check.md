@@ -5,12 +5,12 @@ argument-hint: [path to the spec folder] (optional)
 
 # Trio consistency check
 
-The "ready for implementation" gate. Spec folder: `$ARGUMENTS`
-If no path is given, use the most recently modified folder under `specs/` and tell me which one.
+The "ready for implementation" gate. Target: `$ARGUMENTS`
+If no path is given, use the most recently modified spec under `specs/` — a folder **or** a one-file trio (`specs/<slug>.md`) — and tell me which one.
 
 ## Checks
 
-Read all three of `spec.md`, `plan.md`, `tasks.md`, then verify:
+Read all three of `spec.md`, `plan.md`, `tasks.md` (for a one-file trio: its Spec / Plan / Tasks sections), then verify:
 
 1. Every **acceptance criterion** in `spec.md` has at least one task in `tasks.md` (and an entry in the Verification section).
 2. Every file in `plan.md` § File structure has at least one task that creates or modifies it.

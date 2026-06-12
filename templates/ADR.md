@@ -3,6 +3,7 @@
 ## Status
 
 [Proposed | Accepted — YYYY-MM-DD | Deprecated | Superseded by ADR-XXX]
+Supersedes: ADR-XXX (if any)
 
 ## Context
 

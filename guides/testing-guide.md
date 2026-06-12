@@ -41,8 +41,10 @@ It assumes the agent does most of the typing. Your leverage is in the acceptance
 Three places, already in the method:
 
 - **`spec.md` § Acceptance criteria = the test contract.** Each AC is phrased so it *could be a test name* (*"POST /api/orders with no `X-Partner-Id` → 400"*). That's not a coincidence — the ACs are the tests, written in English first.
-- **`tasks.md` = where tests get written.** The implementation steps are ordered red→green (failing test first), and the **Verification (against acceptance criteria)** section maps every AC to the task/test that proves it. A trio that passes `/trio-check` already guarantees "every AC has a test."
+- **`tasks.md` = where tests get written.** The implementation steps are ordered red→green (failing test first), and the **Verification (against acceptance criteria)** section maps every AC to the task/test that proves it. `/trio-check` runs *before* implementation, so what it checks is that every AC has a **task** (and a Verification row) — the tests themselves arrive later, in the red→green loop of `/sdd-7-implement`.
 - **`TESTING.md` = the conventions the agent reads.** So the tests it writes match your framework, layout, and mocking rules instead of its own defaults.
+
+> Command names here are the short forms; the shipped files are namespaced and phase-numbered (`/trio-check` ships as `/sdd-6-trio-check`) — keep or drop the `sdd-N-` prefix as you like.
 
 So "adding testing to SDD" is mostly: write testable ACs, keep the red→green order, and give the agent a `TESTING.md`. The rest of this guide is doing that well.
 
@@ -95,6 +97,12 @@ run it, and show me it fails for the right reason. Then write the minimum code t
 pass it, and run the suite. Don't touch other ACs.
 ```
 
+**When NOT to test-first.** Red-first is the default for AC-driven work, not a universal law:
+
+- **Spikes / prototypes** — you're going to throw the code away; tests on throwaway code are waste. Write what you *learned* into the spec instead.
+- **Exploratory UI work** — you don't know what right looks like until you see it. Pin the behaviour with tests once it settles.
+- **Legacy code without seams** — you can't red-first what you can't instantiate. Start with characterization tests (assert what it does *today*), then refactor toward testability.
+
 ---
 
 ## Getting good tests out of the agent
@@ -143,6 +151,8 @@ Coverage targets are a trap for small teams. Test by *value at risk*, not by per
 
 The 1–10 default: **a thin layer of integration tests on the ACs and the scary paths, plus unit tests where the logic is dense.** Grow it when a class of bug keeps escaping.
 
+**Integration tests need infrastructure.** Standing up the real thing (e.g. Testcontainers) means Docker has to be available *everywhere the suite runs* — your machine, CI, and the agent's environment; a suite the agent can't run is a loop it can't close. Keep the integration layer thin on purpose: real dependencies are slow, and a fat integration suite turns the run-fix loop into a wait. And put the exact run command (plus any setup, like starting Docker) in `TESTING.md`, so the agent can run the suite unaided.
+
 ---
 
 ## The agent's run-fix loop
@@ -186,7 +196,7 @@ Five reusable prompts (the agent types; you judge):
 3. **Testing the mock.** So much is mocked the test only proves the mocks were called. Mock the edges, not the unit.
 4. **Snapshot-everything.** Giant auto-generated snapshots nobody reads; they pass until they don't, and then everyone just re-blesses them. Use sparingly, for stable output only.
 5. **Chasing 100%.** Effort goes to trivia while the scary paths get one happy-path test. Test by risk.
-6. **A Verification section that doesn't map to tests.** If *"AC4 → covered"* points at no real test, it's a checkbox, not coverage. `/trio-check` catches this.
+6. **A Verification section that doesn't map to tests.** If *"AC4 → covered"* points at no real test, it's a checkbox, not coverage. `/trio-check` flags vague rows before implementation; the break-the-code check is what proves the test is real.
 
 ---
 

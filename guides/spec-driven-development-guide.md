@@ -55,9 +55,9 @@ These are facets of the same idea. The name matters less than the discipline.
 
 **Explicit AI-era SDD adopters:**
 
-- **GitHub** ships [`spec-kit`](https://github.com/github/spec-kit) — the most direct, named SDD reference implementation, with 100k+ stars. The `spec.md → plan.md → tasks.md` flow in this guide mirrors theirs.
+- **GitHub** ships [`spec-kit`](https://github.com/github/spec-kit) — the most direct, named SDD reference implementation, with tens of thousands of stars. The `spec.md → plan.md → tasks.md` flow in this guide mirrors theirs.
 - **Anthropic** treats `CLAUDE.md` as a first-class concept in Claude Code, with public engineering guidance that maps onto the same workflow.
-- **Cursor** (`.cursorrules`), **Aider** (conventions files), **Continue.dev** (`.continuerules`), and other agent tools have independently converged on the same *"one file the agent always reads"* pattern.
+- **Cursor** (`.cursor/rules/` — formerly `.cursorrules`), **Aider** (conventions files), **Continue.dev** (rules files), and other agent tools have independently converged on the same *"one file the agent always reads"* pattern.
 
 **Pre-AI organizations practicing spec-adjacent discipline:**
 
@@ -186,7 +186,7 @@ If you're starting today and don't want to overinvest in docs upfront, what's th
 
 ### The single most important file
 
-**`CLAUDE.md`** at the repo root (or `.cursorrules` for Cursor, equivalent files for other agent tools). If you do nothing else from this guide, do this. It's the only file most agents load automatically; without it your conventions don't exist as far as the agent is concerned. One file the agent always reads beats ten files it might never reach.
+**`CLAUDE.md`** at the repo root (or `.cursor/rules/` for Cursor, equivalent files for other agent tools). If you do nothing else from this guide, do this. It's the only file most agents load automatically; without it your conventions don't exist as far as the agent is concerned. One file the agent always reads beats ten files it might never reach.
 
 What separates a useful `CLAUDE.md` from a generic one — what to put in, what to leave out, how big it should get, how it changes when the repo has 30+ other markdown files competing for attention — is the subject of its own detail guide: [`claude-md-guide.md`](claude-md-guide.md). Read that one before writing your project's `CLAUDE.md` from scratch; the difference between a "wall of text" and a hub that routes the agent's attention well is mostly about the rules in that guide.
 
@@ -206,6 +206,16 @@ For any project beyond a weekend hack, add two more:
 5. **`DOMAIN.md`** (or `GLOSSARY.md`) — business terminology, abbreviations, the words specific to your problem space. Skip if your domain is generic (CRUD on things); essential if it has jargon (finance, biotech, logistics, regulated industries).
 
 Five files cover most of the SDD benefit for a project in the 0–3 month range.
+
+### The loop, per change
+
+With the five files in place, every change runs the same short loop (this is what [`sdd-in-5-files.md`](sdd-in-5-files.md) distills to one page):
+
+1. **Write `spec.md`** — goal + acceptance criteria + out of scope.
+2. **Agent implements it** — each acceptance criterion → one failing test → make it pass (red → green).
+3. **Break the code** — flip a value on purpose; the test must go red. Don't trust green.
+4. **Merge & freeze** — append `STATUS: shipped (PR #N, date)`; never edit the spec again.
+5. **Corrected the agent?** — add ONE line to `CLAUDE.md`; that's how it stops drifting next time.
 
 ### Add the rest reactively, not proactively
 
@@ -467,20 +477,22 @@ A copy-pasteable version lives at [`templates/spec.md`](../templates/spec.md).
 
 ### Spec status lifecycle
 
-A spec moves through four states:
+A spec moves through four states — the same vocabulary [`templates/spec.md`](../templates/spec.md) uses:
 
-1. **Draft** — being written; open questions still listed.
-2. **In implementation** — open questions answered (or moved to ADRs); `plan.md` and `tasks.md` written alongside; engineer is coding.
-3. **Shipped** — PR merged. Append `STATUS: shipped (PR #N, YYYY-MM-DD)` at the top of `spec.md`.
-4. **Frozen** — same as shipped, but emphasized: from this point the spec is *history*. Never edit retroactively. If the feature changes, write a new spec.
+1. **Draft** — being written and reviewed; open questions still listed.
+2. **Active** — open questions answered (or moved to ADRs); `plan.md` and `tasks.md` written alongside; engineer is coding.
+3. **Shipped** — PR merged. Append `STATUS: shipped (PR #N, YYYY-MM-DD)` at the top of `spec.md` (and if you use the optional `Status:` header, flip it too — the appended line is the lightweight default, the header is for teams that want a visible state field). From this point the spec is *history*: never edit retroactively. If the feature changes, write a new spec.
+4. **Superseded** — a later spec replaces this one; link the replacement.
 
-The most common rot pattern: specs sitting in *Draft* indefinitely. A spec older than ~2 weeks with unanswered Open Questions should either move forward or be deleted — stale drafts pollute the catalog and erode trust in the discipline.
+**Changing a spec mid-implementation is allowed — the freeze starts at merge.** If an acceptance criterion turns out wrong while the status is still *Active*, edit the spec, mark the edit visibly (e.g. `CHANGED during implementation: <what and why>` next to the AC), update `plan.md`/`tasks.md` to match, and re-run the trio consistency check. What's forbidden is silently rewriting history *after* the PR merges — that's when a change means a new spec.
+
+The most common rot pattern: specs sitting in *Draft* indefinitely. A spec older than ~2 weeks with unanswered Open Questions should either move forward — resolve the open questions and start implementation — or be deleted; stale drafts pollute the catalog and erode trust in the discipline.
 
 ### Practical tips
 
 **Keep specs short.** A spec longer than ~150 lines is usually two specs in a trenchcoat. Split.
 
-**Spec ships before code.** If you find yourself writing the spec *after* the PR to explain code that already exists, that's documentation, not a spec. File it under `docs/`, not `specs/`. (See [`legacy-to-sdd-migration-guide.md`](legacy-to-sdd-migration-guide.md) § "Phase 2 — Forward-only specs" — this is the migration discipline applied to every change.)
+**Spec ships before code.** If you find yourself writing the spec *after* the PR to explain code that already exists, that's documentation, not a spec. File it under `docs/`, not `specs/`. (See [`legacy-to-sdd-migration-guide.md`](legacy-to-sdd-migration-guide.md) § "Week 2 on: specs for new work only" — this is the migration discipline applied to every change.)
 
 **Open Questions are valuable.** Don't be embarrassed by them. A spec with three Open Questions answered honestly beats a spec with zero questions and three silent assumptions.
 
@@ -648,7 +660,7 @@ Roughly: **one task should be reviewable in 5–15 minutes** of focused attentio
 | Right | *"Wire `POST /api/orders` (controller → handler → repository) with 1 happy-path integration test"* | Yes |
 | Too big | *"Implement the entire order processing pipeline"* | Split into 3–5 tasks |
 
-A task that takes more than ~2 hours of focused work is usually two tasks.
+The two yardsticks are the same rule seen from both sides: a task that takes more than ~1–2 hours of focused work won't be reviewable in 5–15 minutes — split it. When the two disagree, the review-time test wins.
 
 ### How the agent uses tasks.md
 
@@ -693,7 +705,7 @@ For a full worked example of `tasks.md` alongside its `spec.md` + `plan.md` sibl
 
 Once you ship v1, project life unfolds across three documentation layers that evolve at different speeds.
 
-### Layer 1: Stable (rarely changes, agent always reads)
+### Layer 1: Stable (rarely changes, read every session — `CLAUDE.md` automatically, the rest via its pointers)
 
 - `CLAUDE.md` — conventions, stack, what NOT to do
 - `ARCHITECTURE.md` — high-level structure, layers, boundaries
@@ -711,10 +723,10 @@ Each feature gets its own folder. The folder name encodes date + slug. After mer
 
 ### Layer 3: Decisions (immutable, append-only)
 
-- `docs/adr/ADR-001-dapper-instead-of-ef.md`
-- `docs/adr/ADR-002-quartz-for-scheduler.md`
+- `docs/adr/ADR-007-dapper-instead-of-ef.md`
+- `docs/adr/ADR-003-quartz-for-scheduler.md`
 
-An old decision never changes. If you change your mind, write a new ADR with `Supersedes: ADR-001`. The original stays as historical record.
+An old decision never changes. If you change your mind, write a new ADR with `Supersedes: ADR-007`. The original stays as historical record.
 
 ---
 
@@ -728,7 +740,7 @@ A **bugfix** is one short `spec.md` (goal + acceptance criteria), implementation
 
 ### Medium change (new module, endpoint, integration)
 
-The full three-file trio — `spec.md` + `plan.md` + `tasks.md` in `specs/`. If it changes a layer contract — update `ARCHITECTURE.md`. If it adds a domain concept — update `DOMAIN.md`.
+The full three-file trio — `spec.md` + `plan.md` + `tasks.md` in `specs/`. If it changes what `ARCHITECTURE.md` shows — a component, a boundary, a data flow, a new external dependency — the **PR author updates `ARCHITECTURE.md` in the same PR**. If it adds a domain concept — same rule, `DOMAIN.md`.
 
 ### Large change (refactor, stack change, new pattern)
 
@@ -1035,9 +1047,9 @@ This is what a *mature* SDD repo looks like — a mid-sized project, ~6–12 mon
 │           └── SKILL.md               # frontmatter + procedure
 ├── docs/                              # everything that isn't a top-level signpost
 │   ├── adr/                           # architecture decisions — immutable, numbered, append-only
-│   │   ├── ADR-001-dapper.md          # one decision per file, status header on top
-│   │   └── ADR-002-quartz.md
-│   ├── prd/                           # PRDs per era — humans only, agent never reads these
+│   │   ├── ADR-007-dapper.md          # one decision per file, status header on top
+│   │   └── ADR-003-quartz.md
+│   ├── prd/                           # PRDs per era — humans-only; the agent implements from specs/
 │   │   ├── 2025-12-original-prd.md    # the launch PRD (frozen after v1)
 │   │   ├── 2027-Q2-mobile-app.md      # later era: adding mobile (frozen after that release)
 │   │   └── 2029-Q1-platform-shift.md  # later era: B2B → B2C2B pivot

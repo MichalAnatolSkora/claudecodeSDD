@@ -40,8 +40,8 @@ That's the floor. Everything below is per change.
 ## Step 1 — Idea → PRD
 
 - **Before, optionally:** real user/market research feeds the PRD — see [`research-guide.md`](research-guide.md). Most 1–10 teams skip it.
-- **Do:** `/prd-new "<1–3 sentences>"` — it sketches a lean PRD, then asks you the open questions and fills them in (you make the product calls).
-- **Get:** `docs/prd/YYYY-MM-slug.md` — product-level *what & why*, humans-only (the agent reads specs, not the PRD).
+- **Do:** `/prd-new "<1–3 sentences>"` — it sketches a lean PRD, then asks you the open questions and fills them in (you make the product calls). Then `/prd-review` — a read-only audit (specific users? measurable success criteria? ≥5 out-of-scope items?) before you slice.
+- **Get:** `docs/prd/YYYY-MM-slug.md` — product-level *what & why*, humans-only (the agent implements from specs, not the PRD).
 - **Skip if:** solo, small, or the what/why already fits in your head — a one-paragraph issue is enough.
 
 → [`prd-guide.md`](prd-guide.md)
@@ -101,6 +101,7 @@ npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude    # + start
 
 # per change — enter where you start, skip the rest
 /prd-new "<idea>"        # 1  idea → docs/prd/…              (skip if small/solo)
+/prd-review              #     audit the PRD, resolve gaps
 /features-from-prd       # 2  PRD  → prioritized features    (skip if you know the feature)
 /spec-new "<feature>"    # 3  → spec.md   (goal + acceptance criteria + out of scope)
 /spec-review             #     audit, resolve open questions

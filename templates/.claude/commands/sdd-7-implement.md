@@ -5,17 +5,17 @@ argument-hint: [path to the spec folder] (optional)
 
 # Implement the trio
 
-Build the feature by working `tasks.md` one task at a time. Spec folder: `$ARGUMENTS`
-If no path is given, use the most recently modified folder under `specs/` and tell me which one.
+Build the feature by working `tasks.md` one task at a time. Target: `$ARGUMENTS`
+If no path is given, use the most recently modified spec under `specs/` — a folder **or** a one-file trio (`specs/<slug>.md`) — and tell me which one.
 
 ## Before you start
 
-Read `spec.md`, `plan.md`, `tasks.md` in that folder, plus `TESTING.md` and `CLAUDE.md` if present. If the trio clearly hasn't passed `/sdd-6-trio-check` (an unresolved open question, an acceptance criterion with no task), stop and say so — don't build on a broken trio.
+Read `spec.md`, `plan.md`, `tasks.md` in that folder (for a one-file trio: its Spec / Plan / Tasks sections), plus `TESTING.md` and `CLAUDE.md` if present. If the trio clearly hasn't passed `/sdd-6-trio-check` (an unresolved open question, an acceptance criterion with no task), stop and say so — don't build on a broken trio.
 
 ## The loop — one task at a time, in order
 
 1. **Red** — write the failing test first, from the acceptance criterion the task maps to. Run it; confirm it fails for the right reason.
-2. **Green** — write the *minimum* code to pass (`CLAUDE.md` § Simplicity First — nothing speculative).
+2. **Green** — write the *minimum* code to pass; nothing speculative (per `CLAUDE.md` § Simplicity First, if your `CLAUDE.md` carries the behavioral layer).
 3. **Verify** — run the task's ` → verify:` step; it must pass.
 4. **Commit** — one commit per green task. A cheap rollback point.
 

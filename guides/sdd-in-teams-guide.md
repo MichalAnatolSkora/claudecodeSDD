@@ -72,7 +72,7 @@ Owner:  @ana
 
 Add them only when they earn their place — default to the lightest form.
 
-**Status** — what state the doc is in: **Draft** (being written) → **Active** (approved, in progress) → **Shipped** (merged) → **Superseded** (a later doc replaces it — link it). Same lifecycle the overview spells out for specs (*Draft → In implementation → Shipped → Frozen*), generalized to all three docs.
+**Status** — what state the doc is in: **Draft** (being written) → **Active** (approved, in progress) → **Shipped** (merged) → **Superseded** (a later doc replaces it — link it). Same lifecycle the templates and the overview use for specs, generalized to all three docs.
 
 **Owner** — who to ask. At the small end, skip it: `git blame` and the PR author already say who wrote and merged a doc, more reliably than a hand-kept field that goes stale.
 
@@ -116,12 +116,18 @@ The `(or N/A)` matters — people won't tick boxes that don't apply, so make the
 A spec moves through a few states. Who's involved at each:
 
 1. **Draft** — the driver writes `spec.md` (plus `plan.md` / `tasks.md` if the change earns them); open questions listed at the end.
-2. **Reviewed** — one other person checks scope and sanity; open questions get answered or pushed into an ADR.
-3. **In implementation** — the driver works the tasks; the PR links the spec folder.
-4. **Shipped** — PR merged; the driver appends `STATUS: shipped (PR #N, YYYY-MM-DD)` to the spec.
-5. **Archived** — frozen history in `specs/<slug>/`. If the feature changes later, write a *new* spec; never edit a shipped one.
+2. **Review** — a process step, not a status (the doc is still `Draft`): one other person checks scope and sanity; open questions get answered or pushed into an ADR.
+3. **Active** — implementation in progress; the driver works the tasks, and the PR links the spec folder.
+4. **Shipped** — PR merged; the driver appends `STATUS: shipped (PR #N, YYYY-MM-DD)` to the spec (and flips the `Status:` header if you use one). The spec freezes as history in `specs/<slug>/`. If the feature changes later, write a *new* spec; never edit a shipped one.
+5. **Superseded** — only if a later spec replaces it; link the new spec from the old one.
 
-Where it leaks: the **Reviewed** step (busy reviewers, specs piling up). The 24-hour timebox above is the fix.
+Where it leaks: the **Review** step (busy reviewers, specs piling up). The 24-hour timebox above is the fix.
+
+When two people collide on one artifact, the rules are short:
+
+- **Two overlapping specs** — the keeper decides the split before either proceeds.
+- **Driver and reviewer deadlocked on scope** — the keeper breaks the tie, inside the same 24-hour timebox.
+- **Never edit someone else's in-flight spec.** Comment on the PR instead; the driver makes the edit.
 
 For *how* to actually write each of `spec.md` / `plan.md` / `tasks.md` — with the AI-authoring prompts and the consistency check — see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md), the centerpiece guide.
 

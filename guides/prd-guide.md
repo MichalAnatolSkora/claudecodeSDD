@@ -1,6 +1,6 @@
 # Writing a Good PRD (Per Era, For Humans)
 
-> The practical companion to [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer). That section gives you the principles (PRD vs spec, the agent doesn't read PRD, the era pattern, the Frankenstein trap). This guide gives you the *practice*: formats, worked examples, era-boundary heuristics, AI-authoring prompts, and the review process.
+> The practical companion to [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer). That section gives you the principles (PRD vs spec, the agent implements from specs not the PRD, the era pattern, the Frankenstein trap). This guide gives you the *practice*: formats, worked examples, era-boundary heuristics, AI-authoring prompts, and the review process.
 
 ---
 
@@ -17,6 +17,7 @@
 9. [Success metrics — defining "what does success look like"](#success-metrics--defining-what-does-success-look-like)
 10. [Stakeholder review process](#stakeholder-review-process)
 11. [Cross-functional handoff — PRD to engineering](#cross-functional-handoff--prd-to-engineering)
+    - [Slicing the PRD into features](#slicing-the-prd-into-features)
 12. [PRD-specific anti-patterns](#prd-specific-anti-patterns)
 13. [Golden rules](#golden-rules)
 
@@ -24,7 +25,7 @@
 
 ## Why write a PRD — and when
 
-**What it's for.** A PRD (Product Requirements Document) is the product-level statement of *what we're building and why* — the problem, who has it, and what success looks like — agreed **before** anyone writes a spec or a line of code. It's the contract between intent and engineering. Humans read it; the agent never does (it reads `spec.md`). One PRD describes a whole product or a whole release *era*, not a single feature.
+**What it's for.** A PRD (Product Requirements Document) is the product-level statement of *what we're building and why* — the problem, who has it, and what success looks like — agreed **before** anyone writes a spec or a line of code. It's the contract between intent and engineering. Humans read it; the agent never reads it *during implementation* — it implements from `spec.md` — though it does read the PRD when drafting, reviewing, era-checking, or slicing it. One PRD describes a whole product or a whole release *era*, not a single feature.
 
 **Why it's worth the hour or two:**
 
@@ -35,7 +36,7 @@
 
 **When you actually need one.** A PRD earns its place when **more than one person has to agree**, or the bet is big enough that building the wrong thing is expensive. Skip it — or shrink it to a one-paragraph issue — when you're solo, the change is small, or the *what & why* already fits in your head. (When in doubt, the one-pager format below is the lightest real PRD.)
 
-**When to write a *v2* (a new era).** A PRD **freezes after v1 ships** — you do *not* edit it for every new feature (features get specs, not PRD edits; an ever-edited PRD becomes a Frankenstein). You write a **new** PRD when the product's *direction* shifts materially: a new market or segment, a new core capability, a pivot, or a step-change in scale. Routine features are not a new era. For the concrete test, see [Era boundary heuristics](#era-boundary-heuristics--when-do-you-need-a-new-prd) below; for the layered model (PRD vs spec, the three documentation layers), see [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer).
+**When to write a *v2* (a new era).** A PRD **freezes after v1 ships** — you do *not* edit it for every new feature (features get specs, not PRD edits; an ever-edited PRD becomes a Frankenstein). You write a **new** PRD when the product's *direction* shifts materially: a new market or segment, a major new capability, a pivot, or a post-reorg change of direction. Routine features are not a new era. For the concrete test, see [Era boundary heuristics](#era-boundary-heuristics--when-do-you-need-a-new-prd) below; for the layered model (PRD vs spec, the three documentation layers), see [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer).
 
 ---
 
@@ -108,9 +109,13 @@ The format isn't sacred. Mix and match — a lean PRD with a press-release secti
 
 ## Anatomy of a PRD, section by section
 
-Regardless of format, most PRDs have the same underlying questions. Here's how to think about each:
+Regardless of format, most PRDs have the same underlying questions. The section list below follows [`templates/PRD.md`](../templates/PRD.md) — the canonical template in this repo: Problem / Users / Success criteria / In scope (v1) / Out of scope / Constraints / Risks and unknowns / References.
 
-### The problem (1–2 paragraphs)
+Two sanctioned variants exist, and that's fine. A `## Summary` opener (used in the worked examples below) is an optional courtesy for skimmers. And the `/sdd-1-prd-new` command produces a lean variant whose headings differ slightly. The underlying questions are what matters; the template's list is the default.
+
+Here's how to think about each:
+
+### Problem (1–2 paragraphs)
 
 What pain are you solving, *for whom*, and how does it manifest today? A good problem statement has:
 
@@ -121,7 +126,7 @@ What pain are you solving, *for whom*, and how does it manifest today? A good pr
 **Bad:** *"Users want better dashboards."*
 **Good:** *"Mid-market finance teams (50–500 employees) currently export bank transactions to CSV and manually reconcile against invoices in Excel, losing 8–12 hours per month per controller. Existing accounting software handles the bookkeeping but lacks the reconciliation workflow."*
 
-### The user / audience
+### Users
 
 Who exactly is this for? Specificity matters more than feels natural.
 
@@ -133,9 +138,13 @@ Who exactly is this for? Specificity matters more than feels natural.
 
 If you can't list the user precisely, the rest of the PRD will drift.
 
-### The solution (high-level)
+### Success criteria
 
-What you're going to build, at the *product* level — not implementation. 3–5 sentences. Reference patterns the reader recognizes (*"like Stripe Dashboard, but for…"*) when it helps clarity.
+How will you know this worked? See [§ "Success metrics — defining what does success look like"](#success-metrics--defining-what-does-success-look-like) below for the deep treatment. Short version: pick 1–3 measurable outcomes, with rough targets and timeframes.
+
+### In scope (v1)
+
+What you're going to build in this era, at the *product* level — not implementation. 3–5 sentences. Reference patterns the reader recognizes (*"like Stripe Dashboard, but for…"*) when it helps clarity.
 
 Do **not** include:
 - Specific libraries, frameworks, databases, ORMs
@@ -145,9 +154,17 @@ Do **not** include:
 
 If you find yourself writing those, you're writing a spec, not a PRD.
 
-### Success metrics
+### Out of scope (deliberately, not now)
 
-How will you know this worked? See [§ "Success metrics — defining what does success look like"](#success-metrics--defining-what-does-success-look-like) below for the deep treatment. Short version: pick 1–3 measurable outcomes, with rough targets and timeframes.
+Just as important as scope. What you're *not* doing in this era — even if it's tempting.
+
+This section saves more drift than any other. List anything a reasonable reader might assume is in scope:
+
+- Adjacent features that look related but aren't
+- Platforms you're not supporting
+- User segments you're explicitly not targeting
+- Integrations you'll skip
+- "Future" capabilities someone might confuse with this era
 
 ### Constraints
 
@@ -160,19 +177,7 @@ What's fixed, regardless of preference:
 
 Constraints define the option space the team must work within. Without them, the spec writers will propose solutions that don't fit reality.
 
-### Out of scope (explicit)
-
-Just as important as scope. What you're *not* doing in this era — even if it's tempting.
-
-This section saves more drift than any other. List anything a reasonable reader might assume is in scope:
-
-- Adjacent features that look related but aren't
-- Platforms you're not supporting
-- User segments you're explicitly not targeting
-- Integrations you'll skip
-- "Future" capabilities someone might confuse with this era
-
-### Risks and assumptions
+### Risks and unknowns
 
 What could make this fail? What are you taking on faith?
 
@@ -464,7 +469,7 @@ Don't fall into the trap of writing a new PRD every quarter to feel productive. 
 
 ## AI-assisted PRD authoring
 
-The agent can speed up PRD drafting and review meaningfully, *as long as you remember the agent can't make the product decisions for you*. Five reusable prompts — and prompt 1 is also packaged as the **`/prd-new`** command (same idea→draft, but interactive: it sketches a lean PRD, then asks you the open questions and fills them in).
+The agent can speed up PRD drafting and review meaningfully, *as long as you remember the agent can't make the product decisions for you*. Five reusable prompts — and prompt 1 is also packaged as the **`/prd-new`** command (same idea→draft, but interactive: it sketches a lean PRD, then asks you the open questions and fills them in). The shipped command files are namespaced and phase-numbered (`templates/.claude/commands/sdd-1-prd-new.md` installs as `/sdd-1-prd-new`); this guide writes the short forms — keep or drop the prefix in your repo.
 
 ### 1. Draft a PRD from a one-paragraph idea
 
@@ -494,7 +499,7 @@ Mark anything you're inventing as [VERIFY]. Show me the draft before saving.
 
 ### 2. Review a draft PRD for completeness and clarity
 
-Use after a first draft (yours or the agent's) to catch gaps.
+Use after a first draft (yours or the agent's) to catch gaps. Ships ready-made as `/prd-review` (`templates/.claude/commands/sdd-1-prd-review.md`).
 
 **Prompt:**
 
@@ -563,14 +568,14 @@ The "don't fabricate" instruction is important — agents will invent plausible-
 
 ### 5. Translate an accepted PRD into era's first set of specs
 
-Use when a PRD is accepted and engineering is kicking off the era.
+Use when a PRD is accepted and engineering is kicking off the era. This prompt does one narrow thing: name the first 2–3 specs to start with. For the real slicing pass — vertical slices, the walking skeleton, prioritization — use the prompt in [§ "Slicing the PRD into features"](#slicing-the-prd-into-features).
 
 **Prompt:**
 
 ```text
 Read the accepted PRD at docs/prd/[filename].md.
 
-Propose the first 3-7 specs needed to start implementing era 1 of this PRD.
+Propose the first 2-3 specs needed to start implementing this era.
 For each:
 - Proposed filename (specs/YYYY-MM-feature-slug/)
 - One-sentence scope
@@ -584,7 +589,7 @@ Don't include implementation detail. Specs at this stage are placeholders with
 scope only.
 ```
 
-This is the bridge from PRD-as-strategy to specs-as-implementation. The output is a backlog the engineering team can prioritize.
+This is the bridge from PRD-as-strategy to specs-as-implementation. The output is the starting set; the full feature backlog comes from the slicing pass.
 
 ---
 
@@ -724,8 +729,8 @@ Read docs/prd/<name>.md. Propose a feature breakdown as vertical slices —
 each independently shippable and user-visible (NOT "DB layer" / "API layer").
 Size each to ~a few days (a spec under ~150 lines); split anything bigger.
 Flag the walking skeleton (thinnest end-to-end slice that proves the core),
-then order the rest by value × dependency and mark dependencies. Keep every
-feature within the PRD's Out of scope. Output a table:
+then order the rest by value × dependency and mark dependencies. No feature
+may violate the PRD's Out of scope. Output a table:
 feature | PRD outcome it serves | rough size | depends on | P1/P2/P3.
 Don't write specs — just the breakdown.
 ```
@@ -739,7 +744,7 @@ Each feature you pick up becomes a spec — for the mechanics, see [`spec-plan-t
 From the backlog identified in the kickoff, the engineering team writes the first 2–3 specs in parallel. These specs:
 
 - Reference the PRD by path in their `## References` section
-- Stay within the PRD's `Out of scope`
+- Don't violate the PRD's `Out of scope`
 - Translate constraints into concrete acceptance criteria
 - Don't try to cover the entire PRD in one spec — pick the foundational pieces first
 
@@ -826,7 +831,7 @@ The PRD says *"Status: Draft"* for 18 months. Nobody ratifies it. Engineering bu
 
 ## Golden rules
 
-1. **PRD is for humans.** The agent reads `spec.md → plan.md → tasks.md`. Don't write PRD with implementation detail "for the agent" — that detail belongs in `plan.md`, an ADR, or `CLAUDE.md`.
+1. **PRD is for humans.** The agent implements from `spec.md → plan.md → tasks.md` — it only reads the PRD to draft, review, or slice it. Don't write PRD with implementation detail "for the agent" — that detail belongs in `plan.md`, an ADR, or `CLAUDE.md`.
 
 2. **Specificity > scope.** A PRD that names one specific user with one specific pain outperforms a PRD that gestures at "all our users."
 

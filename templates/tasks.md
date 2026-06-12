@@ -21,8 +21,8 @@
 
 ## Post-merge
 
-- [ ] Append `STATUS: shipped (PR #N, YYYY-MM-DD)` to spec.md
-- [ ] Update relevant docs (CLAUDE.md, ARCHITECTURE.md, etc.) if needed
+- [ ] Append `STATUS: shipped (PR #N, YYYY-MM-DD)` to spec.md (and flip its `Status:` header, if it has one)
+- [ ] Update the stable layer **only if this change moved it**: a new/changed convention → one line in CLAUDE.md; a changed component, boundary, or data flow → ARCHITECTURE.md; a new domain term → DOMAIN.md
 - [ ] Close related issues / tickets
 
 ## Notes (append as you work)

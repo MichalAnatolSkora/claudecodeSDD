@@ -103,7 +103,7 @@ Examples:
 - Does this plan contradict any active ADR?
 - Is the "Out of scope" section trivial (only listing obvious exclusions) or substantive?
 
-Implementation: configured subagent (`.claude/agents/trio-auditor.md`), slash command (`/spec-check`), or CI step that invokes the agent.
+Implementation: configured subagent (`.claude/agents/trio-auditor.md`), slash command (`/spec-check`), or CI step that invokes the agent. (Note on names: the shipped command files in `templates/.claude/commands/` are namespaced and phase-numbered — `sdd-6-trio-check.md` → `/sdd-6-trio-check`, `sdd-3-spec-review.md` → `/sdd-3-spec-review`. This guide writes the short forms; keep or drop the prefix as you prefer.)
 
 **Strength:** can evaluate semantic content, catches what regex can't.
 **Weakness:** probabilistic (occasional false positives and negatives), takes tokens, slower than mechanical.
@@ -188,9 +188,9 @@ For each SDD artifact, a working split. This is a menu of what *could* be automa
 
 **Mechanical:**
 - All three files exist in the same `specs/YYYY-MM-*/` folder
-- Spec doesn't reference files that the plan doesn't cover
 
 **LLM evaluator:**
+- Spec doesn't reference files that the plan doesn't cover (spotting file references in prose takes judgment, not regex)
 - Every Out-of-scope item in spec is respected by plan (no task touches it)
 - Every Open Question in spec is marked `[x]` (resolved) or moved to ADR
 - Plan-cited ADRs exist and are Accepted
@@ -260,20 +260,44 @@ done
 
 ```bash
 #!/usr/bin/env bash
-# If an ADR has Status: Accepted, only its header may change.
+# If an ADR has Status: Accepted, only its Status header (and title) may change.
+# Pre-commit: checks staged changes. CI: pass --ci to diff against origin/main instead.
 set -e
-for file in "$@"; do
-  staged_changes=$(git diff --cached "$file")
-  if grep -q '^Status: Accepted' "$file"; then
-    # Allow changes to the Status: line and the title (line 1). Block everything else.
-    body_changes=$(echo "$staged_changes" | grep -E '^[+-][^#]' | grep -vE '^[+-]Status:|^[+-]Superseded by|^[+-]Deprecated' || true)
-    if [ -n "$body_changes" ]; then
-      echo "ERROR: $file has Status: Accepted. Only Status header may change." >&2
-      echo "To revise, create a new ADR with Supersedes: ADR-NNN." >&2
-      exit 1
-    fi
+[ "${SDD_BYPASS_ADR:-0}" = "1" ] && exit 0   # documented escape hatch
+diff_range=(--cached)
+if [ "${1:-}" = "--ci" ]; then diff_range=(origin/main...HEAD); shift; fi
+files=("$@"); [ ${#files[@]} -eq 0 ] && files=(docs/adr/ADR-*.md)
+for file in "${files[@]}"; do
+  [ -f "$file" ] && grep -q '^Status: Accepted' "$file" || continue
+  # Changed content lines only: drop diff metadata (+++/---), headings,
+  # and the explicitly allowed Status-header lines.
+  body_changes=$(git diff "${diff_range[@]}" -- "$file" \
+    | grep -E '^[+-]' \
+    | grep -vE '^(\+\+\+|---) ' \
+    | grep -vE '^[+-](#|Status:|\*\*Status|Superseded by|Deprecated)' || true)
+  if [ -n "$body_changes" ]; then
+    echo "ERROR: $file has Status: Accepted. Only the Status header may change." >&2
+    echo "To revise, create a new ADR with Supersedes: ADR-NNN." >&2
+    echo "(Legitimate exception? Run with SDD_BYPASS_ADR=1.)" >&2
+    exit 1
   fi
 done
+```
+
+**Example: `scripts/spec-format-check.sh`**
+
+```bash
+#!/usr/bin/env bash
+# Minimal structural check on a spec.md: required sections + AC checkboxes.
+status=0
+for file in "$@"; do
+  for section in '## Goal' '## Acceptance criteria' '## Out of scope'; do
+    grep -q "^$section" "$file" || { echo "ERROR: $file missing \"$section\" section." >&2; status=1; }
+  done
+  grep -q -- '- \[ \]' "$file" \
+    || { echo "ERROR: $file has no '- [ ]' acceptance-criteria checkboxes." >&2; status=1; }
+done
+exit $status
 ```
 
 **Trade-offs:**
@@ -286,6 +310,8 @@ done
 ## Pattern B — Claude Code hooks (mechanical, in-session)
 
 Hooks in `.claude/settings.json` fire on Claude Code events: `PreToolUse`, `PostToolUse`, `Stop`, `UserPromptSubmit`. Useful when you want the agent (or the user) to see the failure *immediately*, not at commit time.
+
+Two mechanics to know. Hook commands receive a JSON payload on **stdin** (`tool_name`, `tool_input.file_path`, `tool_input.command`, …) — read it with `jq`. And exit codes carry meaning: **0** allows, **2** is the blocking error whose stderr is fed back to the agent (on `PreToolUse` it blocks the tool call), and any other non-zero exit is non-blocking — shown to the user only, *not* to the agent.
 
 **Use for:**
 - Same checks as Pattern A but with faster feedback during a session
@@ -305,7 +331,7 @@ Hooks in `.claude/settings.json` fire on Claude Code events: `PreToolUse`, `Post
         "hooks": [
           {
             "type": "command",
-            "command": "if [[ \"$CLAUDE_FILE_PATHS\" == docs/adr/* ]] && grep -q '^Status: Accepted' \"$CLAUDE_FILE_PATHS\" 2>/dev/null; then echo 'Blocked: ADR is Accepted. Only header may change. Create a Supersedes ADR instead.' >&2; exit 1; fi"
+            "command": "[ \"${SDD_BYPASS_ADR:-0}\" = \"1\" ] && exit 0; f=$(jq -r '.tool_input.file_path // empty'); if [[ \"$f\" == *docs/adr/* ]] && grep -q '^Status: Accepted' \"$f\" 2>/dev/null; then echo 'Blocked: ADR is Accepted. Only header may change. Create a Supersedes ADR instead.' >&2; exit 2; fi"
           }
         ]
       }
@@ -313,6 +339,8 @@ Hooks in `.claude/settings.json` fire on Claude Code events: `PreToolUse`, `Post
   }
 }
 ```
+
+The `SDD_BYPASS_ADR=1` check at the front is the documented escape hatch (golden rule 4): set it for one session when you legitimately need to touch an Accepted ADR body — visible, deliberate, no hook-disabling.
 
 **Example: warn (don't block) when a spec is edited without checking format**
 
@@ -325,7 +353,7 @@ Hooks in `.claude/settings.json` fire on Claude Code events: `PreToolUse`, `Post
         "hooks": [
           {
             "type": "command",
-            "command": "case \"$CLAUDE_FILE_PATHS\" in specs/*/spec.md) ./scripts/spec-format-check.sh \"$CLAUDE_FILE_PATHS\" >&2 || true ;; esac"
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *specs/*/spec.md) ./scripts/spec-format-check.sh \"$f\" >&2 || exit 2 ;; esac"
           }
         ]
       }
@@ -334,7 +362,7 @@ Hooks in `.claude/settings.json` fire on Claude Code events: `PreToolUse`, `Post
 }
 ```
 
-(Note the `|| true`: this WARNS but doesn't block. The agent sees the message in stderr and can decide whether to fix.)
+(Note the `exit 2`: on `PostToolUse` the edit has already happened, so nothing is undone — but exit 2 is the only exit code that feeds the stderr message back to the agent, which can then decide whether to fix. A plain non-zero exit would show the message to the user only, and the agent would never see it.)
 
 **Example: inject active ADR list before each prompt**
 
@@ -420,7 +448,7 @@ Invoke from the main session:
 Spawn the trio-auditor subagent for specs/2026-05-orders-rate-limit/.
 ```
 
-The subagent reads, analyzes, and returns a structured report. The main session's context stays clean.
+The subagent reads, analyzes, and returns a structured report. The main session's context stays clean. Expect run-to-run variance: verdicts on judgment calls (e.g. "no task touches an out-of-scope item") can differ between runs of the same audit — treat them as advisory annotations, never as required checks.
 
 **Trade-offs:**
 
@@ -503,6 +531,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history — the diffs against origin/main below need it
 
       - name: Spec format check
         if: contains(github.event.pull_request.labels.*.name, 'feature')
@@ -510,31 +540,34 @@ jobs:
 
       - name: PII scan on research
         run: |
-          for f in $(git diff --name-only origin/main -- docs/research/); do
+          for f in $(git diff --name-only origin/main...HEAD -- docs/research/); do
             if [ -f "$f" ]; then ./scripts/pii-scan.sh "$f"; fi
           done
 
       - name: ADR Accepted body unchanged
-        run: ./scripts/adr-frozen-check.sh
+        run: ./scripts/adr-frozen-check.sh --ci
 
   trio-audit:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.changed_files, 'specs/')
+    continue-on-error: true   # advisory: LLM evaluators advise, they don't block (golden rule 8)
     steps:
       - uses: actions/checkout@v4
-      - name: Run trio-auditor via Claude CLI
+        with:
+          fetch-depth: 0
+      - name: Run trio-auditor headless
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          # Find the changed spec folder
-          SPEC_DIR=$(git diff --name-only origin/main -- specs/ | xargs -I{} dirname {} | sort -u | head -1)
+          # Find the changed spec folder (the on.pull_request.paths filter already
+          # scoped this workflow to relevant PRs)
+          SPEC_DIR=$(git diff --name-only origin/main...HEAD -- specs/ | xargs -I{} dirname {} | sort -u | head -1)
           if [ -n "$SPEC_DIR" ]; then
-            claude-cli --skill trio-auditor --input "$SPEC_DIR" --output trio-audit.md
+            claude -p "Run the trio consistency audit from .claude/agents/trio-auditor.md on $SPEC_DIR. Output the findings table in markdown." > trio-audit.md
             cat trio-audit.md >> $GITHUB_STEP_SUMMARY
           fi
 ```
 
-(The exact Claude CLI invocation may vary by version. The pattern: invoke the same subagent definition from CI that you'd invoke locally.)
+(`claude -p` is headless mode — the same trio-auditor subagent definition you'd invoke locally, driven by a prompt from CI. It needs `ANTHROPIC_API_KEY` in the repo's secrets.)
 
 **Trade-offs:**
 
@@ -558,7 +591,7 @@ Putting all five patterns together for a single mid-size SDD repo. This is **opi
         "hooks": [
           {
             "type": "command",
-            "command": "if [[ \"$CLAUDE_FILE_PATHS\" == docs/adr/* ]] && grep -q '^Status: Accepted' \"$CLAUDE_FILE_PATHS\" 2>/dev/null; then echo 'Blocked: ADR Accepted — header only. Use Supersedes.' >&2; exit 1; fi"
+            "command": "[ \"${SDD_BYPASS_ADR:-0}\" = \"1\" ] && exit 0; f=$(jq -r '.tool_input.file_path // empty'); if [[ \"$f\" == *docs/adr/* ]] && grep -q '^Status: Accepted' \"$f\" 2>/dev/null; then echo 'Blocked: ADR Accepted — header only. Use Supersedes.' >&2; exit 2; fi"
           }
         ]
       }
@@ -569,7 +602,7 @@ Putting all five patterns together for a single mid-size SDD repo. This is **opi
         "hooks": [
           {
             "type": "command",
-            "command": "case \"$CLAUDE_FILE_PATHS\" in specs/*/spec.md) ./scripts/spec-format-check.sh \"$CLAUDE_FILE_PATHS\" >&2 || true ;; esac"
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *specs/*/spec.md) ./scripts/spec-format-check.sh \"$f\" >&2 || exit 2 ;; esac"
           }
         ]
       }
@@ -599,6 +632,8 @@ Putting all five patterns together for a single mid-size SDD repo. This is **opi
   }
 }
 ```
+
+(Hook payloads arrive as JSON on stdin — hence the `jq`. The ADR block exits 2 so the agent sees why it was stopped, and `SDD_BYPASS_ADR=1` is its documented escape hatch, same as in Pattern B.)
 
 ### `.claude/agents/trio-auditor.md` (LLM evaluator)
 

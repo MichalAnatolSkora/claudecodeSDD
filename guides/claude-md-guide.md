@@ -86,9 +86,8 @@ The mistakes the agent would otherwise make. This section is what makes a CLAUDE
 
 A one-line summary per active ADR. Update this when you add or supersede an ADR.
 
-> - **ADR-001** — Dapper for data access (not EF Core)
-> - **ADR-003** — Quartz for scheduling, configuration in `appsettings.json`
-> - **ADR-007** — Repository-per-aggregate, SQL in constants
+> - **ADR-001** — Repository per aggregate, hand-written SQL in constants
+> - **ADR-007** — Dapper for data access (not EF Core)
 > - **ADR-014** — Per-environment Quartz config in database (supersedes ADR-003 from 2026-Q3)
 
 Including this list serves two purposes: the agent gets the current decision set without reading every ADR file, and the next contributor sees what's settled vs unsettled. (For how to write the ADRs themselves — format, lifecycle, Supersedes pattern — see [`adr-guide.md`](adr-guide.md).)
@@ -101,7 +100,7 @@ A table that tells the agent which doc to read for which type of task. This is t
 > |------|------------|
 > | Adding a new SQL query | `DOMAIN.md` (terminology), `src/Repositories/OrderRepository.cs` (pattern) |
 > | New API endpoint | `ARCHITECTURE.md` § API, `docs/adr/ADR-005-rest-conventions.md` |
-> | Background job | `ARCHITECTURE.md` § Scheduling, ADR-003 (or ADR-014 if 2026-Q3+) |
+> | Background job | `ARCHITECTURE.md` § Scheduling, ADR-014 |
 > | Production incident | `docs/runbooks/` (find by symptom) |
 > | New external integration | `docs/integrations/_template.md`, `ARCHITECTURE.md` § Integrations |
 > | Deployment / rollback | `OPERATIONS.md` § Release |
@@ -122,7 +121,7 @@ A note for future you (and future contributors and the agent itself):
 
 > - Add a line to **Conventions** the third time you correct the agent on the same thing.
 > - Update **Active decisions** when an ADR is added or superseded.
-> - Trim any line older than 6 months that you can't justify in a sentence.
+> - Trim any line older than 6 months that you can't justify in a sentence (use `git blame` to date lines).
 > - If this file passes ~300 lines, something is over-claimed — move details to a linked guide.
 
 ---
@@ -151,7 +150,7 @@ File paths are the most token-efficient way to pin down what you mean.
 
 ### 4. Cap the length
 
-100–300 lines is the sweet spot for most repos. Above ~500 lines, attention dilutes — the agent reads it but stops weighing each line equally.
+100–300 lines is the sweet spot for most repos. As a rule of thumb, well before ~500 lines attention dilutes — the agent reads it but stops weighing each line equally. (A working heuristic, not a measured threshold — but the direction is reliable.)
 
 If a section grows past 30 lines, that's a signal to extract it into a linked detail doc.
 
@@ -172,7 +171,7 @@ Some content rarely changes (project overview, stack basics). Some changes regul
 
 ### 7. The "third time" rule
 
-Three corrections on the same thing = a CLAUDE.md line. Fewer corrections = a one-time prompt. The threshold prevents bloat from one-off annoyances while still capturing real recurring issues.
+Three corrections on the same thing = a CLAUDE.md line. Fewer corrections = a one-time prompt. The threshold prevents bloat from one-off annoyances while still capturing real recurring issues. (It's a heuristic, not a count — nobody keeps a tally. When you notice you've corrected the same thing more than once, write the line.)
 
 ---
 
@@ -253,7 +252,7 @@ Without a documentation map, the agent:
 
 **3. Convention precedence.** When two docs conflict, which wins? CLAUDE.md should state the rule:
 
-> When `CLAUDE.md`, an ADR, and `ARCHITECTURE.md` disagree, follow this precedence: CLAUDE.md ➜ Accepted ADRs ➜ ARCHITECTURE.md. If they appear to disagree, flag it before acting.
+> `CLAUDE.md` and Accepted ADRs should agree — the Active decisions list is a mirror of the ADRs, not a rival authority. If they disagree, flag it and treat the ADR as authoritative until the list is fixed. `ARCHITECTURE.md` ranks below both.
 
 **4. Sub-`CLAUDE.md` per directory (monorepo only).** Claude Code (and other tools) honor CLAUDE.md files inside subdirectories when the agent is working in that subtree. Per-service files keep each domain manageable:
 
@@ -277,12 +276,16 @@ Each per-service CLAUDE.md inherits the root file's spirit but layers in its own
 
 **7. Marking docs by lifecycle.** Add a `Status:` header to docs (`Status: Active`, `Status: Draft`, `Status: Archived`). CLAUDE.md instructs: *"Only read docs with `Status: Active`."* This solves the stale-content problem without manual pruning.
 
+**8. `@path` imports for small, stable files.** CLAUDE.md supports `@path/to/file` imports — the hub can pull a small, stable file (a short style guide, a command cheat sheet) in verbatim instead of duplicating it. Use sparingly: imports are loaded every session and count against the same attention budget as inline lines. For anything large or volatile, a doc-map pointer beats an import.
+
 ### The token-economy angle
 
 The many-docs case is also the most expensive case. A doc map saves tokens directly:
 
-- Without it: the agent runs grep, loads 5 candidate files, picks one. Cost: 10k tokens.
-- With it: the agent reads the map, loads the named file. Cost: 1k tokens.
+- Without it: the agent runs grep, loads 5 candidate files, picks one. Cost: on the order of 10k tokens.
+- With it: the agent reads the map, loads the named file. Cost: on the order of 1k tokens.
+
+(Illustrative orders of magnitude, not measurements — the exact numbers depend on file sizes.)
 
 For repos that get worked on daily, a good doc map pays for the time to write it many times over in a single week.
 
@@ -391,7 +394,7 @@ Drop this into a fresh repo and fill in the brackets. Cut anything you don't nee
 
 - Add a line to **Conventions** the third time you correct the agent on the same thing.
 - Update **Active decisions** when an ADR is added or superseded.
-- Trim any line older than 6 months you can't justify in one sentence.
+- Trim any line older than 6 months you can't justify in one sentence (use `git blame` to date lines).
 - If this file passes ~300 lines, move detail into a linked doc.
 ```
 
@@ -530,7 +533,6 @@ every transmission.
 ## Active decisions (Accepted ADRs)
 
 - **ADR-001** — Repository per aggregate, hand-written, SQL in constants
-- **ADR-003** — Quartz for scheduling, configuration in `appsettings.json`
 - **ADR-007** — Dapper for data access (not EF Core)
 - **ADR-014** — Per-environment Quartz config in DB (supersedes ADR-003 from 2026-Q3)
 
@@ -555,7 +557,7 @@ every transmission.
 
 - Add a line to **Conventions** the third time you correct the agent on the same thing.
 - Update **Active decisions** when an ADR is added or superseded.
-- Trim any line older than 6 months you can't justify in a sentence.
+- Trim any line older than 6 months you can't justify in a sentence (use `git blame` to date lines).
 - If this file passes ~300 lines, move detail into a linked doc.
 - **Don't edit the attribution block or sections 1–4** — those are upstream from
   multica-ai/andrej-karpathy-skills. If you want to change behavioral rules,
@@ -568,6 +570,7 @@ every transmission.
 - **The project layer addresses repo-specific mistakes** the agent would make from its priors (proposing EF when you use Dapper; reaching for MediatR; inventing file paths).
 - **Different cadences.** The behavioral layer is roughly stable forever; the project layer changes weekly. Maintenance reviews can focus on the project layer.
 - **Portable.** When you copy this file to a new project, you keep the behavioral layer verbatim and rewrite only the project layer. The attribution block carries forward; future readers can trace the lineage.
+- **There's a third home for truly personal rules.** Claude Code also reads a user-level `~/.claude/CLAUDE.md` across all your projects. If a behavioral rule is your personal preference rather than a team convention, it can live there instead — keeping the repo file purely about what the *project* needs.
 
 ### About the attribution
 

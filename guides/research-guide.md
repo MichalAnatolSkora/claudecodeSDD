@@ -40,6 +40,18 @@ This guide adds:
 
 This guide deliberately does **not** cover *"how to conduct user research"* — that's a discipline of its own with established literature (Nielsen Norman Group, Erika Hall's *Just Enough Research*, etc.). Scope here: how research artifacts live in an SDD repo.
 
+### When to skip all of this
+
+Most 1–10 teams skip formal research artifacts — and that's fine. Talking to users informally and writing the PRD straight from what you learned is the default at this scale. Create `docs/research/` only when a trigger fires:
+
+| Trigger | Write |
+|---------|-------|
+| You ran real interviews you'll want to cite later | Interview synthesis |
+| A contested product call needs evidence, not opinion | Validation study or competitive analysis |
+| A second person needs to consume the findings without you in the room | Whichever artifact carries the evidence |
+
+No trigger? Skip the folder. A PRD that says *"based on conversations with ~6 prospects"* is honest and sufficient.
+
 ---
 
 ## The principle, restated
@@ -102,18 +114,24 @@ Two practical patterns:
 
 **Pattern B: anonymize-then-commit.** If you absolutely need raw notes in the repo (e.g., regulated industry with auditable trail), apply anonymization in a separate pass, review the output, then commit. Use a PII linter (`detect-secrets`, custom regex hook) as a safety net.
 
-**Pre-commit hook recipe** (for Pattern B or as a safety net for Pattern A):
+**Mechanical safety nets** (for Pattern B, or as a backstop for Pattern A):
+
+The primary gate is a **git pre-commit hook** — it runs on every human `git commit`, which is exactly where a raw `interview-with-jane-doe.txt` would slip in. A ready-to-use scanner (`scripts/pii-scan.sh`, wired up via the pre-commit framework) lives in [`quality-gates-guide.md` § "Pattern A — Pre-commit / Git hooks"](quality-gates-guide.md#pattern-a--pre-commit--git-hooks-mechanical). Use that; it's not duplicated here.
+
+Keep the patterns narrow: scan for **emails and phone numbers**, plus a per-project name list (a file with your actual participants' names, matched with `grep -f`). Avoid the tempting "two adjacent capitalized words" name pattern — it flags `Order Export` and `New York` too, and near-constant false positives train exactly the `--no-verify` reflex that makes the gate useless.
+
+Optionally, add a **Claude Code hook** as a complementary in-session net — it warns the agent the moment it writes PII into a research file, instead of at commit time. Be clear about what it does *not* cover: it fires only on agent edits, so a human `git commit` bypasses it entirely. It complements the git pre-commit hook; it never replaces it.
 
 ```json
 {
   "hooks": {
-    "PreToolUse": [
+    "PostToolUse": [
       {
         "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "case \"$CLAUDE_FILE_PATHS\" in docs/research/*) if grep -qE '\\b[A-Z][a-z]+ [A-Z][a-z]+\\b|@[a-zA-Z0-9.-]+\\.|[0-9]{3}-[0-9]{3}-[0-9]{4}' \"$CLAUDE_FILE_PATHS\"; then echo 'WARNING: possible PII in research file. Names, emails, or phone numbers detected. Verify anonymization before committing.' >&2; fi ;; esac"
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in */docs/research/*) if [ -f \"$f\" ] && grep -qE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[a-z]{2,}|\\b[0-9]{3}-[0-9]{3}-[0-9]{4}\\b' \"$f\"; then echo 'WARNING: possible PII (email or phone number) in research file. Verify anonymization before committing.' >&2; exit 2; fi ;; esac"
           }
         ]
       }
@@ -122,7 +140,7 @@ Two practical patterns:
 }
 ```
 
-(This is a heuristic — `Firstname Lastname` patterns, email addresses, phone formats. It will have false positives, but a warning is cheap insurance.)
+(Mechanics worth noting: the hook command receives JSON on stdin, and `jq` extracts the file path. It's `PostToolUse`, not `PreToolUse` — the scan must run *after* the edit lands, or it misses the PII written by that very edit. Exit code 2 makes the warning visible to the agent, which can then fix the file.)
 
 ### "When in doubt, leave it out"
 
@@ -422,6 +440,8 @@ The agent can help with research synthesis — provided you keep raw sources OUT
 
 ### 1. Extract themes from anonymized interview notes
 
+This assumes anonymized per-interview notes in a `notes/` subfolder — keep those in-repo only if you must (see anti-pattern 9). Otherwise, run the same prompt against an anonymized export from your research tool, outside the repo.
+
 **Prompt:**
 
 ```text
@@ -462,8 +482,9 @@ Do not modify either file.
 **Prompt:**
 
 ```text
-Read all files in docs/research/. Cross-reference against the active PRDs in
-docs/prd/.
+Read docs/research/README.md (the index) first, then only the synthesis files
+relevant to this question — do not read all of docs/research/. Cross-reference
+against the active PRDs (the most recent non-superseded PRD(s) in docs/prd/).
 
 Identify themes or findings that suggest opportunities NOT covered by current
 PRDs. For each:

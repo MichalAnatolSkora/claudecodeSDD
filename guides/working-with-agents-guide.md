@@ -360,7 +360,7 @@ These are squishy — your mileage depends on file sizes, naming clarity, and ho
 
 | Doc count | Behavior | What you need |
 |-----------|----------|---------------|
-| < 10 | Agent scans the repo, reads what looks relevant, mostly OK | Decent file names |
+| < 10 | Search plus a few `CLAUDE.md` pointers find everything; mostly OK without extra structure | Decent file names |
 | 10–30 | Agent needs a guide to where things live | `CLAUDE.md` as a hub |
 | 30–100 | Agent gets lost without explicit pointers | `CLAUDE.md` hub + folder-level `README.md` index files |
 | 100+ | Agent can't browse — you must hand-select context per task | Strict folder structure + explicit context selection in every non-trivial prompt |
@@ -442,7 +442,7 @@ The **context window** is the total token budget for *one model call* — input 
 Two things to know:
 
 - **The hard limit is rarely the binding constraint.** Models start losing attention well before they run out of window. Dropping from 200k filled to 60k filled often improves output quality even though there was "room."
-- **Each prompt replays the full history.** Long sessions don't just *sit* at 80k tokens — every new prompt re-sends those 80k as input. Token cost grows superlinearly with session length, which is why ending sessions early (see "End sessions early" above) is one of the highest-leverage saves.
+- **Each prompt replays the full history.** Long sessions don't just *sit* at 80k tokens — every new prompt re-sends those 80k as input. Token cost grows superlinearly with session length, which is why ending sessions early (see "End sessions early" below) is one of the highest-leverage saves.
 
 #### Where input tokens come from in a typical session
 
@@ -479,7 +479,7 @@ The biggest items in a session are almost always:
 
 1. **Re-reading the same files.** A long session that reads `CLAUDE.md` four times is doing the work three times for free (caching helps when the prefix is stable — see below).
 2. **Loading entire files when you need one section.** *"Read `OrderRepository.cs`"* when you actually want the `GetOrders` method costs 5,000 tokens to find the 50 you wanted.
-3. **Full-file rewrites instead of diffs.** Generating a 400-line file because you changed 3 lines is the single most common token sink. Diffs cost ~50× less and review faster.
+3. **Full-file rewrites instead of diffs.** Generating a 400-line file because you changed 3 lines is the single most common token sink. Diffs cost dramatically less — ~50× is an order-of-magnitude rule of thumb, not a measured constant — and review faster.
 4. **Verbose ceremony in prompts.** Twelve-line preambles (*"please, kindly, if you would…"*) are pure overhead. The agent doesn't reward politeness with better output.
 5. **Long, unfiltered tool outputs.** `find` returning 800 files; `git log` with 2,000 commits. The agent reads them all, gets less useful per token, and burns budget on noise.
 6. **Re-explaining context each session.** No `CLAUDE.md` → every session pays the *"what is this project"* tax from scratch.
@@ -568,7 +568,7 @@ The exact numbers shift over time, but the ratios are stable:
 | Cache write (1-hour TTL, beta tier) | ~**2.00×** — bigger seed cost, much longer reuse |
 | Output tokens | ~**5.00×** (model-dependent) |
 
-A long session with a stable 10k-token prefix saves roughly: `10,000 × (1.00 − 0.10) = 9,000 tokens per prompt` after the first. Across 20 prompts in a session, that's 180,000 cached tokens — about the same as eliminating two large file reads.
+A long session with a stable 10k-token prefix saves roughly: `10,000 × (1.00 − 0.10) = 9,000 tokens per prompt` after the first. Across 20 prompts in a session, that's 180,000 cached tokens — at ~5–10k tokens per large file read, the equivalent of a couple dozen large file reads you never paid for.
 
 #### TTL — how long the cache lives
 
@@ -739,10 +739,10 @@ Read it carefully. Then:
 **For an ADR that Supersedes another** — **Prompt:**
 
 ```text
-ADR-014 supersedes ADR-002. I've already updated ADR-002's status header.
+ADR-014 supersedes ADR-003. I've already updated ADR-003's status header.
 Please:
-1. Update CLAUDE.md's "Active decisions" list — remove ADR-002, add ADR-014
-2. Grep the codebase and specs/ for references to ADR-002
+1. Update CLAUDE.md's "Active decisions" list — remove ADR-003, add ADR-014
+2. Grep the codebase and specs/ for references to ADR-003
 3. For each reference, recommend whether it stays (historical context)
    or needs updating to point to ADR-014.
 ```
@@ -1206,7 +1206,7 @@ Spawn a subagent with this prompt:
 I'll use the report to plan a refactor.
 ```
 
-**Anti-pattern:** spawning a subagent for short tasks. Each subagent costs ~1–2k tokens just to set up its own context and tool registry. For anything under ~5 tool calls, inline is cheaper *and* faster.
+**Anti-pattern:** spawning a subagent for short tasks. Each subagent re-pays the system prompt and tool registry from scratch — realistically ~10k+ tokens before it does any work. For anything under ~5 tool calls, inline is cheaper *and* faster.
 
 ### When the agent skips spawning a subagent
 
@@ -1241,7 +1241,7 @@ The general principle: subagents are an option the model considers, not an oblig
 
 ### Hooks
 
-**What they are:** automation triggered by events, configured in `.claude/settings.json` (project) or `~/.claude/settings.json` (user). The *harness* runs them, not the agent. Hooks can **block** actions (return non-zero exit), **inject context** (output goes back to the model), or **run side effects** (lint, build, regenerate artifacts, log).
+**What they are:** automation triggered by events, configured in `.claude/settings.json` (project) or `~/.claude/settings.json` (user). The *harness* runs them, not the agent. Hooks can **block** actions (exit code `2`), **inject context** (output goes back to the model), or **run side effects** (lint, build, regenerate artifacts, log).
 
 For SDD-specific hook recipes — blocking edits to Accepted ADRs, scanning PII in research files, injecting the active ADR list, end-of-session reminders, and how to choose between hooks and other patterns (pre-commit, subagent, slash command, CI) — see [`quality-gates-guide.md`](quality-gates-guide.md). This subsection covers the mechanics; that guide covers the full discipline.
 
@@ -1252,18 +1252,19 @@ For SDD-specific hook recipes — blocking edits to Accepted ADRs, scanning PII 
 | `PreToolUse` | Before any tool call | Block destructive actions, gate edits, lint inputs |
 | `PostToolUse` | After a tool call completes | Trigger side effects (rebuild, regenerate, notify) |
 | `UserPromptSubmit` | User submits a new prompt | Inject context, log session |
-| `Stop` | Session ends normally | Session summary, cleanup, commit reminder |
+| `Stop` | The main agent finishes responding (end of every turn — not session end) | Per-turn checks: did the agent leave failing tests, uncommitted work |
 | `SubagentStop` | A subagent finishes | Capture subagent output, validate report |
+| `SessionEnd` | The session terminates | Cleanup, logging, reminders — output is *not* fed to the agent |
 | `Notification` | Agent emits a notification | Forward to chat, log to file |
 
-Each event accepts a `matcher` (which tool name or pattern triggers it — supports regex like `Edit|Write`) and a list of `hooks` (each with `type: command` and the shell command).
+Each event accepts a `matcher` (which tool name or pattern triggers it — supports regex like `Edit|Write`) and a list of `hooks` (each with `type: command` and the shell command). The command receives the event payload as JSON on **stdin** — `tool_name`, `tool_input` (with `file_path`, `command`, …) — which you read with `jq`.
 
 #### Where they fit in SDD
 
 - **Enforce conventions.** A `PreToolUse` hook on `Edit|Write` for `.md` files runs `markdownlint`; malformed docs blocked at the source.
 - **Automate doc maintenance.** A `PostToolUse` hook on `Edit|Write` for `guides/*.md` regenerates the PDF via pandoc + Prince. Agent edits markdown; PDF stays in sync without anyone remembering.
 - **Inject context.** A `UserPromptSubmit` hook prepends *"the active ADR list is in `CLAUDE.md` § Active Decisions."* Agent gets the pointer for free.
-- **End-of-session discipline.** A `Stop` hook checks for uncommitted spec changes, missing PR references in shipped specs, stale ADRs not updated this session.
+- **End-of-session discipline.** A `SessionEnd` hook checks for uncommitted spec changes, missing PR references in shipped specs, stale ADRs not updated this session — and surfaces them to the terminal or a log (the agent itself won't see `SessionEnd` output).
 - **Pre-commit gates.** Block commits that touch `src/` without a corresponding spec update, or modify ADRs with `Status: Accepted`.
 - **Block dangerous tools.** A `PreToolUse` hook on `Bash` that catches `rm -rf` or `git push --force`.
 - **Inject conventions just-in-time.** A `PreToolUse` hook on `Edit` for `*.cs` files prepends the team's C# style guide before the edit.
@@ -1281,7 +1282,7 @@ Each event accepts a `matcher` (which tool name or pattern triggers it — suppo
         "hooks": [
           {
             "type": "command",
-            "command": "case \"$CLAUDE_FILE_PATHS\" in *guides/*.md*) pandoc guides/spec-driven-development-guide.md guides/working-with-agents-guide.md guides/runbook-operations-guide.md -o output.pdf --pdf-engine=prince -H pdf-style-compact.html --metadata title=\"claudecodeSDD\" ;; esac"
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *guides/*.md) pandoc guides/spec-driven-development-guide.md guides/working-with-agents-guide.md guides/runbook-operations-guide.md -o output.pdf --pdf-engine=prince -H pdf-style-compact.html --metadata title=\"claudecodeSDD\" ;; esac"
           }
         ]
       }
@@ -1303,7 +1304,7 @@ Any time the agent edits a guide, the PDF rebuilds automatically.
         "hooks": [
           {
             "type": "command",
-            "command": "if [[ \"$CLAUDE_FILE_PATHS\" == *docs/adr/* ]] && grep -q '^Status: Accepted' \"$CLAUDE_FILE_PATHS\" 2>/dev/null; then echo 'Blocked: ADR is Accepted — only the Status header may change. Create a new ADR with Supersedes instead.' >&2; exit 1; fi"
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); if [[ \"$f\" == *docs/adr/* ]] && grep -q '^Status: Accepted' \"$f\" 2>/dev/null; then echo 'Blocked: ADR is Accepted — only the Status header may change. Create a new ADR with Supersedes instead.' >&2; exit 2; fi"
           }
         ]
       }
@@ -1347,7 +1348,7 @@ The agent sees the active ADR list before every prompt; the human stops having t
         "hooks": [
           {
             "type": "command",
-            "command": "case \"$CLAUDE_FILE_PATHS\" in *.md) markdownlint \"$CLAUDE_FILE_PATHS\" >&2 || true ;; esac"
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *.md) markdownlint \"$f\" >&2 || true ;; esac"
           }
         ]
       }
@@ -1356,14 +1357,14 @@ The agent sees the active ADR list before every prompt; the human stops having t
 }
 ```
 
-The `|| true` keeps the hook from blocking — issues just surface to stderr where the agent can read them. Drop `|| true` and ensure `markdownlint` exits non-zero to make it blocking.
+The `|| true` keeps the hook from blocking — issues just surface as informational output. Replace `|| true` with `|| exit 2` to escalate: exit code `2` is the blocking error code whose stderr is fed back to the agent (the edit already happened, but the agent sees the lint output and fixes the file).
 
 **5. End-of-session checklist**
 
 ```json
 {
   "hooks": {
-    "Stop": [
+    "SessionEnd": [
       {
         "matcher": "",
         "hooks": [
@@ -1378,7 +1379,7 @@ The `|| true` keeps the hook from blocking — issues just surface to stderr whe
 }
 ```
 
-Surfaces the *"did you commit the spec / ADR?"* nudge at session end.
+Surfaces the *"did you commit the spec / ADR?"* nudge when the session terminates. Note: `SessionEnd` output is **not** fed back to the agent — it's for side effects only (a reminder printed to the terminal, a log line). If you want the agent itself to act on the check, use a `Stop` hook with `exit 2` instead — but remember `Stop` fires every time the agent finishes responding, not once per session.
 
 **6. Block `rm -rf` and `git push --force`**
 
@@ -1391,7 +1392,7 @@ Surfaces the *"did you commit the spec / ADR?"* nudge at session end.
         "hooks": [
           {
             "type": "command",
-            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'rm[[:space:]]+-rf|git[[:space:]]+push.*--force'; then echo 'Blocked: destructive command. If intended, run manually.' >&2; exit 1; fi"
+            "command": "cmd=$(jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'rm[[:space:]]+-rf|git[[:space:]]+push.*--force'; then echo 'Blocked: destructive command. If intended, run manually.' >&2; exit 2; fi"
           }
         ]
       }
@@ -1404,11 +1405,11 @@ Catches the most common ways to lose work; bypassing requires explicit human act
 
 #### Operational notes
 
-- **Exit code = blocking behavior.** A hook that exits non-zero stops the tool call. Use this for gates; use stderr to communicate to the agent.
-- **Hooks must be fast.** A hook that takes 5 seconds adds 5 seconds to every matching tool call. Aim for sub-100 ms. Push slow work into subagents or slash commands instead.
-- **Hooks log to stderr by default.** The agent sees stderr output as part of the tool result. For your own debugging, also tee to a file (`>> ~/.claude/hooks.log 2>&1`).
+- **Exit code 2 = blocking behavior.** Exit `0` allows the action. Exit `2` is the blocking error: stderr is fed back to the agent (on `PreToolUse` the tool call is blocked; on `PostToolUse` the tool already ran, but the agent sees the message). Any *other* non-zero exit is a non-blocking error shown to the user only — the agent never sees it. Use `2` for gates; use stderr to communicate to the agent.
+- **Hooks must be fast.** A hook that takes 5 seconds adds 5 seconds to every matching tool call. As a rule of thumb, aim for sub-100 ms. Push slow work into subagents or slash commands instead.
+- **Hooks log to stderr by default.** On exit code `2`, the agent sees stderr as part of the tool result; on other exit codes it surfaces to the user. For your own debugging, also tee to a file (`>> ~/.claude/hooks.log 2>&1`).
 - **Matchers support regex.** `Edit|Write` matches both. `Bash` matches all bash calls. `""` (empty) matches everything.
-- **Useful environment variables.** Typically `$CLAUDE_FILE_PATHS` (paths from tool input), `$CLAUDE_TOOL_INPUT` (raw input), `$CLAUDE_TOOL_NAME`. Names vary by harness version — check current docs before relying on them.
+- **Reading the payload.** The event arrives as JSON on stdin — `session_id`, `tool_name`, `tool_input` (with `file_path`, `command`, …) — read it with `jq`, e.g. `f=$(jq -r '.tool_input.file_path // empty')`. The documented environment variable is `$CLAUDE_PROJECT_DIR` (absolute project root — handy for referencing scripts, e.g. `"$CLAUDE_PROJECT_DIR/scripts/check.sh"`). Details vary by harness version — check current docs before relying on them.
 - **Project vs user scope.** Hooks in `~/.claude/settings.json` apply only to you; the team doesn't see them. For team-shared invariants, put hooks in project `.claude/settings.json` and commit it.
 
 #### Anti-patterns

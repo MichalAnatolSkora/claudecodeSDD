@@ -20,11 +20,14 @@ Every serious AI-coding tool landed on the same idea: **one file the agent alway
 
 | Tool / team | What they use | What it is |
 |-------------|---------------|------------|
-| **GitHub** (Microsoft) | [`spec-kit`](https://github.com/github/spec-kit) | A literal "Spec-Driven Development" toolkit: `spec.md → plan.md → tasks.md`, paired with Copilot. Shipped Aug 2025, tens of thousands of stars. The headline if you need to convince someone: *GitHub ships this themselves.* |
+| **GitHub** (Microsoft) | [`spec-kit`](https://github.com/github/spec-kit) | A literal "Spec-Driven Development" toolkit: `spec.md → plan.md → tasks.md`, driven by slash commands (`/constitution`, `/specify`, `/plan`, `/tasks`, `/implement`). Agent-agnostic — works with Copilot, Claude Code, Gemini CLI, Cursor, and others. Shipped Sept 2025, tens of thousands of stars. The headline if you need to convince someone: *GitHub ships this themselves.* |
 | **Anthropic** | Claude Code + `CLAUDE.md` | A repo-level instruction file the agent reads every session, plus Plan Mode / "plan before code" guidance. These are the **building blocks this repo builds on** — Claude Code ships the primitives (the instruction hub, planning), not the full PRD → spec → plan → tasks → ADR method, which this repo adds on top. |
-| **Cursor** | `.cursorrules` | Same idea as `CLAUDE.md` — a conventions file the agent always reads. The community `awesome-cursorrules` catalog is a de-facto pattern library. |
-| **Aider** | [conventions file](https://aider.chat/docs/usage/conventions.html) | Loaded into every session. |
-| **Continue.dev** | `.continuerules` | Per-repo rules. |
+| **AWS** | **Kiro** | A spec-driven agentic IDE (previewed 2025): each feature gets `requirements.md` (EARS-style acceptance criteria) / `design.md` / `tasks.md`, plus steering files for project conventions. The closest commercial cousin of this repo's trio. |
+| **Cursor** | Project Rules (`.cursor/rules/*.mdc`) | Same idea as `CLAUDE.md` — conventions files the agent always reads. The older single-file `.cursorrules` is deprecated legacy. |
+| **Cross-tool** | [`AGENTS.md`](https://agents.md) | A tool-neutral instructions-file convention, adopted by OpenAI Codex, Google Jules, Cursor, and many others. This repo ships one too — a thin pointer to `CLAUDE.md`. |
+| **OpenSpec** | open-source workflow | A tool-agnostic spec-driven workflow for AI coding assistants: each change is a spec proposal (delta) reviewed before code and archived after it ships. |
+| **Aider** | [conventions file](https://aider.chat/docs/usage/conventions.html) | Loaded when configured (`--read` / `.aider.conf.yml`). |
+| **Continue.dev** | rules files (`.continue/rules/`, formerly `.continuerules`) | Per-repo rules. |
 | **Cline** | `.clinerules` | Per-repo rules. |
 
 Different filenames, same move: **tell the agent your conventions instead of letting it guess.**

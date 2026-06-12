@@ -13,7 +13,7 @@ Turn an accepted PRD into a prioritized list of features — each a vertical sli
 2. Propose features as **vertical slices** — each independently shippable and user-visible. NOT layers: "DB layer" / "API layer" are not features.
 3. Size each to ~a few days (a `spec.md` under ~150 lines). Split anything bigger; fold anything trivial into a neighbour.
 4. Flag the **walking skeleton** — the thinnest end-to-end slice that proves the PRD's core — then order the rest by value × dependency and mark dependencies.
-5. Keep every feature within the PRD's `Out of scope`.
+5. No feature may violate the PRD's `Out of scope` — flag any proposed slice that would.
 
 ## Output
 

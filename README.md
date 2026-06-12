@@ -73,7 +73,7 @@ Minimal starting points. Copy into your project and fill in the brackets:
 npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude
 ```
 
-That drops all ten commands (`/prd-new`, `/features-from-prd`, `/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`, `/implement`) into `.claude/commands/`, ready to use.
+That drops all eleven commands (`/prd-new`, `/prd-review`, `/features-from-prd`, `/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`, `/implement`) into `.claude/commands/`, ready to use.
 
 **Commands + a starter `CLAUDE.md`** (plain git — degit can't grab the single `CLAUDE.md` file):
 
@@ -89,7 +89,7 @@ That drops `.claude/` (the commands) **and** a bracketed `CLAUDE.md` at your rep
 - **[plan.md](templates/plan.md)** — implementation plan (decisions, file structure, constraints)
 - **[tasks.md](templates/tasks.md)** — execution checklist with one verification per step
 - **[TESTING.md](templates/TESTING.md)** — the test conventions the agent reads before writing tests (framework, where tests live, mocking rules, what "done" means)
-- **[.claude/ trio commands](templates/.claude/)** — copy-pasteable Claude Code slash commands (`/prd-new`, `/features-from-prd`, `/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`, `/implement`) that take an idea from PRD through the trio and into implementation
+- **[.claude/ trio commands](templates/.claude/)** — copy-pasteable Claude Code slash commands (`/prd-new`, `/prd-review`, `/features-from-prd`, `/spec-new`, `/spec-review`, `/plan-from-spec`, `/plan-validate`, `/tasks-from-plan`, `/tasks-add`, `/trio-check`, `/implement`) that take an idea from PRD through the trio and into implementation
 - **[ADR.md](templates/ADR.md)** — architecture decision record (context, decision, consequences, alternatives)
 - **[runbook.md](templates/runbook.md)** — operational runbook entry (symptoms, diagnosis, recovery, verification)
 - **[postmortem.md](templates/postmortem.md)** — blameless incident analysis (summary, timeline, root cause, lessons, action items)

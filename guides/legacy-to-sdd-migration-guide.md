@@ -63,6 +63,8 @@ Output a markdown report. Don't propose changes yet — just survey.
 
 The report tells you two things: what you already have (keep it — don't rewrite good docs), and what's *implicit* in the code but written nowhere. That second thing is the raw material for `CLAUDE.md`. Everything the audit doesn't surface, you don't need yet.
 
+**When a doc contradicts the code, the code is the source of truth.** A legacy repo's docs lag its code by years; the code is what actually runs. When the audit surfaces a conflict, fix the doc or archive it — don't split the difference. Mark anything you can't verify against the code `[VERIFY]` rather than restating it as fact. And until the migration sweep is done, put one line in `CLAUDE.md`: *"Existing docs may be stale — when a doc and the code disagree, the code wins."* That single sentence stops the agent from faithfully implementing a doc that's been wrong since 2021.
+
 ---
 
 ## Week 1: the foundation
@@ -149,7 +151,7 @@ You don't have to hand-type the spec/plan/tasks prompts — the commands ship wi
 npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude
 ```
 
-Then it's `/spec-new` → `/plan-from-spec` → `/tasks-from-plan` → `/trio-check`. (The whole loop, step by step: [`flow-guide.md`](flow-guide.md). The trio itself: [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).)
+Then it's `/sdd-3-spec-new` → `/sdd-4-plan-from-spec` → `/sdd-5-tasks-from-plan` → `/sdd-6-trio-check` — the shipped files are phase-numbered; rename them if you'd rather drop the `sdd-N-` prefix. (The whole loop, step by step: [`flow-guide.md`](flow-guide.md). The trio itself: [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).)
 
 ---
 
@@ -187,7 +189,7 @@ Write any of these before the trigger and you get a doc that's wrong, generic, o
 
 After a month of real use you'll notice yourself typing the same prompts. That's the signal to package them.
 
-- **You don't have to build the trio commands** — this repo ships them ready-made (`/prd-new`, `/features-from-prd`, `/spec-new`, … `/trio-check`). Copy them with the one-liner above.
+- **You don't have to build the trio commands** — this repo ships them ready-made (`/sdd-1-prd-new`, `/sdd-2-features-from-prd`, `/sdd-3-spec-new`, … `/sdd-6-trio-check`). Copy them with the one-liner above.
 - **Your own repeated prompts** → a slash command. Anything you've typed 5+ times becomes a single `.claude/commands/<name>.md` (e.g. an `audit-docs` or `end-session` prompt).
 - **Repeated read-heavy audits** (doc-staleness, ADR-vs-code checks) → a subagent, so they don't bloat your main session.
 - **Invariants you want enforced** (block edits to accepted ADRs, check that shipped specs link a PR) → a `settings.json` hook.

@@ -73,7 +73,7 @@ Use this name if the file is the operational handbook for the whole system, not 
 
 ### My recommendation
 
-For a mid-sized project: start with `OPERATIONS.md`. The moment that file crosses ~400 lines, split it:
+For a mid-sized project: start with `OPERATIONS.md`. The moment that file crosses ~500 lines or ~15 distinct procedures, split it:
 - `OPERATIONS.md` stays as the high-level index + routine procedures
 - `docs/runbooks/` becomes a folder of focused, per-incident entries
 - `docs/deployment.md` extracts release procedures
@@ -479,7 +479,7 @@ Good for projects with fewer than ~15 distinct procedures.
 - Easy for an AI agent to load fully into context
 
 **Cons:**
-- Becomes unwieldy past ~600 lines
+- Becomes unwieldy past ~500 lines
 - Diff noise grows (every change touches the same file)
 - Hard to assign per-section ownership
 
@@ -514,7 +514,7 @@ docs/
 
 ### Transition strategy
 
-Don't pre-organize. Start with `OPERATIONS.md`. When it becomes painful to navigate (typically around 500–700 lines or 10+ distinct procedures), do a single splitting refactor:
+Don't pre-organize. Start with `OPERATIONS.md`. When it becomes painful to navigate (typically around ~500 lines or ~15 distinct procedures), do a single splitting refactor:
 
 1. Create `docs/runbooks/`
 2. Move each procedure to its own file, keeping the title as the filename slug

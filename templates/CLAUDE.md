@@ -123,9 +123,10 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## How to update this file
 
-- Add a line to **Conventions** the third time you correct the agent on the same thing.
+- Add a line to **Conventions** the third time you correct the agent on the same thing
+  (a heuristic, not a count — when you notice repeat corrections, write the line).
 - Update **Active decisions** when an ADR is added or superseded.
-- Trim any line older than 6 months you can't justify in one sentence.
+- Trim any line older than 6 months you can't justify in one sentence (use `git blame` to date lines).
 - If this file passes ~300 lines, move detail into a linked doc.
 - **Don't edit the attribution block or sections 1–4** — those are upstream from
   multica-ai/andrej-karpathy-skills. If you want to change behavioral rules,
