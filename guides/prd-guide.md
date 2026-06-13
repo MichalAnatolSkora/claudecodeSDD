@@ -193,6 +193,7 @@ Surfacing these makes the unspoken explicit. Often resolves disagreements that w
 - Competitive analysis
 - Internal discussions / decision documents that led to this PRD
 - Related prior PRDs (especially for era-2+ PRDs)
+- Concept-level product mocks, if any — as frozen exports in `docs/prd/assets/`, frozen with the PRD; the live design file stays outside the repo, linked here. (Per-feature mockups belong to the feature's spec instead — see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) § "Mockups and visual artifacts".)
 
 ---
 

@@ -157,7 +157,7 @@ Used for multi-step work (3+ distinct steps); skip for trivial single-step tasks
 MCP (Model Context Protocol) servers add tools beyond the default set. The most common categories:
 
 - **Browser tools** — `Claude in Chrome`, `Claude Preview`: navigate, click, screenshot, read DOM, fill forms. Used when the task involves a running web app.
-- **Design / project-management tools** — Figma, Linear, Asana, Jira, Notion, Slack: read/write artifacts in those systems. The agent uses them when the task explicitly references one (`"add a Linear ticket for…"`).
+- **Design / project-management tools** — Figma, Linear, Asana, Jira, Notion, Slack: read/write artifacts in those systems. The agent uses them when the task explicitly references one (`"add a Linear ticket for…"`). Note on mockups: an image in context costs thousands of tokens and can't be grepped — keep the testable details as text in the spec's acceptance criteria and treat the image as reference (see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) § "Mockups and visual artifacts").
 - **Database tools** — Supabase, Snowflake, BigQuery MCPs: query the DB directly without going through code.
 - **Repository / directory access** — additional codebases the agent can read alongside the active one.
 

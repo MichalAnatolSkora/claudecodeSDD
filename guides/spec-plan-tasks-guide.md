@@ -135,6 +135,35 @@ Each section in the trio earns its place — none are decoration. Below: the **b
 
 The bare-minimum rows are the sections you'll see filled in across the [worked examples](#worked-example-1--rate-limiting-on-the-orders-endpoint) below; the nice-to-haves are what a multi-module feature accumulates and a bug-fix never needs.
 
+### Mockups and visual artifacts
+
+When a change has a UI, the mockup attaches to the spec — with one rule: **the mockup is a reference, not the contract.** Acceptance criteria stay text; extract them from the mockup, so the agent (and a reviewer who never opens the image) still has the testable definition:
+
+```markdown
+- [ ] AC3: list view renders the columns from mockup-list-view.png
+      (order id, status, created_at), default sort created_at DESC
+- [ ] AC4: empty state shows the "no orders yet" panel (per mockup), not an empty table
+```
+
+Where it lives: a **frozen export** (`mockup-list-view.png`) sits in the spec's folder and freezes with it; the live design file (Figma etc.) never enters the repo — link it from References with the export date:
+
+```markdown
+## References
+- `mockup-list-view.png` — frozen export 2026-06-13 of [Figma file](https://figma.com/file/...)
+  (the live file may drift; this spec implements the snapshot)
+```
+
+Match the weight to the need, lightest first:
+
+| Form | Reach for it when |
+|------|-------------------|
+| ASCII wireframe inline in `spec.md` | Layout intent is enough — grepable, diffable, costs nothing. |
+| Mermaid diagram inline | Flows and screen states. |
+| Frozen PNG in the spec folder + live link in References | Pixels matter. The agent can read the image during `/implement`. |
+| Throwaway HTML mockup (a spike) | The UX itself is an open question — click it, resolve the Open Question into the spec, and the spike never becomes production code. |
+
+Two honesty rules: a visual check in `tasks.md` is a *human* step (`→ verify: screenshot side-by-side with mockup-list-view.png — human eyeball`), don't dress it up as mechanical; and concept-level product mocks belong one layer up — `docs/prd/assets/`, frozen with the PRD ([`prd-guide.md`](prd-guide.md)).
+
 ---
 
 ## When to skip parts of the trio

@@ -35,3 +35,4 @@
 ## References
 
 - [Link to related ADRs, prior specs, or docs]
+- [Mockup, if the change has a UI: frozen export in this folder + live design-file link with export date — the image is reference, the acceptance criteria are the contract]
