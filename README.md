@@ -83,6 +83,20 @@ git clone --depth 1 https://github.com/MichalAnatolSkora/claudecodeSDD /tmp/sdd 
 
 That drops `.claude/` (the commands) **and** a bracketed `CLAUDE.md` at your repo root — then fill in the brackets (see [Writing a Good CLAUDE.md](guides/claude-md-guide.md)).
 
+**Update an existing repo** — already have the commands and want the latest versions? Run *from your repo root*. This clears out the old SDD commands and pulls fresh copies, leaving your own custom commands (and `CLAUDE.md`) untouched:
+
+```bash
+rm -f .claude/commands/sdd-*.md && npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude/commands .claude/commands --force
+```
+
+The `rm` drops the stale `sdd-*` files (so anything renamed or removed upstream doesn't linger); `--force` lets degit write into the non-empty `.claude/commands/`. Only the `sdd-*` commands are touched — refresh your `CLAUDE.md` by hand if you want upstream wording there.
+
+No `npx`? The plain-git equivalent:
+
+```bash
+git clone --depth 1 https://github.com/MichalAnatolSkora/claudecodeSDD /tmp/sdd && rm -f .claude/commands/sdd-*.md && cp -r /tmp/sdd/templates/.claude/commands/. .claude/commands/ && rm -rf /tmp/sdd
+```
+
 - **[CLAUDE.md](templates/CLAUDE.md)** — agent instruction hub with two layers: literal-copied behavioral guidelines (from [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md), kept verbatim with attribution) + bracketed project-specific sections you fill in
 - **[PRD.md](templates/PRD.md)** — product requirements document (problem, users, success criteria, constraints) — the *starting* artifact, freezes after v1
 - **[spec.md](templates/spec.md)** — feature specification (goal, scope, acceptance criteria, open questions)
