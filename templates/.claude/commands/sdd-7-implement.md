@@ -10,7 +10,7 @@ If no path is given, use the most recently modified spec under `specs/` — a fo
 
 ## Before you start
 
-Read `spec.md`, `plan.md`, `tasks.md` in that folder (for a one-file trio: its Spec / Plan / Tasks sections), plus `TESTING.md` and `CLAUDE.md` if present. If the trio clearly hasn't passed `/sdd-6-trio-check` (an unresolved open question, an acceptance criterion with no task), stop and say so — don't build on a broken trio.
+Read `spec.md`, `plan.md`, `tasks.md` in that folder (for a one-file trio: its Spec / Plan / Tasks sections), plus `TESTING.md` and `CLAUDE.md` if present. If the trio clearly hasn't passed `/sdd-6-trio-check` (an unresolved open question, an acceptance criterion with no task), stop and say so — don't build on a broken trio. If `specs/FEATURES.md` exists, flip this feature's row to `in progress` before the first task.
 
 ## The loop — one task at a time, in order
 
@@ -30,6 +30,7 @@ Stop — that's a **spec gap, not a cue to improvise.** Name what's missing (an 
 1. For each new test, break the implementation on purpose (flip a condition, return a wrong value) and confirm the test goes **red**.
 2. Report any test that stayed green — that's false confidence; fix the assertion, not the code.
 3. Restore the implementation; confirm the suite is green again.
+4. If `specs/FEATURES.md` exists, set this feature's row to `shipped` (the spec's own `STATUS: shipped` marker is added later at merge, per `tasks.md` Post-merge).
 
 ## Constraints
 

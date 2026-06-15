@@ -19,6 +19,7 @@ Turn a rough feature idea into a structured `spec.md`. The idea: `$ARGUMENTS`
    - **Open questions** — do NOT answer them yourself; list what's genuinely undecided.
    - **References** — related ADRs by number, prior specs by slug, integrations if relevant.
 3. Mark any guess with `[VERIFY]` — especially file paths you inferred.
+4. After the spec is saved, if `specs/FEATURES.md` exists, update the matching feature's row (match by name or its `Spec` link): set `Status` to `spec'd` unless it's already further along, and point the `Spec` column at `specs/<slug>/`. No `FEATURES.md`? Skip this.
 
 ## Constraints
 

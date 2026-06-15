@@ -508,7 +508,7 @@ A repo doing SDD seriously usually has these in `.claude/commands/`. *(The shipp
 
 - **`/prd-new <idea>`** — *(furthest upstream)* turns a 1–3 sentence idea into a lean PRD draft, then fills the gaps by asking you the open questions. See [`prd-guide.md`](prd-guide.md) § "AI-assisted PRD authoring".
 - **`/prd-review <path>`** — audits a draft PRD for gaps (specific users, measurable success criteria, ≥5 out-of-scope items, no implementation leakage) before you slice it. Read-only.
-- **`/features-from-prd`** — *(upstream of the trio)* slices an accepted PRD into a prioritized, vertically-sliced feature list; each row becomes a spec. See [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".
+- **`/features-from-prd`** — *(upstream of the trio)* slices an accepted PRD into a prioritized, vertically-sliced feature list, saved to `specs/FEATURES.md` as the project's feature/status index; each row becomes a spec. See [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".
 - **`/spec-new <feature-description>`** — drafts `spec.md` from a one-paragraph description ([prompt 1](#1-draft-specmd-from-a-one-paragraph-idea) above)
 - **`/spec-review <path>`** — runs the audit checklist (prompt 2)
 - **`/plan-from-spec`** — drafts `plan.md` from the active spec (prompt 3)

@@ -98,6 +98,10 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - [Naming convention with concrete examples]
 - [Cross-cutting concern — logging, error handling, validation — and where it lives]
 
+## Writing docs (PRD, spec, ADR)
+
+- **Human-reviewed, so factual and tight.** Claims, numbers, decisions — not marketing prose or filler. A reviewer should skim and judge in minutes; verbosity is where the gaps review exists to catch hide. (Per-artifact length and content rules live in the `/sdd-*` commands and the guides.)
+
 ## Do NOT
 
 - [Anti-pattern by name, with ADR reference if applicable]

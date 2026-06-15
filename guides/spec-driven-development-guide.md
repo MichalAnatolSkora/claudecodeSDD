@@ -1108,11 +1108,32 @@ Three files. Everything else is added when a specific trigger fires (see the tri
 
 ### Common variations
 
-- **Monorepo with multiple services** — one root `CLAUDE.md` for cross-service conventions, plus a `CLAUDE.md` per service for service-specific stack/patterns. Same with `ARCHITECTURE.md` (root: service-level boundaries; per-service: internal structure).
+- **Monorepo, shared code** (services of one system) — one root `CLAUDE.md` for cross-service conventions plus a `CLAUDE.md` per service for service-specific stack/patterns; same split for `ARCHITECTURE.md` (root: service boundaries; per-service: internals). Reusable code lives in `packages/`, deployables in `apps/` (or `services/`). ADRs: global `docs/adr/` for cross-cutting decisions, per-service for the rest — see [adr-guide.md](adr-guide.md) and the sub-`CLAUDE.md` pattern in [claude-md-guide.md](claude-md-guide.md).
+- **Monorepo, no shared code** (independent apps under one roof) — drop `packages/`; each app under `apps/<name>/` is an island with its own deps, lockfile, tests, `docs/` (spec→plan→tasks + local ADRs), and `CLAUDE.md`. The root holds only the genuinely global: README-as-map, shared conventions, cross-cutting ADRs. The one real trap is CI — add path filters so a change under `apps/<name>/**` builds and releases only that app; without them every commit rebuilds everything and you lose independent deploys. If the apps share *nothing*, confirm one repo still earns its keep (atomic commits, one clone, shared conventions) over separate repos before committing to the layout.
 - **Small project / solo dev** — collapse `docs/` content into top-level files until it gets unwieldy. A single `ARCHITECTURE.md` covering both structure and runbook is fine until it crosses ~600 lines.
 - **OSS project** — heavier emphasis on `CONTRIBUTING.md` and `LICENSE`; lighter on `ROADMAP.md` and `RUNBOOK.md` (operational stuff is private). `CLAUDE.md` written with external contributors' agents in mind.
 - **Regulated industry** — add `docs/compliance/` (audit trails, control mappings) alongside the standard tree. ADRs gain extra weight; throwing decisions in Slack is no longer an option.
 - **Heavy data/ML work** — add `docs/datasets/` (provenance, schemas, sampling) and `docs/experiments/` (separate from `docs/research/` — experiments are reproducible artifacts, research is exploratory notes).
+
+For the **no-shared-code** case above, a concrete shape — root holds only the global, each app is an island:
+
+```
+/
+├── README.md                 # map: what each app is, how to run it
+├── CLAUDE.md                 # global conventions; says "read the app's local CLAUDE.md"
+├── docs/
+│   └── adr/                  # cross-cutting decisions only
+├── .github/workflows/        # CI with path filters — one pipeline per app
+└── apps/
+    ├── web/                  # an island: own stack, deps, lockfile
+    │   ├── src/
+    │   ├── tests/
+    │   ├── docs/             # this app's spec → plan → tasks (+ local ADRs)
+    │   ├── CLAUDE.md         # this app's conventions
+    │   └── README.md
+    ├── api/                  # another island, possibly a different stack
+    └── worker/
+```
 
 ### The principle behind the layout
 

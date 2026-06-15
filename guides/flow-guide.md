@@ -49,7 +49,7 @@ That's the floor. Everything below is per change.
 ## Step 2 — PRD → features
 
 - **Do:** `/features-from-prd` — slices the PRD into **vertical, independently-shippable features**, prioritized, walking-skeleton first.
-- **Get:** a short prioritized list (in the PRD or an issue tracker). Each row becomes one feature → one trio.
+- **Get:** a short prioritized list, saved to `specs/FEATURES.md` on your OK — the project's feature index. Each row becomes one feature → one trio, and its `Status` tracks `planned → spec'd → in progress → shipped`.
 - **Skip if:** you already know the single feature you're building.
 
 → [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features"

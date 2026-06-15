@@ -20,6 +20,7 @@ Read the PRD, then check:
 6. Are **risks** named with consequences ("if X, then Y") — or generic?
 7. Any **contradictions between sections** (e.g. an out-of-scope item reappearing as a constraint or feature)?
 8. Is it still a **page or two**? A PRD that needs a table of contents is doing a spec's job.
+9. Is it **factual and skimmable** — claims, numbers, decisions, not marketing prose or filler? (Length alone isn't enough; a short PRD can still be padded and vague.) Flag passages a reviewer would have to wade through — brevity is what makes the human review fast.
 
 ## Output
 

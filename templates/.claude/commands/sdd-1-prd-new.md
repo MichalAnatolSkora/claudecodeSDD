@@ -17,4 +17,4 @@ Build a **lean PRD** the simple way — sketch first, then ask me to fill the ga
 2. **Ask me** the open questions — the genuinely undecided things first: who exactly the user is, what success looks like in numbers, what's explicitly out of scope, any hard constraints. Group them, a few at a time, and wait for my answers.
 3. **Fill** in my answers, show the updated draft, and ask another round only if real gaps remain. Stop when nothing important is still a guess.
 
-Keep it to a page or two (a one-pager if that's enough). You draft and ask; **I make the product calls.**
+Keep it **factual and tight** — claims, numbers, and decisions, not marketing prose or filler. A human reviews this next (`/sdd-1-prd-review`), so every sentence has to earn its place: verbosity is where gaps hide. Keep it to a page or two (a one-pager if that's enough). You draft and ask; **I make the product calls.**
