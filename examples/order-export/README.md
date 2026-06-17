@@ -21,8 +21,8 @@ This is the **golden thread**: a PRD's goals flow into feature slices, one slice
 | You see… | …pointing at | which shows |
 |----------|--------------|-------------|
 | PRD goal G3 "resilience" | feature 3 in the breakdown | goals drive features |
-| `spec.md` acceptance criteria | `tasks.md` Verification table | every AC has a task |
-| `plan.md` "use Polly" decision | `ADR-015` | hard decisions become ADRs |
+| `SPEC.md` acceptance criteria | `TASKS.md` Verification table | every AC has a task |
+| `PLAN.md` "use Polly" decision | `ADR-015` | hard decisions become ADRs |
 | `ADR-015` | `CLAUDE.md` § Active decisions | the ADR list is the agent's gate |
 
 ## Which guide explains each file
@@ -30,7 +30,7 @@ This is the **golden thread**: a PRD's goals flow into feature slices, one slice
 | File | Guide |
 |------|-------|
 | `docs/prd/…` | [`prd-guide.md`](../../guides/prd-guide.md) |
-| `spec.md` / `plan.md` / `tasks.md` | [`spec-plan-tasks-guide.md`](../../guides/spec-plan-tasks-guide.md) ★ |
+| `SPEC.md` / `PLAN.md` / `TASKS.md` | [`spec-plan-tasks-guide.md`](../../guides/spec-plan-tasks-guide.md) ★ |
 | `CLAUDE.md` | [`claude-md-guide.md`](../../guides/claude-md-guide.md) |
 | `ADR-015` | [`adr-guide.md`](../../guides/adr-guide.md) |
 | `TESTING.md` | [`testing-guide.md`](../../guides/testing-guide.md) |

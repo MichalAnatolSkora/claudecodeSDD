@@ -93,6 +93,8 @@ Then cut hard. The agent invents conventions that aren't real, misses the unwrit
 
 ### Day 2–3 — `ARCHITECTURE.md`
 
+The shipped command **`/architecture-from-code`** does this for you — it scans the source, drafts `ARCHITECTURE.md`, and additionally stubs a *reactive* ADR for each load-bearing decision already in force (the ORM, the scheduler, the service shape). The prompt below is essentially what it runs, if you'd rather drive it by hand:
+
 **Prompt:**
 
 ```text

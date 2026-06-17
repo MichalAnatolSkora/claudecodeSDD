@@ -1,4 +1,4 @@
-# plan.md — Retry failed partner deliveries
+# PLAN.md — Retry failed partner deliveries
 
 > The *how* for [spec.md](spec.md). Part of `examples/order-export/` (illustrative). Next: [tasks.md](tasks.md).
 
@@ -42,4 +42,4 @@ tests/
 - No new top-level folder (`Delivery/`, `Config/`, `Repositories/` already exist).
 
 ---
-*Illustrative plan. The file paths here are the only ones tasks.md may touch.*
+*Illustrative plan. The file paths here are the only ones TASKS.md may touch.*

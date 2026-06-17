@@ -31,7 +31,7 @@ The docs the agent reads every session. Set them up on day one — then grow the
 - **`CLAUDE.md`** at the repo root — conventions, stack, what NOT to do. The one file the agent always reads. Start it now, then **add a line every time you correct the agent or accept an ADR** — it grows with the project (steps 5–6 feed back into it). → [`claude-md-guide.md`](claude-md-guide.md)
 - **`README.md`** — what the project is, how to run it.
 - Copy the slash commands into your repo: `npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude` — the shipped files are namespaced and phase-numbered (`sdd-1-prd-new.md` → `/sdd-1-prd-new`) so they sort in pipeline order; this guide writes the short forms (`/prd-new` etc.) — same commands, keep or drop the `sdd-N-` prefix as you like.
-- Add `ARCHITECTURE.md`, `DOMAIN.md`, `TESTING.md` **when they earn it** — not before.
+- Add `ARCHITECTURE.md`, `DOMAIN.md`, `TESTING.md` **when they earn it** — not before. When `ARCHITECTURE.md` does earn its place, bootstrap it in one pass: `/architecture-from-prd` (greenfield — Q&A the foundational choices like hosting and datastore, stubbing an ADR per hard decision) or `/architecture-from-code` (existing codebase — reverse-engineer it). Either runs **once per project**; `/plan-validate` then checks every plan against the result. → [`adr-guide.md`](adr-guide.md)
 
 That's the floor. Everything below is per change.
 
@@ -60,18 +60,18 @@ One `spec → plan → tasks` per feature, written **in order** — each locks d
 
 1. **`/spec-new "<feature>"`** → `specs/YYYY-MM-slug/spec.md` — goal, **acceptance criteria** (the test contract), out of scope.
 2. **`/spec-review`** → audits it for gaps (read-only). Resolve the open questions.
-3. **`/plan-from-spec`** → `plan.md` — technical decisions, file structure, constraints (the *how*).
+3. **`/plan-from-spec`** → `PLAN.md` — technical decisions, file structure, constraints (the *how*).
 4. **`/plan-validate`** → checks the plan against your ADRs + `ARCHITECTURE.md` (read-only).
-5. **`/tasks-from-plan`** → `tasks.md` — ordered steps, each ending in `→ verify:`; a Verification section maps every AC.
+5. **`/tasks-from-plan`** → `TASKS.md` — ordered steps, each ending in `→ verify:`; a Verification section maps every AC.
 6. **`/trio-check`** → the gate: every AC has a task, no surprise files, no contradicted ADR. Run it **before** any code.
 
-**Compress to fit the change:** a small feature → the **one-file trio** (all three sections in one file); a bugfix → a short `spec.md` only.
+**Compress to fit the change:** a small feature → the **one-file trio** (all three sections in one file); a bugfix → a short `SPEC.md` only.
 
 → [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) — the core guide, with full worked examples.
 
 ## Step 4 — Implement + test
 
-- **Do:** `/implement` — the agent works `tasks.md` task by task, **red→green** (write the failing test from the AC first, implement the minimum, run, green) and **commits at each green task** (a cheap rollback point). It ends with the break-the-code check below.
+- **Do:** `/implement` — the agent works `TASKS.md` task by task, **red→green** (write the failing test from the AC first, implement the minimum, run, green) and **commits at each green task** (a cheap rollback point). It ends with the break-the-code check below.
 - **Don't trust green:** break the code on purpose; the test must go red. Review the agent's tests, especially the assertions.
 - **Stuck?** If the agent can't build from a finished trio, that's a *spec gap*, not a cue to vibe-code — shrink the task, feed the missing context, or resolve an open question.
 
@@ -88,7 +88,7 @@ One `spec → plan → tasks` per feature, written **in order** — each locks d
 
 - The PR description links the spec: `Implements: specs/YYYY-MM-slug/`.
 - Update the stable layer **only if** a convention or boundary changed — a line in `CLAUDE.md`, an edit to `ARCHITECTURE.md`.
-- `tasks.md` post-merge: append `STATUS: shipped (PR #N, date)` to the spec, update the runbook if relevant, close the ticket.
+- `TASKS.md` post-merge: append `STATUS: shipped (PR #N, date)` to the spec, update the runbook if relevant, close the ticket.
 - **The spec freezes.** If the feature changes later, write a *new* spec — never edit a shipped one.
 
 ---
@@ -98,6 +98,7 @@ One `spec → plan → tasks` per feature, written **in order** — each locks d
 ```
 # set up (CLAUDE.md is living — keep adding to it; see steps 5–6)
 npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude    # + start CLAUDE.md
+/architecture-from-prd   # 0  foundation: ARCHITECTURE.md + ADRs, when it earns it (or /architecture-from-code for existing code)
 
 # per change — enter where you start, skip the rest
 /prd-new "<idea>"        # 1  idea → docs/prd/…              (skip if small/solo)

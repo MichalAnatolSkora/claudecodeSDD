@@ -19,6 +19,8 @@ your-project/.claude/
     ├── sdd-1-prd-new.md
     ├── sdd-1-prd-review.md
     ├── sdd-2-features-from-prd.md
+    ├── sdd-2-architecture-from-prd.md
+    ├── sdd-2-architecture-from-code.md
     ├── sdd-3-spec-new.md
     ├── sdd-3-spec-review.md
     ├── sdd-4-plan-from-spec.md
@@ -37,7 +39,9 @@ The number **is** the phase in the flow. `<...>` is required input; `[path]` is 
 |-------|---------|--------------|
 | **1 · PRD** | `/sdd-1-prd-new <1–3 sentences>` | Sketch a lean PRD from a seed idea, then fill the gaps by Q&A |
 | | `/sdd-1-prd-review [path]` | Audit a draft PRD for gaps (read-only) |
-| **2 · Features** | `/sdd-2-features-from-prd [path]` | Slice an accepted PRD into a prioritized, vertically-sliced feature list (read-only) |
+| **2 · Features + Architecture** | `/sdd-2-features-from-prd [path]` | Slice an accepted PRD into a prioritized, vertically-sliced feature list (read-only) |
+| | `/sdd-2-architecture-from-prd [path]` | Greenfield: Q&A the foundational choices (hosting, datastore, shape) → `ARCHITECTURE.md` + a stub ADR per hard decision |
+| | `/sdd-2-architecture-from-code [path]` | Existing codebase: reverse-engineer `ARCHITECTURE.md` + ADRs for the decisions already in force |
 | **3 · Spec** | `/sdd-3-spec-new <idea>` | Draft a `spec.md` from a one-paragraph idea |
 | | `/sdd-3-spec-review [path]` | Audit a spec for gaps (read-only) |
 | **4 · Plan** | `/sdd-4-plan-from-spec [path]` | Draft `plan.md` from a reviewed spec |
@@ -48,6 +52,8 @@ The number **is** the phase in the flow. `<...>` is required input; `[path]` is 
 | **7 · Implement** | `/sdd-7-implement [path]` | Work `tasks.md` red→green, commit per task, then the break-the-code check |
 
 **Full run:** `/sdd-1-prd-new` → `/sdd-1-prd-review` → `/sdd-2-features-from-prd` → per feature: `/sdd-3-spec-new` → `/sdd-3-spec-review` → `/sdd-4-plan-from-spec` → `/sdd-4-plan-validate` → `/sdd-5-tasks-from-plan` → `/sdd-6-trio-check` → `/sdd-7-implement`.
+
+**Foundation (once per project, not per feature):** run **one** of `/sdd-2-architecture-from-prd` (greenfield, from the PRD) or `/sdd-2-architecture-from-code` (existing codebase) to establish `ARCHITECTURE.md` + the foundational ADRs. `/sdd-4-plan-validate` checks every plan against them.
 
 **Enter where your change starts, skip the rest** — most work isn't the whole pipeline. A bugfix is often just `/sdd-3-spec-new` then `/sdd-7-implement`; a known single feature starts at phase 3.
 

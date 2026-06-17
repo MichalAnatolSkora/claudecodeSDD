@@ -18,7 +18,7 @@ The point in one sentence: **write down what you want — your conventions, your
 
 The first four are the **stable layer** — write them once, grow them slowly. The fifth is **per change** — a new little spec each time, frozen after it merges. That's the whole shape: a stable base the agent always reads, plus one spec per change.
 
-> Truly minimal? Three files — `CLAUDE.md`, `README.md`, one `spec.md` — is the floor. Add `ARCHITECTURE.md` and `DOMAIN.md` the moment the agent starts guessing at structure or vocabulary. Below three, you're hoping, not specifying.
+> Truly minimal? Three files — `CLAUDE.md`, `README.md`, one `SPEC.md` — is the floor. Add `ARCHITECTURE.md` and `DOMAIN.md` the moment the agent starts guessing at structure or vocabulary. Below three, you're hoping, not specifying.
 
 ---
 
@@ -41,7 +41,7 @@ The first four are the **stable layer** — write them once, grow them slowly. T
 - ADR-001 — [one-line summary]      ← only once you start writing ADRs
 ```
 
-**`spec.md`** — one change, written *before* the code. The acceptance criteria are the part that matters most: they become your tests. Skeleton:
+**`SPEC.md`** — one change, written *before* the code. The acceptance criteria are the part that matters most: they become your tests. Skeleton:
 
 ```markdown
 # [Change name]
@@ -71,7 +71,7 @@ Copy-pasteable full versions: [`templates/CLAUDE.md`](../templates/CLAUDE.md), [
 5. Corrected the agent?   add ONE line to CLAUDE.md — that's how it stops drifting next time
 ```
 
-That's it. For a bigger change, the spec grows two siblings in the same folder — `plan.md` (the *how*: decisions, file layout) and `tasks.md` (the *order*, each step ending in `→ verify:`). Spec → plan → tasks, written in that order, is the core loop; the [Feature Trio guide](spec-plan-tasks-guide.md) is the full treatment.
+That's it. For a bigger change, the spec grows two siblings in the same folder — `PLAN.md` (the *how*: decisions, file layout) and `TASKS.md` (the *order*, each step ending in `→ verify:`). Spec → plan → tasks, written in that order, is the core loop; the [Feature Trio guide](spec-plan-tasks-guide.md) is the full treatment.
 
 ---
 
@@ -80,7 +80,7 @@ That's it. For a bigger change, the spec grows two siblings in the same folder �
 | Change | Write |
 |--------|-------|
 | one-line / config tweak | just a PR description — no spec |
-| bug fix | a short `spec.md` (goal + acceptance criteria) |
+| bug fix | a short `SPEC.md` (goal + acceptance criteria) |
 | small feature | one file, three sections: spec / plan / tasks |
 | real feature | the three-file trio in a `specs/<date-slug>/` folder |
 

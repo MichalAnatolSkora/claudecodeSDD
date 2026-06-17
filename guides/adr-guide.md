@@ -61,7 +61,7 @@ The most common mistake is over-scoping — turning the ADR into a mini-architec
 ### Do NOT write an ADR for
 
 - **Variable naming, formatting, code style** — that's `CLAUDE.md` or `.editorconfig`.
-- **Decisions inside a single feature** — that's `spec.md`.
+- **Decisions inside a single feature** — that's `SPEC.md`.
 - **Things obvious from the stack** — *"we use async/await"* — wasted ceremony.
 - **Reversible conventions** — if changing your mind would take an afternoon, it's a convention, not an ADR.
 
@@ -299,7 +299,7 @@ SQL lives in `const string` at the top of the repo class, not in `.sql` files.
 - DDL migrations handled by separate tooling (DbUp or custom scripts)
 - `Dapper.Contrib` only for simple CRUD, never for joins
 
-## Alternatives Rejected
+## Alternatives rejected
 
 - **EF Core 8** — see Context
 - **NHibernate** — abandoned by community; younger devs don't know it
@@ -339,7 +339,7 @@ config in appsettings.json is the natural fit because...
 ## Consequences
 [unchanged]
 
-## Alternatives Rejected
+## Alternatives rejected
 [unchanged]
 ```
 
@@ -385,7 +385,7 @@ for the table follow our standard DDL-diff process.
 - ADR-003 stays as historical context; new jobs go to the DB; existing
   appsettings-based jobs migrate in spec `2026-Q3-quartz-db-migration`
 
-## Alternatives Rejected
+## Alternatives rejected
 - **Keep appsettings.json** — see Context; doesn't meet new requirements
 - **Per-environment config files** — solves env split, not runtime change
 - **Feature flag service** — overkill for cron strings; we don't have one
@@ -444,7 +444,7 @@ polling fallback for partners without webhook support.
 - What's the retry policy on partner side? Do we expose idempotency keys?
 - Does the polling fallback's interval change?
 
-## Alternatives Rejected
+## Alternatives rejected
 - **More frequent polling** — partner contracts forbid; load
 - **Partner pushes via existing SFTP "trigger file"** — half the partners don't support it
 - **Long polling** — operationally complex; webhooks are simpler
@@ -561,7 +561,7 @@ Do **not** list Superseded or Deprecated ADRs here — the agent should not trea
 
 How ADRs connect to the spec → plan → tasks loop (see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md)):
 
-- **`plan.md` cites the ADRs that constrain it.** The plan's § Technical decisions lists the Accepted ADRs it must respect (ADR-007 Dapper, ADR-003 Quartz, …); the `/sdd-4-plan-validate` gate checks that those citations are real and current.
+- **`PLAN.md` cites the ADRs that constrain it.** The plan's § Technical decisions lists the Accepted ADRs it must respect (ADR-007 Dapper, ADR-003 Quartz, …); the `/sdd-4-plan-validate` gate checks that those citations are real and current.
 - **Hard decisions graduate into ADRs.** When a genuinely hard call surfaces during spec review or implementation, it leaves the trio: write a new ADR, reference it from the plan, and add it to `CLAUDE.md` § Active decisions. That's exactly how this repo's example [ADR-015](../examples/order-export/docs/adr/ADR-015-delivery-retry-backoff.md) came out of the `delivery-retry` trio.
 - **Solo case:** you accept your own ADR. The value is the written alternatives, not the ceremony.
 

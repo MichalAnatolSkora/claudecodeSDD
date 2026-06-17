@@ -18,8 +18,8 @@ Long-form guides + copy-pasteable templates for spec-driven development with AI 
 ├── examples/                          # worked end-to-end SDD doc sets (illustrative, docs-only)
 │   └── order-export/                  # one fictional app: PRD → trio → ADR, cross-linked
 ├── pdf-style.html                     # full PDF style (not used by default)
-├── pdf-style-compact.html             # compact PDF style — DEFAULT
-└── pdf-style-wide.html                # wide variant
+├── pdf-style-compact.html             # compact PDF style (narrower 1cm-margin variant)
+└── pdf-style-wide.html                # full-width PDF style — DEFAULT
 ```
 
 Built PDFs (`output.pdf`, per-guide PDFs) are **gitignored** — generated artifacts, never committed.
@@ -84,11 +84,11 @@ pandoc guides/spec-driven-development-guide.md \
        guides/runbook-operations-guide.md \
        -o output.pdf \
        --pdf-engine=prince \
-       -H pdf-style-compact.html \
+       -H pdf-style-wide.html \
        --metadata title="claudecodeSDD"
 ```
 
-- Use `pdf-style-compact.html` (small font), not the full `pdf-style.html` template — the owner prefers compact.
+- Use `pdf-style-wide.html` — the **single unified style** for every PDF (per-guide builds and the bundle above). It keeps the small compact font but drops the side margins to `0.3cm` and overrides pandoc's centered-column cap (`body { max-width: none }`), so text runs full-width on A4 while page-number footers stay. Do **not** use `pdf-style.html` (full template) or `pdf-style-compact.html` (narrower 1cm-margin variant) unless explicitly asked.
 - Do **NOT** pass `--toc`. Each guide already has its own Table of Contents section in markdown; an auto-TOC duplicates them.
 - Guide order in the PDF: spec-driven-development → working-with-agents → runbook-operations (matches the README's "How to read" flow).
 - The `unsupported properties: overflow-x` warning from Prince is harmless — Prince ignores web-only CSS.

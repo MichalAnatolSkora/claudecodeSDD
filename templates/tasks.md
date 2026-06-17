@@ -16,12 +16,12 @@
 
 ## Verification (against acceptance criteria)
 
-- [ ] AC1: [from spec.md] → [test / manual check]
-- [ ] AC2: [from spec.md] → [test / manual check]
+- [ ] AC1: [from SPEC.md] → [test / manual check]
+- [ ] AC2: [from SPEC.md] → [test / manual check]
 
 ## Post-merge
 
-- [ ] Append `STATUS: shipped (PR #N, YYYY-MM-DD)` to spec.md (and flip its `Status:` header, if it has one)
+- [ ] Append `STATUS: shipped (PR #N, YYYY-MM-DD)` to SPEC.md (and flip its `Status:` header, if it has one)
 - [ ] Update the stable layer **only if this change moved it**: a new/changed convention → one line in CLAUDE.md; a changed component, boundary, or data flow → ARCHITECTURE.md; a new domain term → DOMAIN.md
 - [ ] Close related issues / tickets
 

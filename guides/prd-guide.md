@@ -25,14 +25,14 @@
 
 ## Why write a PRD — and when
 
-**What it's for.** A PRD (Product Requirements Document) is the product-level statement of *what we're building and why* — the problem, who has it, and what success looks like — agreed **before** anyone writes a spec or a line of code. It's the contract between intent and engineering. Humans read it; the agent never reads it *during implementation* — it implements from `spec.md` — though it does read the PRD when drafting, reviewing, era-checking, or slicing it. One PRD describes a whole product or a whole release *era*, not a single feature.
+**What it's for.** A PRD (Product Requirements Document) is the product-level statement of *what we're building and why* — the problem, who has it, and what success looks like — agreed **before** anyone writes a spec or a line of code. It's the contract between intent and engineering. Humans read it; the agent never reads it *during implementation* — it implements from `SPEC.md` — though it does read the PRD when drafting, reviewing, era-checking, or slicing it. One PRD describes a whole product or a whole release *era*, not a single feature.
 
 **Why it's worth the hour or two:**
 
 - **The cheapest place to be wrong is a doc.** Discovering *"we're solving the wrong problem"* in a PRD costs an afternoon; discovering it in shipped code costs weeks.
 - **It aligns everyone on one version of the goal.** PM, engineers, design, founder argue on paper — once — instead of in code review, repeatedly.
 - **It freezes intent so it doesn't drift.** Without a written *what & why*, the goal quietly mutates feature by feature, and six months in nobody agrees what you're building.
-- **It's the root of the SDD chain.** PRD → slice into features → `spec.md` → `plan.md` → `tasks.md`. Skip it and the *codebase* becomes the de-facto spec — a pile of decisions nobody chose on purpose.
+- **It's the root of the SDD chain.** PRD → slice into features → `SPEC.md` → `PLAN.md` → `TASKS.md`. Skip it and the *codebase* becomes the de-facto spec — a pile of decisions nobody chose on purpose.
 
 **When you actually need one.** A PRD earns its place when **more than one person has to agree**, or the bet is big enough that building the wrong thing is expensive. Skip it — or shrink it to a one-paragraph issue — when you're solo, the change is small, or the *what & why* already fits in your head. (When in doubt, the one-pager format below is the lightest real PRD.)
 
@@ -66,7 +66,7 @@ There's no single PRD format. For a team of **1–10**, two shapes cover almost 
 | Format | When to use | Length | Watch out for |
 |--------|-------------|--------|---------------|
 | **One-pager** | Internal alignment for a small team, decision mostly made | 1 page | Can't carry rationale that outlives turnover |
-| **Lean PRD** | The default for most features and most teams | 2–4 pages | Light on rationale if you rush it |
+| **Lean PRD** | The default for most features and most teams | 1–2 pages | Light on rationale if you rush it |
 
 ### One-pager
 
@@ -81,7 +81,7 @@ Pioneered (under various names) by startup PMs — Lenny Rachitsky, Marty Cagan'
 - One-paragraph problem
 - One-paragraph solution
 - Target user (who is this for, specifically)
-- Success metrics (1–2 numbers — keep it tight)
+- Success metrics (1–3 numbers — keep it tight)
 - Risks and assumptions
 
 Best default for most modern teams. The discipline of "one paragraph each" prevents bloat.
@@ -298,7 +298,7 @@ That's ~80 lines. Notice what's *not* in it:
 - No test strategy
 - No "the agent should..."
 
-All of those land in `spec.md` / `plan.md` / `ARCHITECTURE.md` / `ADR-*` once engineering starts era 1 implementation.
+All of those land in `SPEC.md` / `PLAN.md` / `ARCHITECTURE.md` / `ADR-*` once engineering starts era 1 implementation.
 
 ---
 
@@ -520,6 +520,10 @@ Audit it against this checklist:
 6. Are risks named with consequences ("if X, then Y"), or are they generic?
 7. Are there any contradictions between sections (e.g., out-of-scope item
    appears as a constraint)?
+8. Is it still a page or two? A PRD that needs a table of contents is doing a
+   spec's job.
+9. Is it factual and skimmable — claims, numbers, decisions, not marketing prose
+   or filler? A short PRD can still be padded and vague.
 
 Return a numbered list of concerns. Don't modify the file — list the gaps.
 ```
@@ -717,7 +721,7 @@ The kickoff's output — the spec backlog — is a list of **features**, each si
 
 **Prioritize and sequence.** Tag each feature P1/P2/P3 (or MoSCoW). Order by *value × dependency*: build only the foundation the next valuable slice actually needs — not all of it up front. Mark hard dependencies so nothing is scheduled before its prerequisite.
 
-**Right-size to a trio.** Each feature should fit one trio: a `spec.md` under ~150 lines, a few days of work. Too big (multi-week, sprawling spec) → split it. Too small (a one-liner) → fold it into a neighbor or treat it as a bugfix-shape spec.
+**Right-size to a trio.** Each feature should fit one trio: a `SPEC.md` under ~150 lines, a few days of work. Too big (multi-week, sprawling spec) → split it. Too small (a one-liner) → fold it into a neighbor or treat it as a bugfix-shape spec.
 
 **The output is a lightweight list, not an artifact.** A prioritized table — feature, the PRD outcome it serves, rough size, dependencies — is enough. It can live in the PRD or an issue tracker. Each row becomes a `specs/YYYY-MM-slug/` when you pick it up. Don't turn the backlog into a second heavy document.
 
@@ -790,7 +794,7 @@ The product solves a problem in the abstract but doesn't name the user. *"Financ
 
 *"Built on React + Postgres, with a microservices architecture, using OAuth 2.0…"* These are engineering decisions, not product decisions. They lock options before specs are written.
 
-**Fix:** if a sentence could go in `plan.md`, it doesn't belong in the PRD. Move it.
+**Fix:** if a sentence could go in `PLAN.md`, it doesn't belong in the PRD. Move it.
 
 ### 5. PRD that reads like a spec
 
@@ -832,7 +836,7 @@ The PRD says *"Status: Draft"* for 18 months. Nobody ratifies it. Engineering bu
 
 ## Golden rules
 
-1. **PRD is for humans.** The agent implements from `spec.md → plan.md → tasks.md` — it only reads the PRD to draft, review, or slice it. Don't write PRD with implementation detail "for the agent" — that detail belongs in `plan.md`, an ADR, or `CLAUDE.md`.
+1. **PRD is for humans.** The agent implements from `SPEC.md → PLAN.md → TASKS.md` — it only reads the PRD to draft, review, or slice it. Don't write PRD with implementation detail "for the agent" — that detail belongs in `PLAN.md`, an ADR, or `CLAUDE.md`.
 
 2. **Specificity > scope.** A PRD that names one specific user with one specific pain outperforms a PRD that gestures at "all our users."
 

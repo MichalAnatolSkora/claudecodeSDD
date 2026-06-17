@@ -77,7 +77,7 @@ The agent has exactly four ways to find a file:
 
 1. **You tell it.** *"Read CLAUDE.md and ARCHITECTURE.md before doing X."* Highest-signal path. The agent uses its `Read` tool with the path you supplied.
 2. **It runs a search.** You say *"fix the bug in the order export flow."* The agent runs `grep` or a glob to find candidates and reads matches. Depends on file/symbol names being findable.
-3. **It follows a reference.** It reads `spec.md`, sees *"see ADR-007"*, and reads ADR-007. Cross-references in your docs become a discovery graph the agent can walk.
+3. **It follows a reference.** It reads `SPEC.md`, sees *"see ADR-007"*, and reads ADR-007. Cross-references in your docs become a discovery graph the agent can walk.
 4. **It follows a meta-rule.** Your `CLAUDE.md` says *"before generating SQL, read DOMAIN.md."* The agent obeys when the task triggers that rule.
 
 There is no fifth path. The agent does **not** "scan the repo to understand the project" the way you would on day one. If you don't point at it, name it, link to it, or rule-mention it — the agent may never read it.
@@ -1494,7 +1494,7 @@ Sometimes the agent stalls, goes in circles, or emits broken or obviously-wrong 
 Work the ladder instead, cheapest rung first:
 
 1. **Ask whose gap it is.** A spec the agent "can't implement" is usually underspecified, self-contradictory, or too big. If a competent human would also stop and ask questions here, the gap is in the spec — fix that, not the agent.
-2. **Shrink the unit.** Point it at *one* acceptance criterion or *one* task, not the whole feature. Big asks overwhelm; small ones succeed. This is what `tasks.md` is for — **Prompt:**
+2. **Shrink the unit.** Point it at *one* acceptance criterion or *one* task, not the whole feature. Big asks overwhelm; small ones succeed. This is what `TASKS.md` is for — **Prompt:**
 
    ```text
    Ignore the rest of the feature. Implement only AC1 from spec.md.

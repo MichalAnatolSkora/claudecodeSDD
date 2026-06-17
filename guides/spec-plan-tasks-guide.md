@@ -1,6 +1,6 @@
 # The Feature Trio: spec → plan → tasks
 
-> **This is the core loop of spec-driven development — the one guide to read if you read only one.** Three short markdown files, written in order: `spec.md` (what & why) → `plan.md` (how) → `tasks.md` (in what order). Each one locks down what the next needs. That's the whole method. No toolkit, no scaffolder, no wall of generated files — the discipline is the *order*, not the tooling. Everything else in this repo exists to support this loop.
+> **This is the core loop of spec-driven development — the one guide to read if you read only one.** Three short markdown files, written in order: `SPEC.md` (what & why) → `PLAN.md` (how) → `TASKS.md` (in what order). Each one locks down what the next needs. That's the whole method. No toolkit, no scaffolder, no wall of generated files — the discipline is the *order*, not the tooling. Everything else in this repo exists to support this loop.
 
 ---
 
@@ -65,7 +65,7 @@ tasks.md
 
 *(Where the **feature** itself comes from — slicing a PRD into features — is one step upstream of this guide: see [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".)*
 
-Each step narrows the option space. Once `spec.md` is accepted, the team has agreed on *what success means*. Once `plan.md` is accepted, the team has agreed on *the shape of the solution*. Once `tasks.md` is set, the engineer (and the agent) just executes.
+Each step narrows the option space. Once `SPEC.md` is accepted, the team has agreed on *what success means*. Once `PLAN.md` is accepted, the team has agreed on *the shape of the solution*. Once `TASKS.md` is set, the engineer (and the agent) just executes.
 
 **The order matters because it forces decisions before code.** Writing tasks before plan forces premature ordering assumptions. Writing plan before spec forces premature architecture decisions. Writing spec after code is fiction.
 
@@ -79,7 +79,7 @@ And when code *won't* come cleanly out of a finished trio? That's almost always 
 
 Each section in the trio earns its place — none are decoration. Below: the **bare minimum** each file must have (and *why* the agent or a reviewer breaks without it), then the **nice-to-haves** worth adding as a change grows. Start minimal; add a section the moment its absence costs you something.
 
-### `spec.md` — the *what & why*
+### `SPEC.md` — the *what & why*
 
 **Bare minimum**
 
@@ -98,14 +98,14 @@ Each section in the trio earns its place — none are decoration. Below: the **b
 | **Open questions** | Surfaces what's undecided so the agent doesn't silently guess (and you don't find the guess in the diff). |
 | **References** | ADRs, prior specs, integration docs — the lineage that keeps decisions consistent. |
 
-### `plan.md` — the *how*
+### `PLAN.md` — the *how*
 
 **Bare minimum**
 
 | Section | Why it's required |
 |---------|-------------------|
 | **Technical decisions** | The stack/pattern choices, each tied to an ADR. Without it the agent picks defaults that may fight your architecture. |
-| **File structure** | Concrete paths to create/modify — what stops the agent inventing a layout, and what `tasks.md` and the consistency check key off. |
+| **File structure** | Concrete paths to create/modify — what stops the agent inventing a layout, and what `TASKS.md` and the consistency check key off. |
 | **Constraints** | The explicit *"do NOT"* list — the known failure modes the agent would otherwise walk into. |
 
 **Nice to have**
@@ -116,7 +116,7 @@ Each section in the trio earns its place — none are decoration. Below: the **b
 | **Open questions** | For *how*-level uncertainties left after the spec's are resolved. |
 | **References** | The spec, the relevant ADRs, the existing pattern file to mirror. |
 
-### `tasks.md` — the *in what order*
+### `TASKS.md` — the *in what order*
 
 **Bare minimum**
 
@@ -157,12 +157,12 @@ Match the weight to the need, lightest first:
 
 | Form | Reach for it when |
 |------|-------------------|
-| ASCII wireframe inline in `spec.md` | Layout intent is enough — grepable, diffable, costs nothing. |
+| ASCII wireframe inline in `SPEC.md` | Layout intent is enough — grepable, diffable, costs nothing. |
 | Mermaid diagram inline | Flows and screen states. |
 | Frozen PNG in the spec folder + live link in References | Pixels matter. The agent can read the image during `/implement`. |
 | Throwaway HTML mockup (a spike) | The UX itself is an open question — click it, resolve the Open Question into the spec, and the spike never becomes production code. |
 
-Two honesty rules: a visual check in `tasks.md` is a *human* step (`→ verify: screenshot side-by-side with mockup-list-view.png — human eyeball`), don't dress it up as mechanical; and concept-level product mocks belong one layer up — `docs/prd/assets/`, frozen with the PRD ([`prd-guide.md`](prd-guide.md)).
+Two honesty rules: a visual check in `TASKS.md` is a *human* step (`→ verify: screenshot side-by-side with mockup-list-view.png — human eyeball`), don't dress it up as mechanical; and concept-level product mocks belong one layer up — `docs/prd/assets/`, frozen with the PRD ([`prd-guide.md`](prd-guide.md)).
 
 ---
 
@@ -173,7 +173,7 @@ The trio is the default for any real change. The main lever isn't *dropping* spe
 | Change shape | How to write it |
 |--------------|-----------------|
 | One-line doc / config tweak | A PR description. No spec. |
-| Bug fix (one file, one commit) | A short `spec.md` — goal + acceptance criteria. Plan and tasks are implicit. |
+| Bug fix (one file, one commit) | A short `SPEC.md` — goal + acceptance criteria. Plan and tasks are implicit. |
 | Small feature (1–3 files, ~half a day) | The one-file trio — spec / plan / tasks as three sections in a single file ([Worked example 2](#worked-example-2--the-whole-trio-in-one-file)). |
 | Non-trivial feature (multiple modules, multi-day) | The full three-file trio ([Worked example 1](#worked-example-1--rate-limiting-on-the-orders-endpoint)). |
 | Refactor (no behavior change, larger surface) | Short spec + full plan + tasks — the *how* and *order* matter more than the *what*. |
@@ -189,24 +189,24 @@ When in doubt, write the shorter form. You can always promote a one-file trio in
 
 The trio is most useful when each document *visibly* refers to the others — you'll see it throughout [the worked examples](#worked-example-1--rate-limiting-on-the-orders-endpoint) below. The pattern, made explicit (snippets are from Worked example 1):
 
-**From `plan.md` back to `spec.md`:**
+**From `PLAN.md` back to `SPEC.md`:**
 - *"per spec § Open Q1 resolution"* — the plan explicitly cites where the spec decided something
-- File structure matches the *"Impact on existing code"* section of `spec.md` — same files listed, no surprises
-- Constraints in `plan.md` (*"Do NOT add Redis"*) restate constraints from `spec.md` § Out of scope
+- File structure matches the *"Impact on existing code"* section of `SPEC.md` — same files listed, no surprises
+- Constraints in `PLAN.md` (*"Do NOT add Redis"*) restate constraints from `SPEC.md` § Out of scope
 
-**From `tasks.md` back to `spec.md`:**
+**From `TASKS.md` back to `SPEC.md`:**
 - The "Verification" section explicitly maps each AC to a task — *"AC2 → covered by AC2 test (step 9)"*
 - Post-merge actions reference docs the spec mentioned (*"runbook"*, *"CLAUDE.md"*)
 
-**From `tasks.md` back to `plan.md`:**
-- Tasks follow the file structure in `plan.md` — no task touches files outside the listed paths
+**From `TASKS.md` back to `PLAN.md`:**
+- Tasks follow the file structure in `PLAN.md` — no task touches files outside the listed paths
 - Each task uses the patterns the plan settled on (Options binding, middleware pattern from `AuthMiddleware`)
 
 **The benefit of these explicit cross-refs:**
 
 - The agent reading the trio can trace any decision back to its source
 - A reviewer can verify completeness — does every AC have a task? does every plan decision trace to the spec?
-- Future-you reads `tasks.md`, sees *"AC4 already enforced by AuthMiddleware"*, and remembers *why* without grepping the codebase
+- Future-you reads `TASKS.md`, sees *"AC4 already enforced by AuthMiddleware"*, and remembers *why* without grepping the codebase
 
 A trio without cross-references is three documents that happen to share a folder. With cross-references, it's a coherent decision chain.
 
@@ -216,7 +216,7 @@ A trio without cross-references is three documents that happen to share a folder
 
 The agent does most of the typing; you do the judging. Six reusable prompts, one per common authoring step.
 
-### 1. Draft `spec.md` from a one-paragraph idea
+### 1. Draft `SPEC.md` from a one-paragraph idea
 
 Use when you have a rough idea and want to turn it into a structured spec.
 
@@ -242,7 +242,7 @@ Show me the draft before saving.
 
 The agent produces a starting point in 30 seconds; you spend 5 minutes editing instead of 30 minutes drafting from scratch.
 
-### 2. Review a draft `spec.md` for missing pieces
+### 2. Review a draft `SPEC.md` for missing pieces
 
 Use after you've drafted a spec (yours or the agent's) and want a sanity check.
 
@@ -266,7 +266,7 @@ Return a numbered list of concerns. Don't modify the file — list the gaps.
 
 This catches the "spec looked complete but missed three obvious AC's" failure that wastes a full review cycle.
 
-### 3. Draft `plan.md` from `spec.md`
+### 3. Draft `PLAN.md` from `SPEC.md`
 
 Once the spec is reviewed and Open Questions are resolved.
 
@@ -290,7 +290,7 @@ remain after the spec's Open Questions are resolved.
 Show me the draft. Mark anything you're uncertain about as [VERIFY].
 ```
 
-### 4. Validate `plan.md` against existing ADRs and `ARCHITECTURE.md`
+### 4. Validate `PLAN.md` against existing ADRs and `ARCHITECTURE.md`
 
 Run this *before* implementation starts. Catches plan/architecture conflicts early.
 
@@ -316,7 +316,7 @@ findings.
 
 A plan that quietly contradicts ADR-007 will produce code reviewers hate. Catch it before code.
 
-### 5. Draft `tasks.md` from `plan.md`
+### 5. Draft `TASKS.md` from `PLAN.md`
 
 After plan review, before implementation.
 
@@ -367,7 +367,7 @@ Don't modify any files. Surface only — I'll decide which gaps to fix
 before starting implementation.
 ```
 
-This is your "ready to ship to implementation" gate. Run it before issuing a `/start-implementation` prompt.
+This is your "ready to ship to implementation" gate. Run it before issuing an `/implement` prompt.
 
 ---
 
@@ -447,12 +447,12 @@ After these three loops, the trio is usually ready to drive implementation witho
 
 The consistency checks I'd add as either subagent calls or `/trio-check` slash command:
 
-1. **AC → task coverage.** Every acceptance criterion in `spec.md` has at least one task that produces evidence for it.
-2. **Out-of-scope respect.** Every item in `spec.md` § Out of scope appears nowhere in `plan.md` or `tasks.md`.
-3. **Open question resolution.** Every `[ ]` in `spec.md` § Open Questions is either marked `[x]` with resolution noted, OR moved to a new ADR (cited in References).
-4. **Plan ↔ ADR consistency.** Every technical decision in `plan.md` is either an existing Accepted ADR, a new ADR, or trivially in-line with existing conventions (no contradictions).
-5. **File-path consistency.** Every file modified by a task in `tasks.md` is listed in `plan.md` § File structure; no surprise files.
-6. **Cross-document language.** Same vocabulary used across all three (the `spec.md` says *"rate limit breach"*; the `tasks.md` shouldn't suddenly call it *"quota exceeded"*).
+1. **AC → task coverage.** Every acceptance criterion in `SPEC.md` has at least one task that produces evidence for it.
+2. **Out-of-scope respect.** Every item in `SPEC.md` § Out of scope appears nowhere in `PLAN.md` or `TASKS.md`.
+3. **Open question resolution.** Every `[ ]` in `SPEC.md` § Open Questions is either marked `[x]` with resolution noted, OR moved to a new ADR (cited in References).
+4. **Plan ↔ ADR consistency.** Every technical decision in `PLAN.md` is either an existing Accepted ADR, a new ADR, or trivially in-line with existing conventions (no contradictions).
+5. **File-path consistency.** Every file modified by a task in `TASKS.md` is listed in `PLAN.md` § File structure; no surprise files.
+6. **Cross-document language.** Same vocabulary used across all three (the `SPEC.md` says *"rate limit breach"*; the `TASKS.md` shouldn't suddenly call it *"quota exceeded"*).
 7. **Reference integrity.** Every cited ADR number exists in `docs/adr/`; every cited spec slug exists in `specs/`; every cited file path exists in the repo.
 
 A trio that passes these seven checks is ready for implementation. A trio that fails on (1) or (4) usually loops back through review.
@@ -492,9 +492,9 @@ The agent generates all three documents in one prompt. They're plausible-soundin
 ### 5. The trio that doesn't audit
 
 Three documents in `specs/YYYY-MM-feature-slug/`. Each looks complete in isolation. But:
-- An AC in `spec.md` isn't covered by any task
-- A "decision" in `plan.md` contradicts ADR-007
-- A task in `tasks.md` touches a file that's not in `plan.md` § File structure
+- An AC in `SPEC.md` isn't covered by any task
+- A "decision" in `PLAN.md` contradicts ADR-007
+- A task in `TASKS.md` touches a file that's not in `PLAN.md` § File structure
 
 The implementation proceeds anyway. Code reviewer catches the gap. Now you're patching specs after the fact.
 
@@ -509,34 +509,37 @@ A repo doing SDD seriously usually has these in `.claude/commands/`. *(The shipp
 - **`/prd-new <idea>`** — *(furthest upstream)* turns a 1–3 sentence idea into a lean PRD draft, then fills the gaps by asking you the open questions. See [`prd-guide.md`](prd-guide.md) § "AI-assisted PRD authoring".
 - **`/prd-review <path>`** — audits a draft PRD for gaps (specific users, measurable success criteria, ≥5 out-of-scope items, no implementation leakage) before you slice it. Read-only.
 - **`/features-from-prd`** — *(upstream of the trio)* slices an accepted PRD into a prioritized, vertically-sliced feature list, saved to `specs/FEATURES.md` as the project's feature/status index; each row becomes a spec. See [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".
-- **`/spec-new <feature-description>`** — drafts `spec.md` from a one-paragraph description ([prompt 1](#1-draft-specmd-from-a-one-paragraph-idea) above)
+- **`/architecture-from-prd`** / **`/architecture-from-code`** — *(once-per-project foundation)* establish `ARCHITECTURE.md` plus a stub ADR per hard-to-reverse decision — greenfield by Q&A on the foundational choices (hosting, datastore, shape), or reverse-engineered from an existing codebase. `/plan-validate` then checks every plan against them.
+- **`/spec-new <feature-description>`** — drafts `SPEC.md` from a one-paragraph description ([prompt 1](#1-draft-specmd-from-a-one-paragraph-idea) above)
 - **`/spec-review <path>`** — runs the audit checklist (prompt 2)
-- **`/plan-from-spec`** — drafts `plan.md` from the active spec (prompt 3)
-- **`/plan-validate`** — checks `plan.md` against ADRs and ARCHITECTURE.md (prompt 4)
-- **`/tasks-from-plan`** — drafts `tasks.md` from scratch (prompt 5)
-- **`/tasks-add <what>`** — appends/inserts task(s) into an existing `tasks.md` (or a one-file trio's Tasks section), in order, each with a verify step
+- **`/plan-from-spec`** — drafts `PLAN.md` from the active spec (prompt 3)
+- **`/plan-validate`** — checks `PLAN.md` against ADRs and ARCHITECTURE.md (prompt 4)
+- **`/tasks-from-plan`** — drafts `TASKS.md` from scratch (prompt 5)
+- **`/tasks-add <what>`** — appends/inserts task(s) into an existing `TASKS.md` (or a one-file trio's Tasks section), in order, each with a verify step
 - **`/trio-check`** — final consistency audit (prompt 6)
-- **`/implement`** — *(downstream of the trio)* works `tasks.md` task-by-task red→green, commits each green task, then runs the break-the-code check. See [`flow-guide.md`](flow-guide.md) (Step 4) and [`testing-guide.md`](testing-guide.md).
+- **`/implement`** — *(downstream of the trio)* works `TASKS.md` task-by-task red→green, commits each green task, then runs the break-the-code check. See [`flow-guide.md`](flow-guide.md) (Step 4) and [`testing-guide.md`](testing-guide.md).
 
 Worked-example placement of these files:
 
 ```
 .claude/
 └── commands/
-    ├── sdd-1-prd-new.md           # /sdd-1-prd-new
-    ├── sdd-1-prd-review.md        # /sdd-1-prd-review
-    ├── sdd-2-features-from-prd.md # /sdd-2-features-from-prd
-    ├── sdd-3-spec-new.md          # /sdd-3-spec-new
-    ├── sdd-3-spec-review.md       # /sdd-3-spec-review
-    ├── sdd-4-plan-from-spec.md    # /sdd-4-plan-from-spec
-    ├── sdd-4-plan-validate.md     # /sdd-4-plan-validate
-    ├── sdd-5-tasks-from-plan.md   # /sdd-5-tasks-from-plan
-    ├── sdd-5-tasks-add.md         # /sdd-5-tasks-add
-    ├── sdd-6-trio-check.md        # /sdd-6-trio-check
-    └── sdd-7-implement.md         # /sdd-7-implement
+    ├── sdd-1-prd-new.md                # /sdd-1-prd-new
+    ├── sdd-1-prd-review.md             # /sdd-1-prd-review
+    ├── sdd-2-features-from-prd.md      # /sdd-2-features-from-prd
+    ├── sdd-2-architecture-from-prd.md  # /sdd-2-architecture-from-prd
+    ├── sdd-2-architecture-from-code.md # /sdd-2-architecture-from-code
+    ├── sdd-3-spec-new.md               # /sdd-3-spec-new
+    ├── sdd-3-spec-review.md            # /sdd-3-spec-review
+    ├── sdd-4-plan-from-spec.md         # /sdd-4-plan-from-spec
+    ├── sdd-4-plan-validate.md          # /sdd-4-plan-validate
+    ├── sdd-5-tasks-from-plan.md        # /sdd-5-tasks-from-plan
+    ├── sdd-5-tasks-add.md              # /sdd-5-tasks-add
+    ├── sdd-6-trio-check.md             # /sdd-6-trio-check
+    └── sdd-7-implement.md              # /sdd-7-implement
 ```
 
-**Ready-made copies of all eleven commands live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
+**Ready-made copies of all thirteen commands live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
 
 See [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks) for the mechanics of writing slash commands.
 
@@ -783,8 +786,8 @@ sane defaults.
 
 - The three sections still appear **in order** — you read top-to-bottom and the discipline holds. The order is the method; the file count isn't.
 - A small feature's plan and tasks are short. Three nearly-empty files cost more attention — a folder, cross-references, open tabs — than three headings in one.
-- Cross-references collapse to *"see the section above"* — no need to cite `plan.md` by name when it's fifteen lines up.
-- It promotes cleanly: if the change grows, move the three sections into `spec.md` / `plan.md` / `tasks.md` in a folder of the same name. Nothing is rewritten, only relocated.
+- Cross-references collapse to *"see the section above"* — no need to cite `PLAN.md` by name when it's fifteen lines up.
+- It promotes cleanly: if the change grows, move the three sections into `SPEC.md` / `PLAN.md` / `TASKS.md` in a folder of the same name. Nothing is rewritten, only relocated.
 
 Reach for the one-file trio when a change has genuine *how* and *order* decisions but separate files would just be padding. Reach for the full three-file trio when the plan or tasks get long, or when more than one person edits them at once.
 
@@ -798,11 +801,11 @@ Reach for the one-file trio when a change has genuine *how* and *order* decision
 4. **Human gates between artifacts.** Spec → review → plan → review → tasks → verify. No skipping reviews because *"the agent said it was fine."*
 5. **A consistency check before the first commit.** Run `/trio-check` (or the equivalent prompt) before you start implementing; catch contradictions when they're cheap to fix.
 6. **Compress for small changes.** A bugfix doesn't need three documents. A short spec is enough. The trio is for changes worth the ceremony.
-7. **Out of scope is the most important section in spec.md.** It does more to prevent drift than any positive guidance.
+7. **Out of scope is the most important section in SPEC.md.** It does more to prevent drift than any positive guidance.
 8. **Every AC traces to a task. Every task traces to an AC.** No orphans.
 9. **Open questions resolve, they don't linger.** A `Proposed` ADR > 1 month old, or an Open Question still `[ ]` two weeks into a spec, is rot.
-10. **The trio freezes after merge.** Don't tidy retrospectively. The messy reality of `tasks.md` notes is more valuable than a clean rewrite.
+10. **The trio freezes after merge.** Don't tidy retrospectively. The messy reality of `TASKS.md` notes is more valuable than a clean rewrite.
 
 ---
 
-*This guide complements [`spec-driven-development-guide.md`](spec-driven-development-guide.md) § "Writing a Good spec.md", "Writing a Good PLAN.md", and "Writing a Good tasks.md" (the principles), [`working-with-agents-guide.md`](working-with-agents-guide.md) § "Working on Specs, ADRs, and Refactors" (the prompts for after-creation), and [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle" (who owns what). Together they form the complete picture: principles in main SDD, practice here, post-spec implementation in working-with-agents, ownership in teams.*
+*This guide complements [`spec-driven-development-guide.md`](spec-driven-development-guide.md) § "Writing a Good SPEC.md", "Writing a Good PLAN.md", and "Writing a Good TASKS.md" (the principles), [`working-with-agents-guide.md`](working-with-agents-guide.md) § "Working on Specs, ADRs, and Refactors" (the prompts for after-creation), and [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle" (who owns what). Together they form the complete picture: principles in main SDD, practice here, post-spec implementation in working-with-agents, ownership in teams.*

@@ -1,7 +1,7 @@
 # PRD: [Project / Product name]
 
 > Starting artifact. Captures *what* and *why* before any code exists.
-> **PRD is for humans only — the agent reads `spec.md`, not this.**
+> **PRD is for humans only — the agent reads `SPEC.md`, not this.**
 > Freeze after this era's initial release ships; archive to `docs/prd/YYYY-MM-<era-slug>.md`.
 > New direction → new PRD (per the era pattern), never edits to this one.
 >

@@ -1,8 +1,8 @@
-# tasks.md — Retry failed partner deliveries
+# TASKS.md — Retry failed partner deliveries
 
 > Execution checklist for [plan.md](plan.md). Part of `examples/order-export/` (illustrative). Ordered red→green; each step ends in `→ verify:`.
 
-## Tasks
+## Implementation (in execution order)
 
 1. Add `RetryOptions` (max attempts, base delay) and bind it from `appsettings.json`. → verify: a unit test reads overridden options from config.
 2. Write the DB migration adding nullable `max_attempts`, `base_delay_seconds` to `app.partner`. → verify: migration applies on a Testcontainers DB; columns exist and default to `NULL`.

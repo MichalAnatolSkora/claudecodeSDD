@@ -26,7 +26,7 @@
 
 The main SDD guide and the artifact-specific guides describe *what* each artifact should look like. They give principles, templates, and worked examples. What they don't give:
 
-- **How to verify** that an actual `spec.md` in a real repo meets the bar
+- **How to verify** that an actual `SPEC.md` in a real repo meets the bar
 - **How to block** edits that would damage history (Accepted ADR bodies, PII in research)
 - **How to scale** SDD discipline so it doesn't depend on every contributor remembering every rule
 
@@ -99,7 +99,7 @@ The check has rules but requires understanding meaning. *"Is this AC testable?"*
 Examples:
 - Are the acceptance criteria phrased as something you could write a test for?
 - Does the spec leak implementation detail (specific class names from `src/`)?
-- Do the tasks in `tasks.md` actually cover every AC in `spec.md`?
+- Do the tasks in `TASKS.md` actually cover every AC in `SPEC.md`?
 - Does this plan contradict any active ADR?
 - Is the "Out of scope" section trivial (only listing obvious exclusions) or substantive?
 
@@ -130,7 +130,7 @@ Implementation: code review, PR reviewer checklist, architecture meeting, retros
 
 For each SDD artifact, a working split. This is a menu of what *could* be automated, not a list of requirements: a solo dev skips all of it, a 2–5 person team might lift one or two checks into a `/trio-check`-style command, and only toward 10 does wiring any of this into CI start to pay for itself.
 
-### spec.md
+### SPEC.md
 
 **Mechanical:**
 - Path matches `specs/YYYY-MM-*/spec.md`
@@ -144,17 +144,17 @@ For each SDD artifact, a working split. This is a menu of what *could* be automa
 - Spec doesn't reference class names that aren't in `src/` (didn't invent file paths)
 - Open Questions read as genuine uncertainties, not as decisions in disguise
 - Problem statement is specific (named user + behavior), not generic
-- Spec doesn't include implementation detail that belongs in `plan.md`
+- Spec doesn't include implementation detail that belongs in `PLAN.md`
 
 **Human:**
 - Do the ACs *fully cover* the intent? (Are any missing?)
 - Is the Out-of-scope list complete enough to prevent drift?
 - Does the spec match what the PRD actually called for?
 
-### plan.md
+### PLAN.md
 
 **Mechanical:**
-- References `spec.md` in References section
+- References `SPEC.md` in References section
 - File structure section non-empty
 - Constraints section non-empty (even if "none")
 
@@ -167,7 +167,7 @@ For each SDD artifact, a working split. This is a menu of what *could* be automa
 - Are technical decisions *good* decisions for this context?
 - Is the file structure right, or does it just look right?
 
-### tasks.md
+### TASKS.md
 
 **Mechanical:**
 - Each task line contains `→ verify:`
@@ -175,8 +175,8 @@ For each SDD artifact, a working split. This is a menu of what *could* be automa
 - "Verification" section exists and references ACs
 
 **LLM evaluator:**
-- Every AC in `spec.md` is covered by at least one task
-- Every file in `plan.md` § File structure is touched by at least one task
+- Every AC in `SPEC.md` is covered by at least one task
+- Every file in `PLAN.md` § File structure is touched by at least one task
 - Task granularity reasonable (no 30-second tasks, no 4-hour tasks)
 - Verification phrasing is actionable
 

@@ -17,7 +17,7 @@
 
 - **Don't mock the database.** Use Testcontainers — mocking Dapper hides the bugs that matter.
 - Mock only true externals: the partner SFTP endpoint, and the system clock (so backoff is testable without real waiting).
-- Each acceptance criterion in a `spec.md` maps to at least one test — **the AC list is the test contract.**
+- Each acceptance criterion in a `SPEC.md` maps to at least one test — **the AC list is the test contract.**
 
 ## "Done"
 

@@ -23,7 +23,7 @@
 
 ## What this guide is
 
-In SDD you don't bolt testing on at the end. Every spec already carries **acceptance criteria** — the testable definition of done — and every `tasks.md` already ends each step with `→ verify:`. Testing is just the discipline of turning those into real, running tests, and (increasingly) letting the agent write them.
+In SDD you don't bolt testing on at the end. Every spec already carries **acceptance criteria** — the testable definition of done — and every `TASKS.md` already ends each step with `→ verify:`. Testing is just the discipline of turning those into real, running tests, and (increasingly) letting the agent write them.
 
 This guide covers the part the other guides only gesture at:
 
@@ -40,8 +40,8 @@ It assumes the agent does most of the typing. Your leverage is in the acceptance
 
 Three places, already in the method:
 
-- **`spec.md` § Acceptance criteria = the test contract.** Each AC is phrased so it *could be a test name* (*"POST /api/orders with no `X-Partner-Id` → 400"*). That's not a coincidence — the ACs are the tests, written in English first.
-- **`tasks.md` = where tests get written.** The implementation steps are ordered red→green (failing test first), and the **Verification (against acceptance criteria)** section maps every AC to the task/test that proves it. `/trio-check` runs *before* implementation, so what it checks is that every AC has a **task** (and a Verification row) — the tests themselves arrive later, in the red→green loop of `/sdd-7-implement`.
+- **`SPEC.md` § Acceptance criteria = the test contract.** Each AC is phrased so it *could be a test name* (*"POST /api/orders with no `X-Partner-Id` → 400"*). That's not a coincidence — the ACs are the tests, written in English first.
+- **`TASKS.md` = where tests get written.** The implementation steps are ordered red→green (failing test first), and the **Verification (against acceptance criteria)** section maps every AC to the task/test that proves it. `/trio-check` runs *before* implementation, so what it checks is that every AC has a **task** (and a Verification row) — the tests themselves arrive later, in the red→green loop of `/sdd-7-implement`.
 - **`TESTING.md` = the conventions the agent reads.** So the tests it writes match your framework, layout, and mocking rules instead of its own defaults.
 
 > Command names here are the short forms; the shipped files are namespaced and phase-numbered (`/trio-check` ships as `/sdd-6-trio-check`) — keep or drop the `sdd-N-` prefix as you like.
@@ -73,7 +73,7 @@ The cleanest agent task in all of SDD is "turn these acceptance criteria into te
 
 - **One AC → at least one test.** If an AC needs three cases (happy, missing field, over-limit), that's three tests, all tracing to the same AC.
 - **Phrase ACs as test names.** *"Same partner over N requests in window W → 429 with `Retry-After`"* becomes a test name almost verbatim. Vague ACs (*"rate limiting works"*) produce vague or fake tests — sharpen the AC first.
-- **The Verification section is the coverage gate.** `tasks.md` maps every AC to its test; "ready to merge" means every row is green. You don't chase a coverage *percentage* — you chase *every AC has a test that would fail if the behaviour broke*.
+- **The Verification section is the coverage gate.** `TASKS.md` maps every AC to its test; "ready to merge" means every row is green. You don't chase a coverage *percentage* — you chase *every AC has a test that would fail if the behaviour broke*.
 
 If an AC is hard to write a test for, that's a signal the AC is vague or the design is untestable — fix it in the spec/plan, not by writing a weaker test.
 
@@ -81,7 +81,7 @@ If an AC is hard to write a test for, that's a signal the AC is vague or the des
 
 ## TDD with an agent (red → green)
 
-`tasks.md` already opens features with a failing test. With an agent, the loop is:
+`TASKS.md` already opens features with a failing test. With an agent, the loop is:
 
 1. **Red** — write the failing test for the next AC *first*. Run it; confirm it fails **for the right reason** (the behaviour is missing — not a typo, not a missing import).
 2. **Green** — implement the minimum to pass it. Run; confirm green.
@@ -181,7 +181,7 @@ Let the agent run the tests (it reads a failure better than it predicts one). Yo
 
 Five reusable prompts (the agent types; you judge):
 
-1. **Write tests from ACs** — *"Write tests for every acceptance criterion in `spec.md`, following `TESTING.md`. One test per case (happy + each failure/boundary). Name each after the AC. Don't change production code."*
+1. **Write tests from ACs** — *"Write tests for every acceptance criterion in `SPEC.md`, following `TESTING.md`. One test per case (happy + each failure/boundary). Name each after the AC. Don't change production code."*
 2. **Add the missing edge cases** — *"List the edge and error cases the current tests don't cover (empty, null, boundary, concurrent, malformed). Add a test for each."*
 3. **Critique a test for weakness** — the *"would it pass if broken?"* prompt above.
 4. **Generate test data / fixtures** — *"Build a test-data builder for `Order` with sensible defaults and overridable fields, per `TESTING.md`'s fixture convention."*
@@ -212,4 +212,4 @@ Five reusable prompts (the agent types; you judge):
 
 ---
 
-*This guide is the testing companion to [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) (the `tasks.md` verify steps and the Verification gate), [`working-with-agents-guide.md`](working-with-agents-guide.md) (the implementation loop and prompting), and [`quality-gates-guide.md`](quality-gates-guide.md) (running the suite as a CI / hook gate). The trio defines what "done" means; this guide is how you prove it — without trusting the agent's green on faith.*
+*This guide is the testing companion to [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) (the `TASKS.md` verify steps and the Verification gate), [`working-with-agents-guide.md`](working-with-agents-guide.md) (the implementation loop and prompting), and [`quality-gates-guide.md`](quality-gates-guide.md) (running the suite as a CI / hook gate). The trio defines what "done" means; this guide is how you prove it — without trusting the agent's green on faith.*

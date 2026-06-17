@@ -17,9 +17,9 @@
 5. [The Absolute Minimum](#the-absolute-minimum)
 6. [Before the PRD: Research and Discovery](#before-the-prd-research-and-discovery)
 7. [The PRD Layer](#the-prd-layer)
-8. [Writing a Good spec.md](#writing-a-good-specmd)
+8. [Writing a Good SPEC.md](#writing-a-good-specmd)
 9. [Writing a Good PLAN.md](#writing-a-good-planmd)
-10. [Writing a Good tasks.md](#writing-a-good-tasksmd)
+10. [Writing a Good TASKS.md](#writing-a-good-tasksmd)
 11. [The Three-Layer Documentation Model](#the-three-layer-documentation-model)
 12. [Workflow for Changes](#workflow-for-changes)
 13. [SDD in Teams: Roles and Responsibilities](#sdd-in-teams-roles-and-responsibilities)
@@ -43,7 +43,7 @@ The core insight: **AI agents fill gaps with assumptions.** The more they assume
 Related terms you'll encounter:
 - **Context engineering** — preparing complete context before generation
 - **PRD-first approach** — starting from a Product Requirements Document
-- **Spec-kit workflow** — GitHub's formalization: `spec.md` → `plan.md` → `tasks.md`
+- **Spec-kit workflow** — GitHub's formalization: `SPEC.md` → `PLAN.md` → `TASKS.md`
 
 These are facets of the same idea. The name matters less than the discipline.
 
@@ -55,7 +55,7 @@ These are facets of the same idea. The name matters less than the discipline.
 
 **Explicit AI-era SDD adopters:**
 
-- **GitHub** ships [`spec-kit`](https://github.com/github/spec-kit) — the most direct, named SDD reference implementation, with tens of thousands of stars. The `spec.md → plan.md → tasks.md` flow in this guide mirrors theirs.
+- **GitHub** ships [`spec-kit`](https://github.com/github/spec-kit) — the most direct, named SDD reference implementation, with tens of thousands of stars. The `SPEC.md → PLAN.md → TASKS.md` flow in this guide mirrors theirs.
 - **Anthropic** treats `CLAUDE.md` as a first-class concept in Claude Code, with public engineering guidance that maps onto the same workflow.
 - **Cursor** (`.cursor/rules/` — formerly `.cursorrules`), **Aider** (conventions files), **Continue.dev** (rules files), and other agent tools have independently converged on the same *"one file the agent always reads"* pattern.
 
@@ -171,10 +171,10 @@ At 2–3 people you'll usually skip formal **research** and a heavy **PRD** (a o
 2. **PRD** — [`prd-guide.md`](prd-guide.md): the product-level *what & why*, per era.
 3. **Slice → features** — [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features": vertical slices, walking skeleton first.
 4. **The trio** — [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md): the core loop; one `spec → plan → tasks` per feature.
-5. **Implement + test** — [`working-with-agents-guide.md`](working-with-agents-guide.md) (the implementation loop) and [`testing-guide.md`](testing-guide.md) (how the agent writes the tests): the agent works `tasks.md` red→green; the tests come straight from the spec's acceptance criteria.
+5. **Implement + test** — [`working-with-agents-guide.md`](working-with-agents-guide.md) (the implementation loop) and [`testing-guide.md`](testing-guide.md) (how the agent writes the tests): the agent works `TASKS.md` red→green; the tests come straight from the spec's acceptance criteria.
 6. **Decisions** — [`adr-guide.md`](adr-guide.md): record the ones worth not relitigating.
 
-Under all of it sits the **stable layer** — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md` — the docs the agent reads every session. That's where you actually start on day one ([The Absolute Minimum](#the-absolute-minimum), next), adding the rest reactively.
+Under all of it sits the **stable layer** — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md` — the docs the agent reads every session. That's where you actually start on day one ([The Absolute Minimum](#the-absolute-minimum), next), adding the rest reactively. When `ARCHITECTURE.md` earns its place, `/architecture-from-prd` (greenfield) or `/architecture-from-code` (existing codebase) bootstraps it — structure plus a stub ADR per hard-to-reverse decision.
 
 **For the full step-by-step** — every command and what it produces, with a cheat sheet — see [`flow-guide.md`](flow-guide.md).
 
@@ -194,7 +194,7 @@ What separates a useful `CLAUDE.md` from a generic one — what to put in, what 
 
 1. **`CLAUDE.md`** — conventions, what NOT to do, pointers to other docs. The agent's instruction hub.
 2. **`README.md`** — what this project is, how to run it. Entry point for humans (and a fallback for agents).
-3. **One spec file** — `specs/<date-slug>/spec.md` for the current change you're working on (see [Writing a Good spec.md](#writing-a-good-specmd) below for what should be in it). Even if it's 20 lines, even if it's for a single PR.
+3. **One spec file** — `specs/<date-slug>/spec.md` for the current change you're working on (see [Writing a Good SPEC.md](#writing-a-good-specmd) below for what should be in it). Even if it's 20 lines, even if it's for a single PR.
 
 Below three, you're hoping, not specifying.
 
@@ -211,7 +211,7 @@ Five files cover most of the SDD benefit for a project in the 0–3 month range.
 
 With the five files in place, every change runs the same short loop (this is what [`sdd-in-5-files.md`](sdd-in-5-files.md) distills to one page):
 
-1. **Write `spec.md`** — goal + acceptance criteria + out of scope.
+1. **Write `SPEC.md`** — goal + acceptance criteria + out of scope.
 2. **Agent implements it** — each acceptance criterion → one failing test → make it pass (red → green).
 3. **Break the code** — flip a value on purpose; the test must go red. Don't trust green.
 4. **Merge & freeze** — append `STATUS: shipped (PR #N, date)`; never edit the spec again.
@@ -348,15 +348,15 @@ The PRD answers *why this system exists*. Specs answer *what changed this week*.
 
 ### The agent doesn't read PRD
 
-A consequence worth stating explicitly: **the AI agent never generates code from a PRD.** The agent reads `spec.md → plan.md → tasks.md`. The PRD lives one layer up — it answers product-level questions (*what are we building, for whom, why*) that the implementation layer takes as given.
+A consequence worth stating explicitly: **the AI agent never generates code from a PRD.** The agent reads `SPEC.md → PLAN.md → TASKS.md`. The PRD lives one layer up — it answers product-level questions (*what are we building, for whom, why*) that the implementation layer takes as given.
 
 Practical implications:
 
 - **Don't feed PRD to the agent and expect a working feature.** It hasn't got the granularity. The agent will fabricate plausible implementation details that may or may not match what you actually want.
-- **Don't write PRD with implementation detail *"for the agent."*** If you find yourself adding *"use Dapper for data access"* or *"implement Y as middleware"* to a PRD, that's a sign the content belongs in `plan.md`, an ADR, or `CLAUDE.md` — not the PRD.
+- **Don't write PRD with implementation detail *"for the agent."*** If you find yourself adding *"use Dapper for data access"* or *"implement Y as middleware"* to a PRD, that's a sign the content belongs in `PLAN.md`, an ADR, or `CLAUDE.md` — not the PRD.
 - **PRD shapes the spec — it doesn't replace it.** When an engineer writes a new spec, they may reference the PRD for context (*"per the original PRD, partner SLA requires < 1% failure rate"*), but the spec itself is what the agent then consumes.
 
-The PRD audience is **humans**: stakeholders, founders, future product strategists. The agent's audience starts at `spec.md`.
+The PRD audience is **humans**: stakeholders, founders, future product strategists. The agent's audience starts at `SPEC.md`.
 
 ### The trap each avoids
 
@@ -414,9 +414,9 @@ The pattern preserves the *"freeze after v1"* discipline (no Frankenstein docume
 
 ---
 
-## Writing a Good spec.md
+## Writing a Good SPEC.md
 
-A `spec.md` answers: *what are we building, why, and how do we know it works?* It's the **first document the agent reads when implementing** (unlike PRD, which is for humans only — see [The agent doesn't read PRD](#the-agent-doesnt-read-prd)); the document the human PR reviewer reads before approving; the document future-you reads when wondering *"why is this code shaped this way?"*
+A `SPEC.md` answers: *what are we building, why, and how do we know it works?* It's the **first document the agent reads when implementing** (unlike PRD, which is for humans only — see [The agent doesn't read PRD](#the-agent-doesnt-read-prd)); the document the human PR reviewer reads before approving; the document future-you reads when wondering *"why is this code shaped this way?"*
 
 A spec is **per-feature** and **frozen after merge** — different from a PRD (whole-product per era, frozen after that era's release) and from a plan (the *how*, written alongside the spec — see [the next section](#writing-a-good-planmd)).
 
@@ -480,11 +480,11 @@ A copy-pasteable version lives at [`templates/spec.md`](../templates/spec.md).
 A spec moves through four states — the same vocabulary [`templates/spec.md`](../templates/spec.md) uses:
 
 1. **Draft** — being written and reviewed; open questions still listed.
-2. **Active** — open questions answered (or moved to ADRs); `plan.md` and `tasks.md` written alongside; engineer is coding.
-3. **Shipped** — PR merged. Append `STATUS: shipped (PR #N, YYYY-MM-DD)` at the top of `spec.md` (and if you use the optional `Status:` header, flip it too — the appended line is the lightweight default, the header is for teams that want a visible state field). From this point the spec is *history*: never edit retroactively. If the feature changes, write a new spec.
+2. **Active** — open questions answered (or moved to ADRs); `PLAN.md` and `TASKS.md` written alongside; engineer is coding.
+3. **Shipped** — PR merged. Append `STATUS: shipped (PR #N, YYYY-MM-DD)` at the top of `SPEC.md` (and if you use the optional `Status:` header, flip it too — the appended line is the lightweight default, the header is for teams that want a visible state field). From this point the spec is *history*: never edit retroactively. If the feature changes, write a new spec.
 4. **Superseded** — a later spec replaces this one; link the replacement.
 
-**Changing a spec mid-implementation is allowed — the freeze starts at merge.** If an acceptance criterion turns out wrong while the status is still *Active*, edit the spec, mark the edit visibly (e.g. `CHANGED during implementation: <what and why>` next to the AC), update `plan.md`/`tasks.md` to match, and re-run the trio consistency check. What's forbidden is silently rewriting history *after* the PR merges — that's when a change means a new spec.
+**Changing a spec mid-implementation is allowed — the freeze starts at merge.** If an acceptance criterion turns out wrong while the status is still *Active*, edit the spec, mark the edit visibly (e.g. `CHANGED during implementation: <what and why>` next to the AC), update `PLAN.md`/`TASKS.md` to match, and re-run the trio consistency check. What's forbidden is silently rewriting history *after* the PR merges — that's when a change means a new spec.
 
 The most common rot pattern: specs sitting in *Draft* indefinitely. A spec older than ~2 weeks with unanswered Open Questions should either move forward — resolve the open questions and start implementation — or be deleted; stale drafts pollute the catalog and erode trust in the discipline.
 
@@ -502,7 +502,7 @@ The most common rot pattern: specs sitting in *Draft* indefinitely. A spec older
 
 ### Where to go deeper
 
-The template above plus [`templates/spec.md`](../templates/spec.md) cover ~90% of features. For a full worked example of `spec.md` + `plan.md` + `tasks.md` filled in for one feature, plus AI-authoring prompts (*drafting a spec from an idea*, *reviewing for gaps*, *the trio consistency check*), see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) — the centerpiece guide of this repo. For the per-role ownership of spec lifecycle (who drafts, who reviews, who approves, who updates status), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle." For how the agent reads specs and implements them task-by-task, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation."
+The template above plus [`templates/spec.md`](../templates/spec.md) cover ~90% of features. For a full worked example of `SPEC.md` + `PLAN.md` + `TASKS.md` filled in for one feature, plus AI-authoring prompts (*drafting a spec from an idea*, *reviewing for gaps*, *the trio consistency check*), see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) — the centerpiece guide of this repo. For the per-role ownership of spec lifecycle (who drafts, who reviews, who approves, who updates status), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle." For how the agent reads specs and implements them task-by-task, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation."
 
 ---
 
@@ -514,8 +514,8 @@ A good `PLAN.md` answers questions the agent would otherwise guess at. Every gue
 
 - **Concrete decisions, not options.** Don't write "consider MediatR or services" — pick one. A plan is not a brainstorm.
 - **Separate what (requirements) from how (architecture).** Mixing them produces code that mixes layers.
-- **Explicit exclusions.** An "out of scope" section prevents the agent from adding features you don't want now.
-- **Acceptance criteria live in the spec, not here.** The plan inherits them from `spec.md` (see [Writing a Good spec.md](#writing-a-good-specmd)) — don't restate them, and never contradict them.
+- **Explicit exclusions.** Scope lives in the spec, not here — carry the spec's "Out of scope" forward as `Do NOT…` items under `## Constraints`. Restating the boundary as enforceable constraints stops the agent from adding features you don't want now, without duplicating the spec's scope list.
+- **Acceptance criteria live in the spec, not here.** The plan inherits them from `SPEC.md` (see [Writing a Good SPEC.md](#writing-a-good-specmd)) — don't restate them, and never contradict them.
 - **Open questions in a separate section.** Forces decisions before the agent starts coding (and before it fabricates an answer).
 - **File structure upfront.** Otherwise the agent invents its own and you refactor.
 
@@ -524,23 +524,14 @@ A good `PLAN.md` answers questions the agent would otherwise guess at. Every gue
 ````markdown
 # [Feature/Project Name]
 
-## Goal
-[1-3 sentences: what problem, for whom, in which system]
-
-## Scope
-### In scope
-- ...
-### Out of scope (deliberately, not now)
-- ...
-
-## Technical Decisions
+## Technical decisions
 - Stack: .NET 8, ASP.NET Core, Dapper, MS SQL Server
 - Data access pattern: repository + Dapper, no EF
 - DI: ...
 - Logging: Serilog, contract matching `IBaseHandler<TSelf>`
 - Naming conventions: lowercase snake_case for schemas/tables (e.g. `app.orders`), primary keys named `id`
 
-## Data Model
+## Data model
 ### Tables (DDL diff)
 ```sql
 -- new table / change
@@ -549,7 +540,7 @@ A good `PLAN.md` answers questions the agent would otherwise guess at. Every gue
 - `XRequest`: fields...
 - `XResponse`: fields...
 
-## File Structure
+## File structure
 ```
 src/
   Domain/
@@ -570,7 +561,7 @@ tests/
 - Do NOT add CQRS/MediatR — handlers called directly
 - Maintain consistency with `BatchXmlMerger` pattern
 
-## Open Questions
+## Open questions
 - [ ] Does `x` use soft-delete or hard?
 - [ ] Retry policy for SFTP — Polly or custom?
 
@@ -583,23 +574,23 @@ tests/
 
 Keep `PLAN.md` short — if it exceeds ~200 lines, the *how* has outgrown one change: keep this change's decisions in `PLAN.md` and move durable, cross-feature structure into `ARCHITECTURE.md`. AI agents work better with several focused files than one monolith.
 
-After each iteration, move items from "Open Questions" to "Technical Decisions." The plan is alive, but decision history must stay visible — so the agent (and you, in a month) know *why* something is the way it is.
+After each iteration, move items from "Open questions" to "Technical decisions." The plan is alive, but decision history must stay visible — so the agent (and you, in a month) know *why* something is the way it is.
 
-For a full worked example of plan.md alongside its sibling spec.md and tasks.md (with cross-document references, AI-authoring prompts for drafting `plan.md` from `spec.md`, and the validation prompt that checks the plan against existing ADRs and `ARCHITECTURE.md`), see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).
+For a full worked example of PLAN.md alongside its sibling SPEC.md and TASKS.md (with cross-document references, AI-authoring prompts for drafting `PLAN.md` from `SPEC.md`, and the validation prompt that checks the plan against existing ADRs and `ARCHITECTURE.md`), see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).
 
 ---
 
-## Writing a Good tasks.md
+## Writing a Good TASKS.md
 
-A `tasks.md` answers: *what's the execution order, and how do we know each step worked?* It's the checklist the engineer (and the agent) walks through to turn `spec.md` + `plan.md` into shipped code.
+A `TASKS.md` answers: *what's the execution order, and how do we know each step worked?* It's the checklist the engineer (and the agent) walks through to turn `SPEC.md` + `PLAN.md` into shipped code.
 
-If `spec.md` is *what + why*, and `plan.md` is *how*, then `tasks.md` is *do, in this order, with verification at each step.*
+If `SPEC.md` is *what + why*, and `PLAN.md` is *how*, then `TASKS.md` is *do, in this order, with verification at each step.*
 
-### When you need a tasks.md
+### When you need a TASKS.md
 
 Most non-trivial features benefit from one. Skip it when:
 
-- The change is one or two commits (`tasks.md` becomes overhead for trivial work)
+- The change is one or two commits (`TASKS.md` becomes overhead for trivial work)
 - The spec is small enough that the order is obvious
 - The work is genuinely exploratory and the order will change as you learn
 
@@ -609,10 +600,10 @@ For everything else — write it. The act of writing tasks down forces you to th
 
 - **One task = one verification.** Each task has a way to confirm it's done before moving on. *"Add validation"* → bad. *"Write tests for invalid inputs (red), then implement validation (green)"* → good.
 - **Order matters.** Tasks are sequential by default. If two are truly parallel, mark them — but the default assumption is that task N depends on N-1.
-- **Test-first when applicable.** Red-green-refactor is the most common discipline; `tasks.md` often opens with the failing test.
-- **Reference acceptance criteria.** Each AC from `spec.md` should map to one or more tasks. If an AC has no matching task, you're missing work; if a task doesn't trace to an AC, it's scope creep.
+- **Test-first when applicable.** Red-green-refactor is the most common discipline; `TASKS.md` often opens with the failing test.
+- **Reference acceptance criteria.** Each AC from `SPEC.md` should map to one or more tasks. If an AC has no matching task, you're missing work; if a task doesn't trace to an AC, it's scope creep.
 - **Atomic enough to checkpoint.** A task should be small enough that you (or the agent) can finish it without losing context, then pause for review.
-- **Updated as work progresses.** Checkboxes flip; notes appended. After merge, the file freezes alongside `spec.md` as historical record.
+- **Updated as work progresses.** Checkboxes flip; notes appended. After merge, the file freezes alongside `SPEC.md` as historical record.
 
 ### Template
 
@@ -662,9 +653,9 @@ Roughly: **one task should be reviewable in 5–15 minutes** of focused attentio
 
 The two yardsticks are the same rule seen from both sides: a task that takes more than ~1–2 hours of focused work won't be reviewable in 5–15 minutes — split it. When the two disagree, the review-time test wins.
 
-### How the agent uses tasks.md
+### How the agent uses TASKS.md
 
-When the agent implements a spec, the standard prompt is *"work through tasks.md one task at a time, with checkpoints."* The agent then:
+When the agent implements a spec, the standard prompt is *"work through TASKS.md one task at a time, with checkpoints."* The agent then:
 
 1. Reads the next unchecked task
 2. Restates what it's about to do (a brief plan)
@@ -679,25 +670,25 @@ See [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Cre
 
 ### Practical tips
 
-**Update as you work.** Check off completed tasks; append notes when something unexpected happens. The notes are the most underrated part of `tasks.md` — they tell future you (or the post-mortem) what really happened.
+**Update as you work.** Check off completed tasks; append notes when something unexpected happens. The notes are the most underrated part of `TASKS.md` — they tell future you (or the post-mortem) what really happened.
 
-**Freezes alongside spec.md after merge.** All checkboxes should be ticked; notes should be readable. Don't tidy up retroactively — leave the messy reality.
+**Freezes alongside SPEC.md after merge.** All checkboxes should be ticked; notes should be readable. Don't tidy up retroactively — leave the messy reality.
 
 **Pause for review at task boundaries, not mid-task.** If the agent is mid-task and you want to interject, finish the current task first. Mid-task interruptions produce broken artifacts.
 
-**Skip for trivial changes.** A 1-task `tasks.md` is just `spec.md` with extra ceremony. If you genuinely have only one thing to do, mention it in `spec.md` and skip the file.
+**Skip for trivial changes.** A 1-task `TASKS.md` is just `SPEC.md` with extra ceremony. If you genuinely have only one thing to do, mention it in `SPEC.md` and skip the file.
 
 ### Anti-patterns
 
 1. **Tasks without verification.** *"- [ ] Implement validation"* gives the agent no way to know when it's done. Always add `→ verify:`.
 2. **Tasks describing the result, not the action.** *"- [ ] Order processing works"* is a vibe, not a task. *"- [ ] Implement `OrderProcessor` with 3 cases (happy + 2 failures)"* is a task.
-3. **`tasks.md` as TODO list for the whole feature lifecycle.** *"- [ ] Decide on logging library"* belongs in `plan.md` or an ADR. `tasks.md` is for *implementation* steps, not pending decisions.
-4. **Rewriting `tasks.md` mid-flight.** If the plan changes, update `plan.md` and add new tasks at the end. Don't retcon the old ones — the history is valuable.
+3. **`TASKS.md` as TODO list for the whole feature lifecycle.** *"- [ ] Decide on logging library"* belongs in `PLAN.md` or an ADR. `TASKS.md` is for *implementation* steps, not pending decisions.
+4. **Rewriting `TASKS.md` mid-flight.** If the plan changes, update `PLAN.md` and add new tasks at the end. Don't retcon the old ones — the history is valuable.
 5. **No checkboxes.** Plain text without `- [ ]` defeats half the point. The checkboxes give a visible progress signal at any moment.
 
 ### Where to go deeper
 
-For a full worked example of `tasks.md` alongside its `spec.md` + `plan.md` siblings, the AI prompt for drafting tasks from a plan, and the `/trio-check` consistency audit before implementation, see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). For per-role ownership (who writes `tasks.md`, who reviews, who flips checkboxes), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle". For the agent-side implementation flow with concrete prompts, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation".
+For a full worked example of `TASKS.md` alongside its `SPEC.md` + `PLAN.md` siblings, the AI prompt for drafting tasks from a plan, and the `/trio-check` consistency audit before implementation, see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). For per-role ownership (who writes `TASKS.md`, who reviews, who flips checkboxes), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle". For the agent-side implementation flow with concrete prompts, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation".
 
 ---
 
@@ -715,7 +706,7 @@ These define the "physics" of your codebase. Change them only when fundamentals 
 
 ### Layer 2: Per-feature (created, implemented, frozen)
 
-- `specs/2026-01-order-retry/spec.md` + `plan.md` + `tasks.md`
+- `specs/2026-01-order-retry/spec.md` + `PLAN.md` + `TASKS.md`
 - After shipping, append `STATUS: shipped (PR #123, 2026-01-15)`
 - Never edit retroactively — this is history
 
@@ -732,15 +723,15 @@ An old decision never changes. If you change your mind, write a new ADR with `Su
 
 ## Workflow for Changes
 
-Each feature (sliced out of the PRD — see [The whole flow](#the-whole-flow)) goes through the **trio**: `spec.md` → `plan.md` → `tasks.md`. How much of the trio you write scales with the change — you compress small changes, you don't skip the discipline. The full model is in [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) § "When to skip parts of the trio".
+Each feature (sliced out of the PRD — see [The whole flow](#the-whole-flow)) goes through the **trio**: `SPEC.md` → `PLAN.md` → `TASKS.md`. How much of the trio you write scales with the change — you compress small changes, you don't skip the discipline. The full model is in [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) § "When to skip parts of the trio".
 
 ### Small change (bugfix, minor feature)
 
-A **bugfix** is one short `spec.md` (goal + acceptance criteria), implementation, done — no `plan.md` / `tasks.md`, don't touch `ARCHITECTURE.md`. A **small feature** that still has real *how* and *order* decisions fits the **one-file trio** — `spec` / `plan` / `tasks` as three sections in a single file — instead of three separate ones.
+A **bugfix** is one short `SPEC.md` (goal + acceptance criteria), implementation, done — no `PLAN.md` / `TASKS.md`, don't touch `ARCHITECTURE.md`. A **small feature** that still has real *how* and *order* decisions fits the **one-file trio** — `spec` / `plan` / `tasks` as three sections in a single file — instead of three separate ones.
 
 ### Medium change (new module, endpoint, integration)
 
-The full three-file trio — `spec.md` + `plan.md` + `tasks.md` in `specs/`. If it changes what `ARCHITECTURE.md` shows — a component, a boundary, a data flow, a new external dependency — the **PR author updates `ARCHITECTURE.md` in the same PR**. If it adds a domain concept — same rule, `DOMAIN.md`.
+The full three-file trio — `SPEC.md` + `PLAN.md` + `TASKS.md` in `specs/`. If it changes what `ARCHITECTURE.md` shows — a component, a boundary, a data flow, a new external dependency — the **PR author updates `ARCHITECTURE.md` in the same PR**. If it adds a domain concept — same rule, `DOMAIN.md`.
 
 ### Large change (refactor, stack change, new pattern)
 
@@ -775,9 +766,9 @@ In `CLAUDE.md` you add one line in the "Conventions" section: *"Batch compressio
 
 **Write ADRs after the fact when you must.** Ideally an ADR is written before the decision. In practice you often discover a pattern after 3 similar implementations — then write the ADR retroactively and link future specs to it.
 
-**"Impact on existing code" section in every spec.md.** Forces thinking about side effects before the agent starts generating. This is where you catch "ah, this breaks the `IBaseHandler<TSelf>` contract" *before* four hours of debugging.
+**"Impact on existing code" section in every SPEC.md.** Forces thinking about side effects before the agent starts generating. This is where you catch "ah, this breaks the `IBaseHandler<TSelf>` contract" *before* four hours of debugging.
 
-**Link spec to PR.** In the PR description: `Implements: specs/2026-01-order-retry/`. After merge, append the PR number to spec.md. After a year you have full traceability: feature → spec → code → decision.
+**Link spec to PR.** In the PR description: `Implements: specs/2026-01-order-retry/`. After merge, append the PR number to SPEC.md. After a year you have full traceability: feature → spec → code → decision.
 
 ---
 
@@ -837,7 +828,7 @@ Write an ADR when a decision:
 ### When NOT to write an ADR
 
 - **Variable naming, formatting, code style** → `CLAUDE.md` or `.editorconfig`
-- **Decisions inside a single feature** → `spec.md`
+- **Decisions inside a single feature** → `SPEC.md`
 - **Things obvious from the stack** (*"we use async/await"*)
 
 **Practical test:** if a year from now someone asks *"why the hell did we do it this way?"* — that's an ADR.
@@ -947,7 +938,7 @@ Beyond what we've covered (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, sp
 
 **`ONBOARDING.md`** — from `git clone` to a working environment. Step by step. If a new person needs more than a day, this document is bad. The agent uses it when you ask for setup scripts.
 
-**`docs/templates/`** — PR templates, issue templates, spec.md template, ADR template. Anything you repeat on every change becomes a template.
+**`docs/templates/`** — PR templates, issue templates, SPEC.md template, ADR template. Anything you repeat on every change becomes a template.
 
 **`docs/postmortems/`** — incident analyses. *"2026-03-12: SFTP went down, how we diagnosed it, lessons learned."* Gold for the agent, because it sees what mistakes to *avoid*.
 
@@ -1194,7 +1185,7 @@ For the full treatment — five implementation patterns (pre-commit hooks, Claud
 
 3. **A repo with 30 stale markdown files is worse than a repo with 5 always-fresh ones.** Discipline > completeness.
 
-4. **Research and PRD are both for humans + agent context, never code source.** The agent reads `spec.md → plan.md → tasks.md`. Research lives in `docs/research/` (anonymized — synthesis only, no raw PII); PRDs live in `docs/prd/` (frozen per era; multiple over time = fine, editing old ones = Frankenstein).
+4. **Research and PRD are both for humans + agent context, never code source.** The agent reads `SPEC.md → PLAN.md → TASKS.md`. Research lives in `docs/research/` (anonymized — synthesis only, no raw PII); PRDs live in `docs/prd/` (frozen per era; multiple over time = fine, editing old ones = Frankenstein).
 
 5. **ADRs are immutable. Specs freeze after shipping. Only the stable layer evolves continuously.**
 

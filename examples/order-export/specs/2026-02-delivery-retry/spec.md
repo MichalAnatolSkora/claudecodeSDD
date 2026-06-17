@@ -1,4 +1,4 @@
-# spec.md — Retry failed partner deliveries
+# SPEC.md — Retry failed partner deliveries
 
 > Feature 3 from the [PRD](../../docs/prd/2026-01-order-export.md). Part of `examples/order-export/` (illustrative). Trio order: **this → [plan.md](plan.md) → [tasks.md](tasks.md)**.
 
