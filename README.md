@@ -11,10 +11,24 @@ Most SDD writeups hand you a *method*. This repo's strong point is the method **
 **The pipeline — 13 `/sdd-*` slash commands, idea to merge.** Each does one narrow thing and **stops for your judgment**: drafts are shown before saving, audits are read-only, open questions are surfaced rather than invented. The agent types; you stay the decision-maker.
 
 ```
-idea ─▶ /prd-new · /prd-review ─▶ /features-from-prd ─▶ /spec-new … /trio-check ─▶ /implement ─▶ merge
-         (1 · the PRD)              (2 · vertical slices)   (3–6 · the trio)         (7 · red→green) (freeze)
-  ▲                                                                                                    │
-  └────────────  loop: a shipped slice re-ranks the next — re-enter for the next slice  ◀──────────────┘
+    idea
+     │
+     ▼
+    /prd-new · /prd-review      1 · the PRD
+     │
+     ▼
+ ┌─ /features-from-prd          2 · vertical slices
+ │   │
+ │   ▼
+ │  /spec-new … /trio-check     3–6 · the trio
+ │   │
+ │   ▼
+ │  /implement                  7 · red→green
+ │   │
+ │   ▼
+ │  merge & freeze
+ │   │
+ └───┘ loop: a shipped slice re-ranks the next slice
 ```
 
 The skill isn't running all 13 in a row — it's **operating** them. Three rules:

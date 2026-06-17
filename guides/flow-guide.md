@@ -7,11 +7,30 @@
 ## At a glance
 
 ```
-set up:  copy the commands  +  start CLAUDE.md  (then keep it updated — see steps 5–6)
-                     │
-per change ─▶ research? ─▶ /prd-new ─▶ /features-from-prd ─▶ /spec-new … /trio-check ─▶ implement + test ─▶ ADR? ─▶ merge
-   ▲         (optional)    (idea→PRD)   (PRD→features)        (the trio)                 (agent, red→green)  (record) (freeze)
-   └──────────────── loop: a shipped slice re-ranks the next — back to the trio for the next slice ◀───────────────────┘
+ set up:  the commands + a starter CLAUDE.md   (then keep it updated)
+     │
+     ▼
+    research?                  optional — most 1–10 teams skip
+     │
+     ▼
+    /prd-new · /prd-review     idea → PRD   (skip if small/solo)
+     │
+     ▼
+ ┌─ /features-from-prd         PRD → vertical slices
+ │   │
+ │   ▼
+ │  /spec-new … /trio-check    the trio — gated, no code yet
+ │   │
+ │   ▼
+ │  /implement                 agent, red→green per task
+ │   │
+ │   ▼
+ │  ADR?                       record a decision worth keeping
+ │   │
+ │   ▼
+ │  merge & freeze
+ │   │
+ └───┘ loop: a shipped slice re-ranks the next slice
 ```
 
 **Enter where your change starts** — you rarely run the whole thing:
