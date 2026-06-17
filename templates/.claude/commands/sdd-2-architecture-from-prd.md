@@ -30,5 +30,6 @@ Show me the drafts first. Once I approve: save `ARCHITECTURE.md` and the ADR fil
 ## Constraints
 
 - **Lean, not big-design-up-front.** Decide only the unavoidable foundation; per-feature detail is the trio's job (`/sdd-3-spec-new` →). If a question can wait for a spec, don't ask it here.
+- **Structure can emerge from the first slices, too.** A true walking skeleton defers most of this — decide only what slice 1 genuinely can't start without, and let the rest surface as you build, captured reactively as ADRs when a real choice forces it (the same reactive-ADR stance as the legacy guide). When unsure whether something is foundational or a feature's call, leave it to the feature.
 - Hard decisions become **ADRs**, not prose buried in `ARCHITECTURE.md`. The file shows the resulting *structure*; the ADR holds the *why*.
 - Don't invent the answers — **I make the calls.** You draft, ask, and record.

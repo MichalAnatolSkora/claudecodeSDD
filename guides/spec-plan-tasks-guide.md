@@ -27,8 +27,9 @@
 **Examples**
 11. [Worked example 1 — Rate limiting on the orders endpoint](#worked-example-1--rate-limiting-on-the-orders-endpoint)
 12. [Worked example 2 — the whole trio in one file](#worked-example-2--the-whole-trio-in-one-file)
+13. [Worked example 3 — discovery (the first spec was wrong)](#worked-example-3--discovery-the-first-spec-was-wrong)
 
-13. [Golden rules for trio authoring](#golden-rules-for-trio-authoring)
+14. [Golden rules for trio authoring](#golden-rules-for-trio-authoring)
 
 ---
 
@@ -38,7 +39,7 @@ This is the definitive, hands-on treatment of the trio — the centerpiece of th
 
 What you get here:
 
-- **Two complete worked examples** — a non-trivial feature as the full three-file trio (all three documents filled in, cross-references explicit) and a small feature as a one-file trio, both ready to copy as starting points
+- **Three worked examples** — a non-trivial feature as the full three-file trio (all three documents filled in, cross-references explicit), a small feature as a one-file trio, and a discovery feature whose first acceptance criterion was wrong (the messy, realistic case) — all ready to copy as starting points
 - **AI-assisted authoring prompts** — copy-pasteable prompts for drafting each artifact, reviewing it, refining it, and validating it against the others
 - **Iteration patterns** — how a rough draft becomes a tight spec, then a clear plan, then an executable task list
 - **Cross-artifact consistency checks** — concrete rules that keep the three documents honest (every acceptance criterion has a task; every "out of scope" survives into the plan; every open question resolves into a decision or an ADR)
@@ -70,6 +71,8 @@ Each step narrows the option space. Once `SPEC.md` is accepted, the team has agr
 **The order matters because it forces decisions before code.** Writing tasks before plan forces premature ordering assumptions. Writing plan before spec forces premature architecture decisions. Writing spec after code is fiction.
 
 For tiny changes, the trio compresses (see [When to skip parts of the trio](#when-to-skip-parts-of-the-trio)). For most non-trivial work, all three earn their place.
+
+**The order is the discipline *within a slice* — not a ban on iterating.** Between slices you loop: ship the thinnest slice, learn from it, then write the next one's spec. Looping between slices isn't skipping the order inside one — and the smaller each slice, the more often you loop. (Where the slices come from: [`prd-guide.md` § Slicing the PRD into features](prd-guide.md#slicing-the-prd-into-features).)
 
 And when code *won't* come cleanly out of a finished trio? That's almost always a gap in the spec or plan — not a cue to abandon them and vibe code. See [`working-with-agents-guide.md` § "When the Agent Can't Build from the Spec"](working-with-agents-guide.md#when-the-agent-cant-build-from-the-spec).
 
@@ -177,11 +180,22 @@ The trio is the default for any real change. The main lever isn't *dropping* spe
 | Small feature (1–3 files, ~half a day) | The one-file trio — spec / plan / tasks as three sections in a single file ([Worked example 2](#worked-example-2--the-whole-trio-in-one-file)). |
 | Non-trivial feature (multiple modules, multi-day) | The full three-file trio ([Worked example 1](#worked-example-1--rate-limiting-on-the-orders-endpoint)). |
 | Refactor (no behavior change, larger surface) | Short spec + full plan + tasks — the *how* and *order* matter more than the *what*. |
-| Spike / research | A spec heavy on Open Questions; plan and tasks wait until the spike resolves. |
+| Spike / research (discovery) | A spec heavy on Open Questions; spike first, let the acceptance criteria *emerge*, then fill them in — see [Two modes: delivery and discovery](#two-modes-delivery-and-discovery) below. Plan and tasks wait until the spike resolves. |
 
 The rule: **if you'd struggle to explain the change in a one-paragraph PR description, write a spec.** If the execution order would change had you been interrupted for a week, write the tasks. Reach for three *separate* files only when the plan or tasks get long, or when more than one person edits them at once — otherwise the one-file trio keeps everything in view.
 
 When in doubt, write the shorter form. You can always promote a one-file trio into three files later (nothing is rewritten, only relocated); you can't recover the time spent ceremony-ing a tiny change.
+
+### Two modes: delivery and discovery
+
+Most work is **delivery**: you can write the acceptance criteria up front, so the trio runs as above — spec → plan → tasks → code, plan-first. That's the default; both [Worked example 1](#worked-example-1--rate-limiting-on-the-orders-endpoint) and [2](#worked-example-2--the-whole-trio-in-one-file) are it. You don't label it — you just write the spec.
+
+Some work is **discovery**: you genuinely can't write the AC until you've seen something run — a new UX, an unfamiliar integration, an algorithm you have to feel out. Forcing acceptance criteria up front there just freezes a guess. The move:
+
+1. **Spike first — throwaway.** Build the smallest thing that answers the open question (a script, an HTML mockup, a branch you'll delete — the same throwaway rule as the [mockup spike](#mockups-and-visual-artifacts)). The spike's job is to *teach you the AC*, not to ship.
+2. **Then write the thin spec.** With the AC finally known, capture them and run the trio normally. The spike is deleted; production code comes from the trio, not the spike.
+
+Discovery **defers** the order, it doesn't waive it: the spec still comes before the *production* code, and the spike never becomes that code (that's [anti-pattern 3](#3-spec-retro-fitted-from-completed-code) — a spike is throwaway, not a feature pretending to be a spec). Reach for discovery only when the AC are genuinely unknowable up front; when in doubt, you're in delivery. [Worked example 3](#worked-example-3--discovery-the-first-spec-was-wrong) shows the whole loop.
 
 ---
 
@@ -439,7 +453,11 @@ For each task in "Implementation":
 Return a table: task #, estimate, suggestion. Don't modify the file.
 ```
 
-After these three loops, the trio is usually ready to drive implementation without correction mid-flight.
+After these three loops, the trio is usually ready to drive implementation. *Usually* — not always: sometimes implementation itself shows an acceptance criterion was wrong. That's the next loop.
+
+### When the code shows the spec was wrong
+
+The three loops above sharpen the trio *before* code. One more runs *during* it: you start implementing and an acceptance criterion turns out wrong. That's expected, not a failure — and while the spec is still **Active** (pre-merge) the fix is cheap. Edit the spec in place, mark it with a dated `CHANGED during implementation: <what and why>` note next to the AC, update `PLAN.md`/`TASKS.md`, and re-run `/trio-check`. The canonical rule lives in [the overview's spec lifecycle](spec-driven-development-guide.md#spec-status-lifecycle); `/implement`'s *"that's a spec gap, not a cue to improvise"* is the same loop seen from the command side. The freeze starts at *merge* — everything before it is allowed to change. (Once shipped, a change is a *new* spec, not an edit — [golden rule 10](#golden-rules-for-trio-authoring).)
 
 ---
 
@@ -793,9 +811,48 @@ Reach for the one-file trio when a change has genuine *how* and *order* decision
 
 ---
 
+## Worked example 3 — discovery (the first spec was wrong)
+
+Not every feature can be specced up front. Ops asks for *"a view of which export batches need attention."* You can't write the acceptance criteria — **nobody knows what "needs attention" means** until someone looks at real batches. This is [discovery mode](#two-modes-delivery-and-discovery): spike first, let the AC emerge, then spec.
+
+**Spike (throwaway).** A half-day branch dumps every batch with its status, age, and retry count into a plain table; an ops operator looks at it. What you learn: they don't care about *status* — they scan for **stuck** batches (no progress in > 2h) and **retry-looping** ones (≥ 3 delivery attempts). *"Needs attention"* just got a definition. Delete the branch.
+
+**Now the thin spec — `specs/2026-06-batch-attention.md` (one-file trio):**
+
+```markdown
+# Batch attention view
+
+> Discovery feature. Spike done 2026-06-10 (deleted); the AC below came out of it, not from a guess.
+
+## Spec
+**Goal.** One view of the batches that need a human — defined, after the spike, as *stuck* or *retry-looping*.
+**Out of scope.** Healthy batches (a list of everything is what we're replacing); per-batch actions (a later slice).
+**Acceptance criteria**
+- [ ] AC1: a batch with no status change in > 2h shows as `stuck`, with hours-idle
+- [ ] AC2: a batch with ≥ 3 delivery attempts shows as `looping`, with the attempt count
+- [ ] AC3: healthy batches are absent (not greyed out, not zero-count rows)
+  - ~~AC1 (v1, WRONG): list all batches ordered by status, newest first~~
+    CHANGED during implementation (2026-06-12): building it, the ops reviewer
+    pointed out they'd still have to eyeball every row to find the bad ones.
+    Replaced with the stuck/looping signals the spike actually surfaced.
+    Spec still Active → in-place edit + re-ran /trio-check, not a new spec.
+
+## Plan
+- One read-model query, no new tables: batches where `now - last_change > 2h` OR `attempt_count >= 3`
+- Read from `order_batch` + `delivery_attempt`
+## Tasks
+- [ ] 1. Failing test: a 3h-idle batch → `stuck` → verify: red (no query yet)
+- [ ] 2. Read-model query + unit tests for both signals → verify: AC1, AC2 green
+- [ ] 3. Wire the view, exclude healthy → verify: AC3 green
+```
+
+**Why this is the honest case.** The first acceptance criterion (the struck-through line) was *wrong* — and that isn't a failure, it's discovery working. Because the spec was still **Active** (pre-merge), fixing it was a one-line edit with a dated `CHANGED during implementation:` note ([§ When the code shows the spec was wrong](#when-the-code-shows-the-spec-was-wrong)), not a new spec. The freeze starts at merge; everything before it is allowed to be wrong on the way to right. Keep the struck line and the note — that fossil is more useful than a clean rewrite.
+
+---
+
 ## Golden rules for trio authoring
 
-1. **Order is the discipline.** Spec → plan → tasks → code. Skipping or reversing produces worse output for the same total effort.
+1. **Order is the discipline — within a slice.** Spec → plan → tasks → code; skipping or reversing produces worse output for the same total effort. *Between* slices you loop (ship the thinnest slice, learn, spec the next) — looping between slices isn't skipping the order inside one.
 2. **Each document references the previous one explicitly.** Without cross-refs, you have three documents that share a folder, not a coherent decision chain.
 3. **The agent drafts; you judge.** Especially for Context, Alternatives Rejected, and Acceptance Criteria — the agent's plausible-sounding fills are most likely to be wrong here.
 4. **Human gates between artifacts.** Spec → review → plan → review → tasks → verify. No skipping reviews because *"the agent said it was fine."*

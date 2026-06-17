@@ -25,12 +25,15 @@ Do one task per cycle. Don't batch tasks or skip ahead.
 
 Stop — that's a **spec gap, not a cue to improvise.** Name what's missing (an unresolved open question, an underspecified AC, a file not in the plan) and pick one: shrink the task, feed the missing context, or send it back to `/sdd-3-spec-review` / `/sdd-5-tasks-add`. Don't vibe-code past it.
 
+If the gap is a *wrong* acceptance criterion (not a missing one), that's the code→spec loop: while the spec is still **Active** (pre-merge) edit it in place with a dated `CHANGED during implementation: <what and why>` note, update `plan.md`/`tasks.md`, re-run `/sdd-6-trio-check`, then continue. The freeze starts at merge — until then the spec is allowed to change.
+
 ## After the last task — break the code (don't trust green)
 
 1. For each new test, break the implementation on purpose (flip a condition, return a wrong value) and confirm the test goes **red**.
 2. Report any test that stayed green — that's false confidence; fix the assertion, not the code.
 3. Restore the implementation; confirm the suite is green again.
 4. If `specs/FEATURES.md` exists, set this feature's row to `shipped` (the spec's own `STATUS: shipped` marker is added later at merge, per `tasks.md` Post-merge).
+5. If building this taught you something about the next slice — a new one, a now-unnecessary one, a re-ordering — say so, and re-run `/sdd-2-features-from-prd` to merge it into the backlog before the next trio. Shipping a slice routinely re-ranks what comes next.
 
 ## Constraints
 

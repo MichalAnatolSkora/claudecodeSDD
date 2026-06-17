@@ -10,7 +10,8 @@
 set up:  copy the commands  +  start CLAUDE.md  (then keep it updated — see steps 5–6)
                      │
 per change ─▶ research? ─▶ /prd-new ─▶ /features-from-prd ─▶ /spec-new … /trio-check ─▶ implement + test ─▶ ADR? ─▶ merge
-             (optional)    (idea→PRD)   (PRD→features)        (the trio)                 (agent, red→green)  (record) (freeze)
+   ▲         (optional)    (idea→PRD)   (PRD→features)        (the trio)                 (agent, red→green)  (record) (freeze)
+   └──────────────── loop: a shipped slice re-ranks the next — back to the trio for the next slice ◀───────────────────┘
 ```
 
 **Enter where your change starts** — you rarely run the whole thing:
@@ -50,13 +51,14 @@ That's the floor. Everything below is per change.
 
 - **Do:** `/features-from-prd` — slices the PRD into **vertical, independently-shippable features**, prioritized, walking-skeleton first.
 - **Get:** a short prioritized list, saved to `specs/FEATURES.md` on your OK — the project's feature index. Each row becomes one feature → one trio, and its `Status` tracks `planned → spec'd → in progress → shipped`.
+- **Loop:** the slice list is a first guess, not a contract. A shipped slice often re-ranks it — re-run `/features-from-prd` to merge new or dropped slices in (it never resets your progress). The PRD freezes; the slice list doesn't.
 - **Skip if:** you already know the single feature you're building.
 
 → [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features"
 
 ## Step 3 — Feature → trio
 
-One `spec → plan → tasks` per feature, written **in order** — each locks down what the next needs.
+One `spec → plan → tasks` per feature, written **in order** — each locks down what the next needs. (The order is the discipline *within* a slice; across slices you loop — ship the thinnest, learn, slice the next.)
 
 1. **`/spec-new "<feature>"`** → `specs/YYYY-MM-slug/spec.md` — goal, **acceptance criteria** (the test contract), out of scope.
 2. **`/spec-review`** → audits it for gaps (read-only). Resolve the open questions.
@@ -89,7 +91,43 @@ One `spec → plan → tasks` per feature, written **in order** — each locks d
 - The PR description links the spec: `Implements: specs/YYYY-MM-slug/`.
 - Update the stable layer **only if** a convention or boundary changed — a line in `CLAUDE.md`, an edit to `ARCHITECTURE.md`.
 - `TASKS.md` post-merge: append `STATUS: shipped (PR #N, date)` to the spec, update the runbook if relevant, close the ticket.
-- **The spec freezes.** If the feature changes later, write a *new* spec — never edit a shipped one.
+- **The spec freezes.** If the feature changes later, write a *new* spec — never edit a shipped one. (Frozen as the intent you had at merge, not as a description of today's behavior — when spec and code later disagree, the code wins.)
+- **Then loop, don't stop.** Merging a slice usually teaches you something about the next — let it re-rank the backlog before you start the next trio (Step 2). The flow loops back here; it doesn't end at freeze.
+
+---
+
+## Iterative loops — the same commands, run in cycles
+
+The pipeline above is one pass; real work loops. Three loops reuse the commands you already have — **no new command needed**, you just re-enter the pipeline at the right point:
+
+**Discovery loop** — *you can't write the acceptance criteria yet (a new UX, an unfamiliar integration, an algorithm you have to feel out).*
+
+```
+/spec-new "<feature>"   →  mark the spec `discovery`, leave the AC as Open Questions
+spike  (a throwaway branch — no command; it teaches you the AC, then you delete it)
+   →  fill in the AC the spike surfaced  →  /trio-check   (before the spike it reports
+      "discovery — pending spike" instead of failing; now it must pass)
+   →  /plan-from-spec  →  /tasks-from-plan  →  /implement
+```
+The spike is throwaway and never becomes the code. → [`spec-plan-tasks-guide.md` § Two modes](spec-plan-tasks-guide.md#two-modes-delivery-and-discovery)
+
+**Code→spec loop** — *implementation shows an acceptance criterion was wrong.*
+
+```
+/implement   →  an AC turns out wrong (spec still Active, pre-merge)
+   →  edit the spec in place + a dated `CHANGED during implementation:` note  →  /trio-check  →  back to /implement
+```
+The freeze starts at merge; until then the spec is allowed to change. → [`spec-plan-tasks-guide.md` § When the code shows the spec was wrong](spec-plan-tasks-guide.md#when-the-code-shows-the-spec-was-wrong)
+
+**Re-slice loop** — *a shipped slice reshapes the backlog.*
+
+```
+/implement ships slice N   →  /features-from-prd   (re-run: merges new / dropped / reordered slices, never resets progress)
+   →  pick the next slice  →  /spec-new …
+```
+The PRD freezes; the slice list doesn't. → [`prd-guide.md` § Slicing](prd-guide.md#slicing-the-prd-into-features)
+
+These aren't extra ceremony — they're the same commands, entered at the point your change actually starts and again for the next slice. Most features are pure **delivery** (acceptance criteria known up front): run the pipeline once, top to bottom, and never touch a loop. Reach for a loop only when the work calls for it.
 
 ---
 
@@ -113,6 +151,7 @@ npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude    # + start
 /implement               # 4  work tasks.md red→green, commit per task, break-the-code
 # write an ADR if a real decision shows up; add it to CLAUDE.md
 # merge: link the spec, update the stable layer if it changed, freeze the spec
+# then loop: a shipped slice re-ranks the next — /features-from-prd to merge it in, then the next trio
 ```
 
 ---

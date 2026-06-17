@@ -15,7 +15,7 @@ Read all three of `spec.md`, `plan.md`, `tasks.md` (for a one-file trio: its Spe
 1. Every **acceptance criterion** in `spec.md` has at least one task in `tasks.md` (and an entry in the Verification section).
 2. Every file in `plan.md` § File structure has at least one task that creates or modifies it.
 3. Every **Out of scope** item in `spec.md` is respected — no task touches it.
-4. Every **Open Question** in `spec.md` is `[x]` resolved or moved to an ADR; none still `[ ]`.
+4. Every **Open Question** in `spec.md` is `[x]` resolved or moved to an ADR; none still `[ ]`. *(Exception: a spec marked **discovery** at the top may still hold open acceptance criteria while its spike runs — report those as "discovery — pending spike," not "fail.")*
 5. `plan.md` technical decisions don't contradict any Accepted ADR.
 6. `tasks.md` uses only file paths listed in `plan.md` § File structure.
 

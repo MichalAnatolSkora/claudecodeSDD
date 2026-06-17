@@ -73,6 +73,8 @@ Copy-pasteable full versions: [`templates/CLAUDE.md`](../templates/CLAUDE.md), [
 
 That's it. For a bigger change, the spec grows two siblings in the same folder — `PLAN.md` (the *how*: decisions, file layout) and `TASKS.md` (the *order*, each step ending in `→ verify:`). Spec → plan → tasks, written in that order, is the core loop; the [Feature Trio guide](spec-plan-tasks-guide.md) is the full treatment.
 
+And for a feature too big for one pass: build it in **thin slices**, each one trip through this loop. Ship the thinnest slice that works end-to-end, learn from it, then spec the next — the order holds *inside* each slice; you loop *between* them. A shipped slice often changes what the next one should be — that's iteration working, not the plan failing.
+
 ---
 
 ## Compress to fit the change

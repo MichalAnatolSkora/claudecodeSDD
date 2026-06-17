@@ -217,6 +217,8 @@ With the five files in place, every change runs the same short loop (this is wha
 4. **Merge & freeze** — append `STATUS: shipped (PR #N, date)`; never edit the spec again.
 5. **Corrected the agent?** — add ONE line to `CLAUDE.md`; that's how it stops drifting next time.
 
+For a feature too big for one pass, run this loop on the thinnest next slice each time: the order holds *inside* a slice, and you loop *between* slices — ship thin, learn, spec the next (a shipped slice often reshapes what comes next).
+
 ### Add the rest reactively, not proactively
 
 Beyond the starter set, each new doc should be triggered by something concrete — not by *"the methodology mentions it."*
@@ -481,7 +483,7 @@ A spec moves through four states — the same vocabulary [`templates/spec.md`](.
 
 1. **Draft** — being written and reviewed; open questions still listed.
 2. **Active** — open questions answered (or moved to ADRs); `PLAN.md` and `TASKS.md` written alongside; engineer is coding.
-3. **Shipped** — PR merged. Append `STATUS: shipped (PR #N, YYYY-MM-DD)` at the top of `SPEC.md` (and if you use the optional `Status:` header, flip it too — the appended line is the lightweight default, the header is for teams that want a visible state field). From this point the spec is *history*: never edit retroactively. If the feature changes, write a new spec.
+3. **Shipped** — PR merged. Append `STATUS: shipped (PR #N, YYYY-MM-DD)` at the top of `SPEC.md` (and if you use the optional `Status:` header, flip it too — the appended line is the lightweight default, the header is for teams that want a visible state field). From this point the spec is *history*: never edit retroactively. It's frozen as the **intent you had at merge, not as a description of current behavior** — if the spec and the code later disagree, the code wins. If the feature changes, write a new spec. (Need to flag that a shipped spec has gone stale without rewriting it? Append a dated, one-line erratum at the bottom — `Correction (YYYY-MM-DD): <what's now wrong> → see <newer spec / ADR / the code>` — append-only: a pointer, never an edit to the body, and never a substitute for a new spec when the feature actually changes.)
 4. **Superseded** — a later spec replaces this one; link the replacement.
 
 **Changing a spec mid-implementation is allowed — the freeze starts at merge.** If an acceptance criterion turns out wrong while the status is still *Active*, edit the spec, mark the edit visibly (e.g. `CHANGED during implementation: <what and why>` next to the AC), update `PLAN.md`/`TASKS.md` to match, and re-run the trio consistency check. What's forbidden is silently rewriting history *after* the PR merges — that's when a change means a new spec.
@@ -1187,7 +1189,7 @@ For the full treatment — five implementation patterns (pre-commit hooks, Claud
 
 4. **Research and PRD are both for humans + agent context, never code source.** The agent reads `SPEC.md → PLAN.md → TASKS.md`. Research lives in `docs/research/` (anonymized — synthesis only, no raw PII); PRDs live in `docs/prd/` (frozen per era; multiple over time = fine, editing old ones = Frankenstein).
 
-5. **ADRs are immutable. Specs freeze after shipping. Only the stable layer evolves continuously.**
+5. **ADRs are immutable; specs freeze as authored intent, not current truth.** A frozen ADR is a decision and loses nothing. A frozen spec is a snapshot of intent on the day it merged — when it and the code later disagree, the *code* wins; read it as history, not as a description of today's behavior. Only the stable layer evolves continuously.
 
 6. **Context per task, not context per project.** Don't dump everything on the agent. Pick what's relevant.
 

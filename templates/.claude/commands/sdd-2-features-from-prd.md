@@ -27,4 +27,5 @@ Don't write the file before I approve the list. Once I do, save it to `specs/FEA
 ## Constraints
 
 - **Don't write specs.** This is the breakdown + index only — I'll pick which features become specs, then run `/sdd-3-spec-new <feature>` per one.
+- **A shipped slice can change the backlog.** Re-running this after a slice ships may surface a new slice, a now-unnecessary one, or a re-ordering you learned from shipping — merge those in (append new as `planned`, flag dropped ones) and never reset progress. The PRD froze; the slice list didn't.
 - Mark anything you're guessing with `[VERIFY]`.

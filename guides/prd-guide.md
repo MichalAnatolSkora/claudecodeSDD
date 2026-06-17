@@ -715,11 +715,15 @@ The kickoff's output — the spec backlog — is a list of **features**, each si
 
 **Slice vertically, not horizontally.** The most common mistake is slicing by layer — "the database work," "the API work," "the UI work." None of those ship anything a user can use, and none can be verified end-to-end. Slice by **capability** instead: a thin path that runs through every layer and delivers one visible outcome. (Standard terms: *vertical slice*, *walking skeleton*.)
 
+*Bad vs good, concretely.* For an order-export platform, a **horizontal** (bad) first slice is *"build the database schema for every export type"* — it ships nothing a user can see and can't be verified end-to-end. A **vertical** (good) first slice is *"one partner's orders → XML → SFTP, hardcoded trigger"* — thin and ugly, but it runs through every layer and proves the core path. The bad slice front-loads infrastructure nobody can use yet; the good one front-loads a working skeleton you thicken later.
+
 **Find the walking skeleton first.** The first feature should be the thinnest end-to-end slice that proves the PRD's core value — even if it hardcodes the boring parts. Ship it, then thicken. This beats building the whole foundation before anything works.
 
 **Derive features from the PRD's success criteria.** Each measurable outcome in the PRD maps to one or a few features. If a success criterion has no feature, you missed one; if a feature serves no criterion, question it — it may be out of scope.
 
 **Prioritize and sequence.** Tag each feature P1/P2/P3 (or MoSCoW). Order by *value × dependency*: build only the foundation the next valuable slice actually needs — not all of it up front. Mark hard dependencies so nothing is scheduled before its prerequisite.
+
+**Re-slice as you learn — the list is a first guess, not a contract.** A shipped slice routinely changes what the next one should be: a partner edge case you didn't anticipate, a step that turned out trivial, a whole slice that became unnecessary. After a slice ships, let what you learned re-rank, add, or drop slices before you start the next trio — in `FEATURES.md` if you keep one, otherwise just in your tracker or your head. This is the upstream half of the loop the trio runs downstream: the PRD freezes, the slice list does not. (Guardrail: re-slice when a *ship* taught you something — not endlessly; if you're re-slicing without having shipped anything, see the anti-patterns below.)
 
 **Right-size to a trio.** Each feature should fit one trio: a `SPEC.md` under ~150 lines, a few days of work. Too big (multi-week, sprawling spec) → split it. Too small (a one-liner) → fold it into a neighbor or treat it as a bugfix-shape spec.
 
