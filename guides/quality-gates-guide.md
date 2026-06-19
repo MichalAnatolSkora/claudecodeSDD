@@ -7,18 +7,19 @@
 ## Table of Contents
 
 1. [What this guide adds](#what-this-guide-adds)
-2. [Enforcement vs evaluation — same tooling, different purposes](#enforcement-vs-evaluation--same-tooling-different-purposes)
-3. [Three categories of checks: mechanical, LLM, human](#three-categories-of-checks-mechanical-llm-human)
-4. [What belongs in each category](#what-belongs-in-each-category)
-5. [Pattern A — Pre-commit / Git hooks (mechanical)](#pattern-a--pre-commit--git-hooks-mechanical)
-6. [Pattern B — Claude Code hooks (mechanical, in-session)](#pattern-b--claude-code-hooks-mechanical-in-session)
-7. [Pattern C — Configured subagent (LLM evaluator)](#pattern-c--configured-subagent-llm-evaluator)
-8. [Pattern D — Slash commands (LLM evaluator, user-invoked)](#pattern-d--slash-commands-llm-evaluator-user-invoked)
-9. [Pattern E — CI/CD checks (mechanical + LLM, team-wide)](#pattern-e--cicd-checks-mechanical--llm-team-wide)
-10. [Worked example — complete setup for one repo](#worked-example--complete-setup-for-one-repo)
-11. [What to mechanize vs leave human](#what-to-mechanize-vs-leave-human)
-12. [Anti-patterns](#anti-patterns)
-13. [Golden rules](#golden-rules)
+2. [For most 1–10 teams: the lightweight version](#for-most-110-teams-the-lightweight-version)
+3. [Enforcement vs evaluation — same tooling, different purposes](#enforcement-vs-evaluation--same-tooling-different-purposes)
+4. [Three categories of checks: mechanical, LLM, human](#three-categories-of-checks-mechanical-llm-human)
+5. [What belongs in each category](#what-belongs-in-each-category)
+6. [Pattern A — Pre-commit / Git hooks (mechanical)](#pattern-a--pre-commit--git-hooks-mechanical)
+7. [Pattern B — Claude Code hooks (mechanical, in-session)](#pattern-b--claude-code-hooks-mechanical-in-session)
+8. [Pattern C — Configured subagent (LLM evaluator)](#pattern-c--configured-subagent-llm-evaluator)
+9. [Pattern D — Slash commands (LLM evaluator, user-invoked)](#pattern-d--slash-commands-llm-evaluator-user-invoked)
+10. [Pattern E — CI/CD checks (mechanical + LLM, team-wide)](#pattern-e--cicd-checks-mechanical--llm-team-wide)
+11. [Worked example — complete setup for one repo](#worked-example--complete-setup-for-one-repo)
+12. [What to mechanize vs leave human](#what-to-mechanize-vs-leave-human)
+13. [Anti-patterns](#anti-patterns)
+14. [Golden rules](#golden-rules)
 
 ---
 
@@ -45,6 +46,20 @@ What it doesn't cover:
 - *"Every possible regex check"* — selectively useful, exhaustive lists go stale
 
 For the building blocks themselves (skills, slash commands, subagents, hooks — what they are, how they work in Claude Code), see [`working-with-agents-guide.md` § "Claude Code Building Blocks"](working-with-agents-guide.md#claude-code-building-blocks). This guide assumes you've read that section and focuses on *applying* those blocks to SDD discipline.
+
+---
+
+## For most 1–10 teams: the lightweight version
+
+**You almost certainly don't need the five patterns below.** For a solo dev or a 2–3 person team, the whole of "making SDD stick" is three things you already have:
+
+- **Good docs the agent actually reads** — a fresh `CLAUDE.md`, a spec before each change. The gate that matters most, and it needs no automation.
+- **One human on the PR** — a second pair of eyes reading the diff against the spec's acceptance criteria. Judgment, not tooling (see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md)).
+- **The break-the-code check** — already built into `/implement` ([`testing-guide.md`](testing-guide.md)). It catches confidently-wrong green suites for free.
+
+Add exactly one mechanical gate when you feel a specific pain: a `pii-scan` pre-commit hook the first time someone nearly commits a customer name ([Pattern A](#pattern-a--pre-commit--git-hooks-mechanical)), or a `/trio-check` slash command the third time a trio ships with an uncovered AC ([Pattern D](#pattern-d--slash-commands-llm-evaluator-user-invoked)). Nothing else, until it earns its place.
+
+**Everything below — the five patterns, the CI matrix, the full worked setup — is "when you outgrow ~10":** multiple contributors who don't share a memory, a real CI pipeline, ADR bodies worth protecting mechanically. Read it then. *(The hook/CI snippets are illustrative — Claude Code's hook interface and exit-code semantics vary by version; adapt the specifics to your harness rather than pasting verbatim.)*
 
 ---
 
@@ -791,4 +806,4 @@ Every check is automated. Code review becomes a rubber stamp because "the bots c
 
 ---
 
-*This guide complements [`working-with-agents-guide.md` § "Claude Code Building Blocks"](working-with-agents-guide.md#claude-code-building-blocks) (the building blocks themselves), [`spec-plan-tasks-guide.md` § "Cross-artifact consistency checks"](spec-plan-tasks-guide.md#cross-artifact-consistency-checks) (the trio audit conceptually), [`adr-guide.md`](adr-guide.md) (the ADR immutability invariant), and [`research-guide.md`](research-guide.md) (the PII concern). Together they describe what to enforce and how; this guide is the *how to make it stick* across patterns.*
+*This guide complements [`working-with-agents-guide.md` § "Claude Code Building Blocks"](working-with-agents-guide.md#claude-code-building-blocks) (the building blocks themselves), [`spec-plan-tasks-guide.md` § "Cross-artifact consistency checks"](spec-plan-tasks-guide.md#cross-artifact-consistency-checks) (the trio audit conceptually), [`adr-guide.md`](adr-guide.md) (the ADR immutability invariant). Together they describe what to enforce and how; this guide is the *how to make it stick* across patterns.*

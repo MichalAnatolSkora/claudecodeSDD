@@ -10,9 +10,6 @@
  set up:  the commands + a starter CLAUDE.md   (then keep it updated)
      │
      ▼
-    research?                  optional — most 1–10 teams skip
-     │
-     ▼
     /prd-new · /prd-review     idea → PRD   (skip if small/solo)
      │
      ▼
@@ -38,7 +35,7 @@
 | You have… | Start at | Skip |
 |-----------|----------|------|
 | a new product / a real change of direction | step 1 (PRD) | nothing |
-| a rough idea, or an accepted PRD | step 2 (slice) | research, sometimes the PRD |
+| a rough idea, or an accepted PRD | step 2 (slice) | sometimes the PRD |
 | a known single feature | step 3 (trio) | steps 1–2 |
 | a one-line fix | step 3, short spec only | steps 1–2, plan, tasks |
 
@@ -59,7 +56,7 @@ That's the floor. Everything below is per change.
 
 ## Step 1 — Idea → PRD
 
-- **Before, optionally:** real user/market research feeds the PRD — see [`research-guide.md`](research-guide.md). Most 1–10 teams skip it.
+- **Before, optionally:** informal user/market research feeds the PRD — see [overview § Before the PRD](spec-driven-development-guide.md#before-the-prd-research-and-discovery). Most 1–10 teams skip it (a paragraph from a few customer conversations is plenty).
 - **Do:** `/prd-new "<1–3 sentences>"` — it sketches a lean PRD, then asks you the open questions and fills them in (you make the product calls). Then `/prd-review` — a read-only audit (specific users? measurable success criteria? ≥5 out-of-scope items?) before you slice.
 - **Get:** `docs/prd/YYYY-MM-slug.md` — product-level *what & why*, humans-only (the agent implements from specs, not the PRD).
 - **Skip if:** solo, small, or the what/why already fits in your head — a one-paragraph issue is enough.
@@ -95,6 +92,7 @@ One `spec → plan → tasks` per feature, written **in order** — each locks d
 - **Do:** `/implement` — the agent works `TASKS.md` task by task, **red→green** (write the failing test from the AC first, implement the minimum, run, green) and **commits at each green task** (a cheap rollback point). It ends with the break-the-code check below.
 - **Don't trust green:** break the code on purpose; the test must go red. Review the agent's tests, especially the assertions.
 - **Stuck?** If the agent can't build from a finished trio, that's a *spec gap*, not a cue to vibe-code — shrink the task, feed the missing context, or resolve an open question.
+- **Before the PR (Step 6):** run the built-in `/code-review` for generic bugs and quality (and `/security-review` if the change touches a trust boundary), then read the diff yourself against the spec's acceptance criteria, `CLAUDE.md` conventions, and `plan.md` § File structure — does every AC actually hold, did the diff stay inside the planned files, any scope creep or dead code? This is a human gate, not a new pipeline command.
 
 → [`working-with-agents-guide.md`](working-with-agents-guide.md) · [`testing-guide.md`](testing-guide.md)
 

@@ -29,11 +29,12 @@ If the gap is a *wrong* acceptance criterion (not a missing one), that's the cod
 
 ## After the last task — break the code (don't trust green)
 
-1. For each new test, break the implementation on purpose (flip a condition, return a wrong value) and confirm the test goes **red**.
-2. Report any test that stayed green — that's false confidence; fix the assertion, not the code.
-3. Restore the implementation; confirm the suite is green again.
-4. If `specs/FEATURES.md` exists, set this feature's row to `shipped` (the spec's own `STATUS: shipped` marker is added later at merge, per `tasks.md` Post-merge).
-5. If building this taught you something about the next slice — a new one, a now-unnecessary one, a re-ordering — say so, and re-run `/sdd-2-features-from-prd` to merge it into the backlog before the next trio. Shipping a slice routinely re-ranks what comes next.
+1. **Confirm each acceptance criterion is actually asserted** — not just that *some* test goes green. Walk the spec's AC list: each one must map to a test whose assertion would fail if that AC were violated. An AC with no asserting test is uncovered even when the suite is green.
+2. For each new test, break the implementation on purpose (flip a condition, return a wrong value) and confirm the test goes **red**.
+3. Report any test that stayed green — that's false confidence; fix the assertion, not the code.
+4. Restore the implementation; confirm the suite is green again.
+5. If `specs/FEATURES.md` exists, set this feature's row to `shipped` (the spec's own `STATUS: shipped` marker is added later at merge, per `tasks.md` Post-merge).
+6. If building this taught you something about the next slice — a new one, a now-unnecessary one, a re-ordering — say so, and re-run `/sdd-2-features-from-prd` to merge it into the backlog before the next trio. Shipping a slice routinely re-ranks what comes next.
 
 ## Constraints
 

@@ -22,7 +22,7 @@ Long-form guides + copy-pasteable templates for spec-driven development with AI 
 └── pdf-style-wide.html                # full-width PDF style — DEFAULT
 ```
 
-Built PDFs (`output.pdf`, per-guide PDFs) are **gitignored** — generated artifacts, never committed.
+Built PDFs live in `pdf/` (a per-guide PDF for each `guides/*.md`, plus `claudecodeSDD-bundle.pdf`) and are **gitignored** — generated artifacts, never committed. The whole `pdf/` folder is ignored.
 
 `examples/` holds worked, **docs-only** SDD sets (no runnable code) — one folder per fictional app, kept consistent with the guides and the neutral-naming rules below. Currently: `order-export/`.
 
@@ -48,9 +48,7 @@ Existing detail guides:
 - `guides/runbook-operations-guide.md` — operational / runbook layer
 - `guides/claude-md-guide.md` — how to write a good `CLAUDE.md` itself (what goes in, sizing, the many-docs case, anti-patterns, template)
 - `guides/adr-guide.md` — full ADR how-to: Nygard format, MADR/Y-statements, four worked examples, Supersedes pattern, numbering, cross-referencing, anti-patterns, tooling, maintenance
-- `guides/prd-guide.md` — PRD how-to: formats (PR-FAQ / lean / one-pager / full), anatomy, two worked-example PRDs (era 1 + era 2), era-boundary heuristics, AI-authoring prompts, review process, anti-patterns
-- `guides/research-guide.md` — research artifacts in the repo: PII gating, folder structure for `docs/research/`, the five artifact types (interview synthesis / competitive / sizing / validation / opportunity briefs), synthesis discipline, AI-assisted synthesis prompts, PRD↔research interface, anti-patterns. Research is for humans + agent context; agent never generates code from research.
-- `guides/quality-gates-guide.md` — enforcement + evaluation of SDD: three categories of checks (mechanical / LLM evaluator / human), five implementation patterns (pre-commit / Claude Code hooks / configured subagent / slash command / CI), what to mechanize vs leave human, worked example with full setup, anti-patterns
+- `guides/prd-guide.md` — PRD how-to: formats (PR-FAQ / lean / one-pager / full), anatomy, two worked-example PRDs (era 1 + era 2), era-boundary heuristics, AI-authoring prompts, review process, anti-patterns- `guides/quality-gates-guide.md` — enforcement + evaluation of SDD: three categories of checks (mechanical / LLM evaluator / human), five implementation patterns (pre-commit / Claude Code hooks / configured subagent / slash command / CI), what to mechanize vs leave human, worked example with full setup, anti-patterns
 - `guides/spec-plan-tasks-guide.md` — **the flagship guide and centerpiece of the repo: the core spec → plan → tasks loop.** Three worked-example trios (a non-trivial feature as the three-file trio, a small feature as a one-file trio, and a discovery feature whose first spec was wrong), six AI-authoring prompts per artifact, iteration loops (incl. delivery vs discovery modes and the code→spec correction loop), cross-artifact consistency checks, slash-command sketches. Deliberately kept simple (no toolkit/scaffolder). Keep this the most polished guide.
 - `guides/flow-guide.md` — the whole SDD flow as a runnable sequence: each step's command and output (idea → PRD → slice → trio → implement+test → ADR → merge), an entry-points table, and a cheat sheet. The spine; depth lives in the linked guides. Complements the "The whole flow" map section in the overview.
 - `guides/sdd-in-teams-guide.md` — running SDD with 2–10 people, kept deliberately light: who owns what (one name per artifact), lightweight PR review, spec lifecycle, ADRs as a shared decision log, the solo case, onboarding, small-team failure modes, and what to add only when you outgrow ~10. No RACI / enterprise ceremony.
@@ -82,11 +80,21 @@ Build with pandoc + Prince. Default invocation:
 pandoc guides/spec-driven-development-guide.md \
        guides/working-with-agents-guide.md \
        guides/runbook-operations-guide.md \
-       -o output.pdf \
+       -o pdf/claudecodeSDD-bundle.pdf \
        --pdf-engine=prince \
        -H pdf-style-wide.html \
        --metadata title="claudecodeSDD"
 ```
+
+- **Output goes to the gitignored `pdf/` folder.** To regenerate a per-guide PDF for every guide, loop:
+  ```bash
+  mkdir -p pdf
+  for f in guides/*.md; do
+    pandoc "$f" -o "pdf/$(basename "$f" .md).pdf" --pdf-engine=prince \
+      -H pdf-style-wide.html --metadata title="$(grep -m1 '^# ' "$f" | sed 's/^# *//')"
+  done
+  ```
+  The bundle above is the 3-guide reading-flow PDF; the loop is the full per-guide set.
 
 - Use `pdf-style-wide.html` — the **single unified style** for every PDF (per-guide builds and the bundle above). It keeps the small compact font but drops the side margins to `0.3cm` and overrides pandoc's centered-column cap (`body { max-width: none }`), so text runs full-width on A4 while page-number footers stay. Do **not** use `pdf-style.html` (full template) or `pdf-style-compact.html` (narrower 1cm-margin variant) unless explicitly asked.
 - Do **NOT** pass `--toc`. Each guide already has its own Table of Contents section in markdown; an auto-TOC duplicates them.

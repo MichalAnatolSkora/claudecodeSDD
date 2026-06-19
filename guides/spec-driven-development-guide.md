@@ -155,9 +155,9 @@ If the answer to all four is *no* — prompt away. Don't perform documentation t
 Everything in this guide fits one pipeline — and for a team of **1–10**, you almost never run all of it: **you enter where your change starts and skip the rest.**
 
 ```
-research?  →  PRD  →  slice into  →  ┌ spec → plan → tasks ┐ → implement + test → ADR? → merge
-(optional)   (per     features        └──── the trio ──────┘    (agent, red→green)  (record  (freeze
-             era)     (/features-       one per feature                              keepers)  the spec)
+PRD  →  slice into  →  ┌ spec → plan → tasks ┐ → implement + test → ADR? → merge
+(per    features         └──── the trio ──────┘   (agent, red→green)  (record  (freeze
+ era)   (/features-       one per feature                             keepers)  the spec)
                        from-prd)
 ```
 
@@ -167,12 +167,13 @@ At 2–3 people you'll usually skip formal **research** and a heavy **PRD** (a o
 
 **The stages, with their detail guides:**
 
-1. **Research** *(optional)* — [`research-guide.md`](research-guide.md): synthesized research as human + agent context, never a code source.
-2. **PRD** — [`prd-guide.md`](prd-guide.md): the product-level *what & why*, per era.
-3. **Slice → features** — [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features": vertical slices, walking skeleton first.
-4. **The trio** — [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md): the core loop; one `spec → plan → tasks` per feature.
-5. **Implement + test** — [`working-with-agents-guide.md`](working-with-agents-guide.md) (the implementation loop) and [`testing-guide.md`](testing-guide.md) (how the agent writes the tests): the agent works `TASKS.md` red→green; the tests come straight from the spec's acceptance criteria.
-6. **Decisions** — [`adr-guide.md`](adr-guide.md): record the ones worth not relitigating.
+*(Upstream and optional, not really an SDD phase: **research** — informal user/market discovery that grounds the PRD. Most 1–10 teams skip it; see [§ Before the PRD: Research and Discovery](#before-the-prd-research-and-discovery). It stays human + agent context, never a code source.)*
+
+1. **PRD** — [`prd-guide.md`](prd-guide.md): the product-level *what & why*, per era.
+2. **Slice → features** — [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features": vertical slices, walking skeleton first.
+3. **The trio** — [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md): the core loop; one `spec → plan → tasks` per feature.
+4. **Implement + test** — [`working-with-agents-guide.md`](working-with-agents-guide.md) (the implementation loop) and [`testing-guide.md`](testing-guide.md) (how the agent writes the tests): the agent works `TASKS.md` red→green; the tests come straight from the spec's acceptance criteria.
+5. **Decisions** — [`adr-guide.md`](adr-guide.md): record the ones worth not relitigating.
 
 Under all of it sits the **stable layer** — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md` — the docs the agent reads every session. That's where you actually start on day one ([The Absolute Minimum](#the-absolute-minimum), next), adding the rest reactively. When `ARCHITECTURE.md` earns its place, `/architecture-from-prd` (greenfield) or `/architecture-from-code` (existing codebase) bootstraps it — structure plus a stub ADR per hard-to-reverse decision.
 
@@ -290,7 +291,7 @@ The agent **never** turns research into a feature without a PRD + specs in betwe
 
 **Anonymization happens before commit, not after.** The discipline: synthesized artifact ≠ raw source. Raw sources stay in your research-ops tool (Dovetail, Grain, Notion, etc.); only synthesized artifacts enter the repo. *"When in doubt, leave it out."*
 
-For the practical mechanics — full folder structure, the artifact-type breakdown, the synthesis discipline (raw → patterns → themes), AI-assisted synthesis prompts, the PRD↔research interface, and research-specific anti-patterns (raw transcripts in repo, opinion-as-research, advocacy disguised as synthesis, research that quietly becomes a PRD by accident) — see [`research-guide.md`](research-guide.md).
+Keep it lean. Most 1–10 teams never create `docs/research/` at all — a PRD that says *"based on ~6 customer conversations"* is honest and sufficient. Reach for synthesized research artifacts (interview themes, a competitive table, a sizing estimate) only when more than one person must consume the findings without you in the room, or a contested product call needs evidence over opinion. The discipline above — synthesis not raw data, PII out, findings flow through a PRD and never straight into code — is the whole rule; everything else is optional scaffolding you add only when a real reader needs it.
 
 ---
 
@@ -435,47 +436,7 @@ A spec is **per-feature** and **frozen after merge** — different from a PRD (w
 
 ### Template
 
-```markdown
-# [Feature name]
-
-> Copy this file to `specs/YYYY-MM-feature-slug/spec.md` and fill in.
-
-## Goal
-
-[1-3 sentences. What problem, for whom, in which system.]
-
-## In scope
-
-- [Concrete, observable outcomes]
-- ...
-
-## Out of scope (deliberately, not now)
-
-- [Things you'd consider but are explicitly excluding from this change]
-- ...
-
-## Acceptance criteria
-
-- [ ] [Concrete, testable. e.g. "POST /api/x with payload Y returns 201 and a row in event_log"]
-- [ ] ...
-
-## Impact on existing code
-
-- [Which files / modules will change]
-- [Which contracts or conventions this touches]
-- [Anything that could break — call it out by name]
-
-## Open questions
-
-- [ ] [Question that must be answered before implementation starts]
-- [ ] ...
-
-## References
-
-- [Link to related ADRs, prior specs, or docs]
-```
-
-A copy-pasteable version lives at [`templates/spec.md`](../templates/spec.md).
+The section-by-section template lives at [`templates/spec.md`](../templates/spec.md) — Goal · In/Out of scope · Acceptance criteria · Impact on existing code · Open questions · References. A complete worked `SPEC.md` (with its `PLAN.md`/`TASKS.md` siblings filled in) is in [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) § Worked example 1.
 
 ### Spec status lifecycle
 
@@ -523,54 +484,7 @@ A good `PLAN.md` answers questions the agent would otherwise guess at. Every gue
 
 ### Template
 
-````markdown
-# [Feature/Project Name]
-
-## Technical decisions
-- Stack: .NET 8, ASP.NET Core, Dapper, MS SQL Server
-- Data access pattern: repository + Dapper, no EF
-- DI: ...
-- Logging: Serilog, contract matching `IBaseHandler<TSelf>`
-- Naming conventions: lowercase snake_case for schemas/tables (e.g. `app.orders`), primary keys named `id`
-
-## Data model
-### Tables (DDL diff)
-```sql
--- new table / change
-```
-### DTOs / contracts
-- `XRequest`: fields...
-- `XResponse`: fields...
-
-## File structure
-```
-src/
-  Domain/
-    ...
-  Infrastructure/
-    Repositories/XRepository.cs
-  Application/
-    Handlers/XHandler.cs
-  Api/
-    Controllers/XController.cs
-tests/
-  Integration/
-    XHandlerTests.cs   // Testcontainers + NUnit
-```
-
-## Constraints
-- Do NOT use EF Core
-- Do NOT add CQRS/MediatR — handlers called directly
-- Maintain consistency with `BatchXmlMerger` pattern
-
-## Open questions
-- [ ] Does `x` use soft-delete or hard?
-- [ ] Retry policy for SFTP — Polly or custom?
-
-## References
-- `src/.../OrderImportRepository.cs` — repo pattern to follow
-- `docs/adr/ADR-007-dapper.md`
-````
+The template lives at [`templates/plan.md`](../templates/plan.md) — Technical decisions (each tied to an ADR) · Data model (only when persistent state is involved) · File structure (concrete paths) · Constraints (the `Do NOT…` list carried from the spec's Out of scope) · Open questions · References. See it filled in for a real feature, alongside its `SPEC.md` and `TASKS.md`, in [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) § Worked example 1.
 
 ### Practical Tips
 
@@ -609,38 +523,7 @@ For everything else — write it. The act of writing tasks down forces you to th
 
 ### Template
 
-```markdown
-# Tasks: [Feature name]
-
-> Order matters. Each task has its own verification. Check off as you go.
-
-## Setup
-
-- [ ] [Any prerequisites — branch, DB migration, env setup]
-
-## Implementation (in execution order)
-
-- [ ] 1. [Task description] → verify: [how to confirm]
-- [ ] 2. [Task description] → verify: [how to confirm]
-- [ ] 3. ...
-
-## Verification (against acceptance criteria)
-
-- [ ] AC1: [from spec.md] → [test / manual check]
-- [ ] AC2: [from spec.md] → [test / manual check]
-
-## Post-merge
-
-- [ ] Append `STATUS: shipped (PR #N, YYYY-MM-DD)` to spec.md
-- [ ] Update relevant docs (CLAUDE.md, ARCHITECTURE.md, etc.) if needed
-- [ ] Close related issues / tickets
-
-## Notes (append as you work)
-
-- [YYYY-MM-DD]: [observation, blocker, decision made on the fly]
-```
-
-A copy-pasteable version lives at [`templates/tasks.md`](../templates/tasks.md).
+The template lives at [`templates/tasks.md`](../templates/tasks.md) — Setup · Implementation (ordered, each step ending in `→ verify:`) · Verification against the acceptance criteria · Post-merge · Notes. See it filled in — including the messy real-work Notes (a race condition found under load, a flaky-clock fix) — in [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) § Worked example 1.
 
 ### Granularity — how big is a task?
 
@@ -924,7 +807,7 @@ Beyond what we've covered (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, sp
 
 **`ROADMAP.md`** — what you plan in the coming quarters. Not details, just direction. Gives the agent (and new joiners) context on *where* we're going, so proposed solutions don't conflict with future plans.
 
-**`docs/research/`** — synthesized research artifacts upstream of PRDs: interview themes, competitive analyses, market sizing, problem validation, opportunity briefs. Lives here as **agent context** (the agent uses it when drafting PRDs and interpreting user vocabulary), never as a code-generation source. **Raw data with PII stays out — synthesis only.** See [Before the PRD: Research and Discovery](#before-the-prd-research-and-discovery) above and [`research-guide.md`](research-guide.md) for the full discipline.
+**`docs/research/`** — synthesized research artifacts upstream of PRDs: interview themes, competitive analyses, market sizing, problem validation, opportunity briefs. Lives here as **agent context** (the agent uses it when drafting PRDs and interpreting user vocabulary), never as a code-generation source. **Raw data with PII stays out — synthesis only.** See [Before the PRD: Research and Discovery](#before-the-prd-research-and-discovery) above for the discipline.
 
 ### Domain-Specific
 
@@ -989,21 +872,7 @@ The postmortem may flag "runbook needs further updating" — feedback loop close
 
 ### A minimal postmortem template
 
-A copy-pasteable postmortem template lives at [`templates/postmortem.md`](../templates/postmortem.md). The headings:
-
-```
-# Postmortem: [one-line incident summary]
-
-Date / Severity / Duration / Author / Status
-
-## Summary
-## Timeline
-## Root cause
-## What went well
-## What went wrong
-## Lessons learned
-## Action items (each with owner + due date)
-```
+A copy-pasteable postmortem template lives at [`templates/postmortem.md`](../templates/postmortem.md) — headings: *Summary · Timeline · Root cause · What went well · What went wrong · Lessons learned · Action items (each with owner + due date)*, under a `Date / Severity / Duration / Author / Status` line.
 
 **Blameless framing matters.** A postmortem accuses systems and decisions, not individuals. Otherwise the next one isn't written honestly — and the whole discipline collapses within a quarter.
 

@@ -107,9 +107,7 @@ The guides assume a mid-sized project context (.NET, Quartz, SFTP integrations, 
 - **[Testing in SDD](guides/testing-guide.md)** — how testing fits the trio and how the AI agent writes tests you can trust: acceptance criteria as the test contract, the `TESTING.md` conventions file, TDD red→green with an agent, getting good tests out of it (and the break-the-code check so you don't trust green), and pragmatic coverage at 1–10.
 - **[Writing a Good CLAUDE.md](guides/claude-md-guide.md)** — the deep-dive on the single most important file in an SDD repo: what goes in (and what doesn't), good-vs-bad example lines, how to size it by project scale, and what changes when your repo has 30+ docs competing for the agent's attention.
 - **[Writing Good ADRs](guides/adr-guide.md)** — the full how-to for Architecture Decision Records: Nygard format section-by-section, alternative formats (MADR, Y-statements), four worked examples (Accepted, Superseded pair, Proposed, Deprecated), the Supersedes pattern in depth, numbering, cross-referencing, anti-patterns, tooling, maintenance.
-- **[Writing a Good PRD (Per Era, For Humans)](guides/prd-guide.md)** — the practice companion to main SDD's "The PRD Layer": format alternatives (PR-FAQ, lean PRD, one-pager, full), anatomy section-by-section, two complete worked PRDs (original launch + era-2 expansion), era-boundary heuristics, five AI-authoring prompts, success-metrics deep-dive, stakeholder review process, PRD-specific anti-patterns.
-- **[Research in the Repo](guides/research-guide.md)** — the upstream-of-PRD layer: what synthesized research belongs in the repo (and what stays out for PII reasons), folder structure for `docs/research/`, the five artifact types (interview synthesis, competitive, sizing, validation, opportunity briefs), the synthesis discipline, AI-assisted synthesis prompts, the PRD↔research interface, and research-specific anti-patterns. Research is for humans + agent context; the agent never generates code from research.
-- **[Quality Gates: Enforcing and Evaluating SDD](guides/quality-gates-guide.md)** — the "how do I make SDD stick?" guide: three categories of checks (mechanical / LLM evaluator / human), five implementation patterns (pre-commit hooks, Claude Code hooks, configured subagents, slash commands, CI/CD), what to mechanize vs leave human, a complete worked-example setup, and the anti-patterns of over-automation (alert fatigue, no escape hatch, mechanical checks of subjective things).
+- **[Writing a Good PRD (Per Era, For Humans)](guides/prd-guide.md)** — the practice companion to main SDD's "The PRD Layer": format alternatives (PR-FAQ, lean PRD, one-pager, full), anatomy section-by-section, two complete worked PRDs (original launch + era-2 expansion), era-boundary heuristics, five AI-authoring prompts, success-metrics deep-dive, stakeholder review process, PRD-specific anti-patterns.- **[Quality Gates: Enforcing and Evaluating SDD](guides/quality-gates-guide.md)** — the "how do I make SDD stick?" guide: three categories of checks (mechanical / LLM evaluator / human), five implementation patterns (pre-commit hooks, Claude Code hooks, configured subagents, slash commands, CI/CD), what to mechanize vs leave human, a complete worked-example setup, and the anti-patterns of over-automation (alert fatigue, no escape hatch, mechanical checks of subjective things).
 - **[SDD in Teams (1–10 People)](guides/sdd-in-teams-guide.md)** — what changes when SDD goes from solo to a small team, kept deliberately light: who owns what (one name per artifact), lightweight PR-based review, the spec lifecycle, ADRs as a shared decision log, the solo case, onboarding, the failure modes that actually hit small teams, and what to add only once you outgrow ~10.
 - **[Migrating a Legacy Repo to SDD](guides/legacy-to-sdd-migration-guide.md)** — the one-time process of retrofitting SDD onto an existing codebase: 30-minute audit, week-1 foundation, forward-only specs, reactive ADRs, reusable agent prompts, anti-patterns (the big-bang sprint, fabricated-history ADRs), and worked examples (Python web app, .NET monorepo, C# legacy, OSS project).
 - **[Who uses SDD (and what they call it)](guides/who-uses-sdd.md)** — plain "who uses what" tables: AI-coding tools (GitHub spec-kit, Claude Code + `CLAUDE.md`, Cursor `.cursorrules`, Aider/Continue/Cline) and the pre-AI crowd (Amazon PR-FAQ, Google design docs, Stripe RFCs, Basecamp Shape Up), plus the older ideas SDD borrows from. Useful when someone calls SDD a fad.
@@ -129,9 +127,7 @@ The guides assume a mid-sized project context (.NET, Quartz, SFTP integrations, 
 │   ├── testing-guide.md              # testing in SDD: agent-written tests, TESTING.md, what to test
 │   ├── claude-md-guide.md             # how to write a good CLAUDE.md (incl. many-docs repos)
 │   ├── adr-guide.md                   # full ADR how-to: format, lifecycle, examples, anti-patterns
-│   ├── prd-guide.md                   # PRD how-to: formats, era pattern, worked examples, AI prompts
-│   ├── research-guide.md              # research in the repo: PII, folder structure, synthesis, agent context
-│   ├── quality-gates-guide.md         # enforcement + evaluation: hooks, subagents, slash commands, CI
+│   ├── prd-guide.md                   # PRD how-to: formats, era pattern, worked examples, AI prompts│   ├── quality-gates-guide.md         # enforcement + evaluation: hooks, subagents, slash commands, CI
 │   ├── sdd-in-teams-guide.md          # SDD for 1–10 people: ownership, review, onboarding (light)
 │   ├── legacy-to-sdd-migration-guide.md   # retrofitting SDD onto an existing repo
 │   └── who-uses-sdd.md                # who uses SDD and what they call it (plain who-uses-what)
@@ -147,8 +143,7 @@ The guides assume a mid-sized project context (.NET, Quartz, SFTP integrations, 
 │   ├── TESTING.md                     # test conventions the agent reads (framework, mocking, "done")
 │   ├── ADR.md
 │   ├── runbook.md
-│   ├── postmortem.md                  # blameless incident analysis (timeline, root cause, lessons, actions)
-│   └── research-synthesis.md          # interview synthesis (anonymized; raw stays outside repo)
+│   └── postmortem.md                  # blameless incident analysis (timeline, root cause, lessons, actions)
 └── examples/                          # worked end-to-end SDD doc sets (illustrative, docs-only)
     └── order-export/                  # one fictional app: PRD → trio → ADR, all cross-linked
 ```
@@ -169,8 +164,6 @@ The artifacts the commands produce and the agent reads. Copy into your project a
 - **[ADR.md](templates/ADR.md)** — architecture decision record (context, decision, consequences, alternatives)
 - **[runbook.md](templates/runbook.md)** — operational runbook entry (symptoms, diagnosis, recovery, verification)
 - **[postmortem.md](templates/postmortem.md)** — blameless incident analysis (summary, timeline, root cause, lessons, action items)
-- **[research-synthesis.md](templates/research-synthesis.md)** — interview synthesis with themed evidence + role-attributed quotes (anonymized; raw transcripts stay outside the repo)
-
 ## Examples
 
 - **[examples/order-export/](examples/order-export/)** — a complete, illustrative SDD paper trail for one fictional app (a B2B order-export platform): a PRD, the stable layer (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, `TESTING.md`), features taken through the trio in both shapes (one-file and three-file), a **discovery** feature whose first spec was wrong (fixed mid-flight), and the ADR the work produced — all cross-linked so you can follow the "golden thread" end to end. Docs only; no runnable code. Start at its [README](examples/order-export/README.md).

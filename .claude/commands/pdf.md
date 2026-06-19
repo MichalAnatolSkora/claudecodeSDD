@@ -13,9 +13,9 @@ Arguments: `$ARGUMENTS`
 
 1. **Parse arguments:**
    - **Input** — first arg. If empty, default to `guides/*.md`.
-   - **Output** — second arg. If empty, derive:
-     - Single file (e.g. `README.md`) → `README.pdf`
-     - Glob or multiple files → `output.pdf`
+   - **Output** — second arg. If empty, derive (always into the gitignored `pdf/` folder — `mkdir -p pdf` first):
+     - Single file (e.g. `guides/flow-guide.md`) → `pdf/flow-guide.pdf`
+     - Glob or multiple files → `pdf/claudecodeSDD-bundle.pdf`
 
 2. **Pre-check:**
    - Verify `pandoc` is on PATH (`which pandoc`). If missing, instruct: `brew install pandoc`.

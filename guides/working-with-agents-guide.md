@@ -989,6 +989,8 @@ Plain prompting takes you a long way, but Claude Code (and similar agent tools) 
 
 This section explains what each is, where it earns its place in your SDD workflow, an example, and the anti-pattern that comes with it. The decision table at the end is the *"which do I reach for?"* summary.
 
+> **Reach-for-it reference, not core reading.** This is the longest section in the guide, and you don't read it front-to-back. Skim the four blocks once so you know they exist, then come back to the relevant one *when you actually build it*. For a solo dev the trio plus the shipped `/sdd-*` commands already cover the day-to-day; skills, subagents, and hooks earn their place only when you have a recurring workflow worth encoding. **The hook examples below are illustrative** — Claude Code's hook interface (event names, how input is passed, which exit code blocks an action) varies by version, so treat them as shape-not-spec and check them against your harness before wiring them up.
+
 ### Skills
 
 **What they are:** self-contained, named capabilities Claude can discover and invoke. A skill lives in `.claude/skills/<name>/SKILL.md` (project-scoped) or `~/.claude/skills/<name>/SKILL.md` (user-scoped). The SKILL.md frontmatter describes *when* the skill applies; Claude auto-suggests or invokes it when a prompt matches.

@@ -55,7 +55,7 @@ This guide is the practice:
 - **Success metrics deep-dive** — how to write *"what success looks like"* measurably without overcommitting
 - **Cross-functional handoff** — getting from *"PRD accepted"* to *"first specs in flight"*
 
-For the underlying principles, go back to [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer). For the upstream side — research and discovery that feeds the PRD — see [`research-guide.md`](research-guide.md). A PRD without grounding research is mostly opinion; a PRD that cites synthesized research is mostly evidence.
+For the underlying principles, go back to [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer). For the upstream side — research and discovery that feeds the PRD — see [`spec-driven-development-guide.md` § Before the PRD](spec-driven-development-guide.md#before-the-prd-research-and-discovery). A PRD without grounding is mostly opinion; a PRD that cites what you learned (even *"~6 customer conversations"*) is mostly evidence.
 
 ---
 
@@ -639,13 +639,15 @@ If you can't name your *primary* metric, the PRD isn't ready. If you have 5+ pri
 
 ## Stakeholder review process
 
-A PRD that's been written but not reviewed isn't yet a PRD — it's a draft. Two patterns work, pick one.
+A PRD that's been written but not reviewed isn't yet a PRD — it's a draft.
+
+**For 1–10 people, PRD review is you + one other person.** The author drafts; one reviewer — usually the tech lead or whoever will build it — reads it against the [checklist below](#what-reviewers-check-universal) and says *go / not-yet*, async, in 24–72 hours. That's the whole process; don't stage a committee. The two named patterns and the seven-role roster below scale *up* from there — they're what a regulated or multi-team org grows into ("when you outgrow ~10"), not a checklist for three people who collapse all seven roles into one or two.
 
 ### Pattern A: Async PR-style review
 
 The PRD is committed as a `Status: Draft` PR. Reviewers comment inline. Once consensus emerges, a second small PR flips to `Status: Accepted` and adds the freeze date.
 
-**Reviewers (typical):**
+**Reviewers (the full roster — for a regulated or multi-team org; below ~10 these collapse to one or two people):**
 
 - **Founding team / executive sponsor** — does this match strategic direction?
 - **Engineering lead** — is this feasible given the constraints and team?

@@ -1,5 +1,7 @@
 # Build artifacts — PDFs are generated from the markdown guides, never committed.
+# They build into pdf/ (see .claude/commands/pdf.md). The whole folder is ignored.
 *.pdf
+/pdf/
 
 # macOS junk
 .DS_Store
