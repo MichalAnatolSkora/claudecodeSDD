@@ -255,43 +255,9 @@ See [Additional Files Worth Adding](#additional-files-worth-adding) for the full
 
 ## Before the PRD: Research and Discovery
 
-Before you can write a PRD, someone has to figure out *what to build, for whom, why*. That's the **research** phase (also called *discovery* in product/UX vocabulary — same thing). It includes customer interviews and synthesis, competitive analysis, market sizing, problem validation, and opportunity briefs.
+Before a PRD, someone figures out *what to build, for whom, why* — customer conversations, a look at competitors, a sanity-check on the size of the problem. The PRD is the *output* of that; research feeds it. It's **not really an SDD phase, and the agent never generates code from it** — research is human + agent context (it grounds a PRD's problem statement, helps the agent match user vocabulary), routed *through* a PRD, never straight into a feature.
 
-The PRD is the *output* of research. Research is what feeds it.
-
-### The principle: humans + agent context, never code source
-
-Research artifacts follow the same rule as PRDs, one layer up: **research is for humans plus the agent's context — the agent never generates code from research**.
-
-Three ways the agent legitimately uses research:
-
-1. **As context when drafting PRDs.** *"Per `docs/research/2025-Q3-interviews.md`, controllers spend 8–12 hours/month on reconciliation."* The PRD's problem statement gets grounded in cited findings.
-2. **As context when interpreting *"for whom"* during implementation.** Helps name variables, write UI copy, match user vocabulary, sanity-check assumptions.
-3. **As a synthesis assistant.** Given anonymized notes already in the repo, the agent can extract themes, identify patterns, or flag contradictions across interviews.
-
-The agent **never** turns research into a feature without a PRD + specs in between. Research is upstream of strategy, not a substitute for it.
-
-### What goes in `docs/research/`
-
-**Yes:**
-- Synthesized interview themes (anonymized; quotes attributed to roles — *"Controller at mid-market SaaS company"* — not names)
-- Competitive analyses with named real competitors and sourced claims
-- Market sizing with assumptions documented
-- Problem validation studies and the conclusions drawn
-- Opportunity briefs (PRD candidates that haven't been ratified)
-- Postmortems from failed pilots or canceled directions
-
-**No:**
-- Raw interview transcripts with PII
-- Customer names, contracts, NDA-protected materials
-- Salary or revenue data identifiable to specific companies
-- Anything you'd be uncomfortable seeing in a leak
-
-### The PII gate
-
-**Anonymization happens before commit, not after.** The discipline: synthesized artifact ≠ raw source. Raw sources stay in your research-ops tool (Dovetail, Grain, Notion, etc.); only synthesized artifacts enter the repo. *"When in doubt, leave it out."*
-
-Keep it lean. Most 1–10 teams never create `docs/research/` at all — a PRD that says *"based on ~6 customer conversations"* is honest and sufficient. Reach for synthesized research artifacts (interview themes, a competitive table, a sizing estimate) only when more than one person must consume the findings without you in the room, or a contested product call needs evidence over opinion. The discipline above — synthesis not raw data, PII out, findings flow through a PRD and never straight into code — is the whole rule; everything else is optional scaffolding you add only when a real reader needs it.
+Keep it lean. **Most 1–10 teams never create `docs/research/` at all** — a PRD that says *"based on ~6 customer conversations"* is honest and sufficient. Reach for synthesized artifacts (interview themes, a competitive table, a sizing estimate) only when more than one person must consume the findings without you in the room, or a contested product call needs evidence over opinion. The whole rule: **synthesis, not raw data; PII out** (anonymize before commit — raw sources stay in your research-ops tool, only synthesized artifacts enter the repo); **findings flow through a PRD, never straight into code.** Everything else is optional scaffolding you add only when a real reader needs it.
 
 ---
 
@@ -720,29 +686,7 @@ Write an ADR when a decision:
 
 ### Minimal structure (Nygard format)
 
-```markdown
-# ADR-007: Dapper as the Data Access Layer
-
-## Status
-Accepted — 2026-01-15
-
-## Context
-[The forces that made this decision necessary — 3 to 8 sentences.]
-
-## Decision
-[The choice itself — 3 to 5 sentences. Not a tutorial.]
-
-## Consequences
-**Positive:** [...]
-**Negative:** [...]
-**Neutral:** [...]
-
-## Alternatives Rejected
-- [Option A] — [one-sentence reason]
-- [Option B] — [one-sentence reason]
-```
-
-For smaller decisions, **MADR** (Markdown ADR) trims to just Status / Context / Decision / Consequences.
+Five sections: **Status** (one of Proposed / Accepted / Deprecated / Superseded, with a date) · **Context** (the forces that made the decision necessary, 3–8 sentences) · **Decision** (the choice itself, 3–5 sentences) · **Consequences** (positive / negative / neutral) · **Alternatives rejected** (one line each). For smaller decisions, **MADR** trims to Status / Context / Decision / Consequences. The copy-pasteable template is [`templates/ADR.md`](../templates/ADR.md); a full worked ADR — the format `ADR-015` in the [order-export example](../examples/order-export/) instantiates — is in [`adr-guide.md`](adr-guide.md) § Worked examples.
 
 ### The Supersedes pattern (the rule that makes ADRs work)
 
@@ -807,7 +751,7 @@ Beyond what we've covered (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`, ADRs, sp
 
 **`ROADMAP.md`** — what you plan in the coming quarters. Not details, just direction. Gives the agent (and new joiners) context on *where* we're going, so proposed solutions don't conflict with future plans.
 
-**`docs/research/`** — synthesized research artifacts upstream of PRDs: interview themes, competitive analyses, market sizing, problem validation, opportunity briefs. Lives here as **agent context** (the agent uses it when drafting PRDs and interpreting user vocabulary), never as a code-generation source. **Raw data with PII stays out — synthesis only.** See [Before the PRD: Research and Discovery](#before-the-prd-research-and-discovery) above for the discipline.
+**`docs/research/`** *(optional — most 1–10 teams skip it)* — synthesized research upstream of PRDs (interview themes, a competitive note) as **agent context** when drafting PRDs, never a code source; PII out, synthesis only. See [Before the PRD: Research and Discovery](#before-the-prd-research-and-discovery).
 
 ### Domain-Specific
 
@@ -920,13 +864,7 @@ This is what a *mature* SDD repo looks like — a mid-sized project, ~6–12 mon
 │   ├── data-flows/                    # Mermaid diagrams of main flows through the system
 │   ├── schemas/                       # DDL of current schema + ERDs
 │   ├── postmortems/                   # incident analyses — root cause, lessons, follow-ups
-│   ├── research/                      # synthesized research — agent context, never code source
-│   │   ├── README.md                  # index — what's here, currency, used-for
-│   │   ├── interviews/                # anonymized interview themes (raw stays in research-ops tool)
-│   │   ├── competitive/               # competitive analyses with named real competitors
-│   │   ├── sizing/                    # TAM / SAM / SOM with assumptions documented
-│   │   ├── validation/                # problem validation studies, failed-pilot postmortems
-│   │   └── opportunity-briefs/        # PRD candidates not yet ratified
+│   ├── research/                      # synthesized research (optional — most teams skip) — agent context, never code source
 │   ├── templates/                     # PR/issue/spec/ADR templates to copy from
 │   ├── GLOSSARY.md                    # alternative home for DOMAIN.md content if you prefer it under docs/
 │   ├── TESTING.md                     # test strategy, conventions, coverage expectations
@@ -1056,7 +994,7 @@ For the full treatment — five implementation patterns (pre-commit hooks, Claud
 
 3. **A repo with 30 stale markdown files is worse than a repo with 5 always-fresh ones.** Discipline > completeness.
 
-4. **Research and PRD are both for humans + agent context, never code source.** The agent reads `SPEC.md → PLAN.md → TASKS.md`. Research lives in `docs/research/` (anonymized — synthesis only, no raw PII); PRDs live in `docs/prd/` (frozen per era; multiple over time = fine, editing old ones = Frankenstein).
+4. **The PRD (and any research behind it) is for humans + agent context, never a code source.** The agent reads `SPEC.md → PLAN.md → TASKS.md`. PRDs live in `docs/prd/` (frozen per era; multiple over time = fine, editing old ones = Frankenstein). Research, if you keep any, is synthesis-only and anonymized — and most 1–10 teams just cite a few customer conversations in the PRD.
 
 5. **ADRs are immutable; specs freeze as authored intent, not current truth.** A frozen ADR is a decision and loses nothing. A frozen spec is a snapshot of intent on the day it merged — when it and the code later disagree, the *code* wins; read it as history, not as a description of today's behavior. Only the stable layer evolves continuously.
 

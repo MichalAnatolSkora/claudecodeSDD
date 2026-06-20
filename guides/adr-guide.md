@@ -404,56 +404,7 @@ Notice the `Migration` section — useful when the supersede has phased rollout.
 
 ### Example 3: A Proposed ADR under discussion
 
-A draft that hasn't been accepted yet. Visible to the team for comments; subject to change.
-
-```markdown
-# ADR-022: Switch from Synchronous SFTP to Event-Driven File Delivery
-
-## Status
-Proposed — 2026-08-12
-
-## Context
-[Drafted by Alice. Subject to revision until Accepted.]
-
-Current setup (per ADR-005): the scheduler polls partner SFTPs every 5
-minutes; partner-side late files cause our SLA to slip by up to 5 minutes.
-Adding more frequent polling increases load on partner systems and is
-explicitly forbidden by some partner contracts.
-
-An event-driven model — partner pushes notifications to our endpoint when
-a file is ready — would close the gap.
-
-## Decision
-[DRAFT] We add a webhook endpoint `/api/v1/file-ready/{partnerId}` that
-partners call to signal a file is available. The scheduler retains the
-polling fallback for partners without webhook support.
-
-## Consequences
-
-**Positive:**
-- SLA gap closed for partners on webhook
-- Reduced load on partner SFTPs (we poll less)
-
-**Negative:**
-- New public endpoint = new attack surface; needs HMAC auth per partner
-- Existing partner contracts need amendment for webhook support
-- Some partners can't host outbound calls (firewall) — they stay on polling
-
-**Open questions (resolve before Accept):**
-- How do we sign webhook calls? HMAC vs mTLS?
-- What's the retry policy on partner side? Do we expose idempotency keys?
-- Does the polling fallback's interval change?
-
-## Alternatives rejected
-- **More frequent polling** — partner contracts forbid; load
-- **Partner pushes via existing SFTP "trigger file"** — half the partners don't support it
-- **Long polling** — operationally complex; webhooks are simpler
-
-## References
-- Slack thread #ops-platform 2026-08-08 (kicking off discussion)
-```
-
-The `Open questions` block is the tell that this is `Proposed` — once those are answered, they collapse into the Decision and Consequences, the `Open questions` block disappears, and Status moves to Accepted.
+A `Proposed` ADR looks like an `Accepted` one with two tells: the **Status** line reads `Proposed — <date>`, and it carries an **`## Open questions (resolve before Accept)`** block — e.g. *"HMAC vs mTLS for signing the webhook calls? what's the partner-side retry policy? does the polling-fallback interval change?"*. While it's `Proposed`, anyone may edit the content. Once those questions are answered they collapse into the Decision and Consequences, the `Open questions` block disappears, and Status flips to `Accepted` (after which the body freezes).
 
 ### Example 4: A Deprecated ADR with no replacement
 
@@ -749,29 +700,13 @@ some detail is necessarily reconstructed.
 
 Treat retroactive ADRs as exceptions, not the default. See [`legacy-to-sdd-migration-guide.md` § Phase 1 Day 5](legacy-to-sdd-migration-guide.md#day-5--the-first-adr).
 
-### Sub-ADRs / ADR groups
+### When you outgrow a flat `docs/adr/` (past ~10 people, or a monorepo)
 
-When a single big decision has multiple related sub-decisions (e.g., adopting a microservices architecture might involve 6 connected sub-ADRs), two patterns:
+Three scaling concerns a 1–10 team doesn't start with — quick rules for when they show up:
 
-1. **Group of independent ADRs.** Write each as a top-level ADR; cross-reference each other in Context. Don't fake hierarchy.
-2. **One big ADR with sub-sections.** Acceptable for tightly-coupled sub-decisions. Keep it under ~3 pages or split.
-
-Avoid: numbered sub-ADRs (`ADR-002.1`). They break sort order and cross-references.
-
-### Format migrations
-
-You've been writing Nygard-format ADRs and want to switch to MADR (or vice versa).
-
-Don't rewrite the old ones. New ADRs use the new format; old stay as written. Note the change in your `_template.md` and `CLAUDE.md`. The cross-format inconsistency is mild; rewriting the past is worse.
-
-### ADRs in monorepos
-
-Per-service ADRs OR a global ADR folder. Pick by ownership:
-
-- **Per-service** (`services/orders/docs/adr/`) — service team owns local decisions.
-- **Global** (`docs/adr/`) — when most decisions affect multiple services.
-
-Hybrid is common: global for cross-cutting (logging, auth, observability), per-service for the rest. Document which is which in root `CLAUDE.md`.
+- **Sub-ADRs / groups** — one big decision with many sub-decisions (e.g. adopting microservices): write each as an independent top-level ADR that cross-references the others; don't fake hierarchy with numbered sub-ADRs (`ADR-002.1`) — they break sort order and cross-references.
+- **Format migrations** (Nygard ↔ MADR) — don't rewrite old ones; new ADRs use the new format, old stay as written, note the switch in `CLAUDE.md`. Mild inconsistency beats rewriting history.
+- **Monorepos** — per-service `docs/adr/` for local decisions, a global `docs/adr/` for cross-cutting ones (logging, auth, observability); document which is which in the root `CLAUDE.md`.
 
 ---
 

@@ -1284,7 +1284,7 @@ Each event accepts a `matcher` (which tool name or pattern triggers it — suppo
         "hooks": [
           {
             "type": "command",
-            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *guides/*.md) pandoc guides/spec-driven-development-guide.md guides/working-with-agents-guide.md guides/runbook-operations-guide.md -o output.pdf --pdf-engine=prince -H pdf-style-compact.html --metadata title=\"claudecodeSDD\" ;; esac"
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *guides/*.md) pandoc guides/spec-driven-development-guide.md guides/working-with-agents-guide.md guides/runbook-operations-guide.md -o pdf/claudecodeSDD-bundle.pdf --pdf-engine=prince -H pdf-style-wide.html --metadata title=\"claudecodeSDD\" ;; esac"
           }
         ]
       }
