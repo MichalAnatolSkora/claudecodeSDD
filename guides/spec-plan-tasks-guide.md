@@ -162,7 +162,7 @@ Match the weight to the need, lightest first:
 |------|-------------------|
 | ASCII wireframe inline in `SPEC.md` | Layout intent is enough — grepable, diffable, costs nothing. |
 | Mermaid diagram inline | Flows and screen states. |
-| Frozen PNG in the spec folder + live link in References | Pixels matter. The agent can read the image during `/implement`. |
+| Frozen PNG in the spec folder + live link in References | Pixels matter. The agent can read the image during `/sdd-7-implement`. |
 | Throwaway HTML mockup (a spike) | The UX itself is an open question — click it, resolve the Open Question into the spec, and the spike never becomes production code. |
 
 Two honesty rules: a visual check in `TASKS.md` is a *human* step (`→ verify: screenshot side-by-side with mockup-list-view.png — human eyeball`), don't dress it up as mechanical; and concept-level product mocks belong one layer up — `docs/prd/assets/`, frozen with the PRD ([`prd-guide.md`](prd-guide.md)).
@@ -381,7 +381,7 @@ Don't modify any files. Surface only — I'll decide which gaps to fix
 before starting implementation.
 ```
 
-This is your "ready to ship to implementation" gate. Run it before issuing an `/implement` prompt.
+This is your "ready to ship to implementation" gate. Run it before issuing an `/sdd-7-implement` prompt.
 
 ---
 
@@ -457,13 +457,13 @@ After these three loops, the trio is usually ready to drive implementation. *Usu
 
 ### When the code shows the spec was wrong
 
-The three loops above sharpen the trio *before* code. One more runs *during* it: you start implementing and an acceptance criterion turns out wrong. That's expected, not a failure — and while the spec is still **Active** (pre-merge) the fix is cheap. Edit the spec in place, mark it with a dated `CHANGED during implementation: <what and why>` note next to the AC, update `PLAN.md`/`TASKS.md`, and re-run `/trio-check`. The canonical rule lives in [the overview's spec lifecycle](spec-driven-development-guide.md#spec-status-lifecycle); `/implement`'s *"that's a spec gap, not a cue to improvise"* is the same loop seen from the command side. The freeze starts at *merge* — everything before it is allowed to change. (Once shipped, a change is a *new* spec, not an edit — [golden rule 10](#golden-rules-for-trio-authoring).)
+The three loops above sharpen the trio *before* code. One more runs *during* it: you start implementing and an acceptance criterion turns out wrong. That's expected, not a failure — and while the spec is still **Active** (pre-merge) the fix is cheap. Edit the spec in place, mark it with a dated `CHANGED during implementation: <what and why>` note next to the AC, update `PLAN.md`/`TASKS.md`, and re-run `/sdd-6-trio-check`. The canonical rule lives in [the overview's spec lifecycle](spec-driven-development-guide.md#spec-status-lifecycle); `/sdd-7-implement`'s *"that's a spec gap, not a cue to improvise"* is the same loop seen from the command side. The freeze starts at *merge* — everything before it is allowed to change. (Once shipped, a change is a *new* spec, not an edit — [golden rule 10](#golden-rules-for-trio-authoring).)
 
 ---
 
 ## Cross-artifact consistency checks
 
-The consistency checks I'd add as either subagent calls or `/trio-check` slash command:
+The consistency checks I'd add as either subagent calls or `/sdd-6-trio-check` slash command:
 
 1. **AC → task coverage.** Every acceptance criterion in `SPEC.md` has at least one task that produces evidence for it.
 2. **Out-of-scope respect.** Every item in `SPEC.md` § Out of scope appears nowhere in `PLAN.md` or `TASKS.md`.
@@ -475,7 +475,7 @@ The consistency checks I'd add as either subagent calls or `/trio-check` slash c
 
 A trio that passes these seven checks is ready for implementation. A trio that fails on (1) or (4) usually loops back through review.
 
-For mechanizing these checks — as a configured subagent (`trio-auditor`), a slash command (`/trio-check`), a pre-commit hook, or a CI step — see [`quality-gates-guide.md`](quality-gates-guide.md) § "Pattern C — Configured subagent" and the worked-example setup.
+For mechanizing these checks — as a configured subagent (`trio-auditor`), a slash command (`/sdd-6-trio-check`), a pre-commit hook, or a CI step — see [`quality-gates-guide.md`](quality-gates-guide.md) § "Pattern C — Configured subagent" and the worked-example setup.
 
 ---
 
@@ -516,26 +516,26 @@ Three documents in `specs/YYYY-MM-feature-slug/`. Each looks complete in isolati
 
 The implementation proceeds anyway. Code reviewer catches the gap. Now you're patching specs after the fact.
 
-**Fix:** Run [the trio consistency check](#cross-artifact-consistency-checks) before the first commit. Better — make it a slash command (`/trio-check`) or a hook that runs on PR open.
+**Fix:** Run [the trio consistency check](#cross-artifact-consistency-checks) before the first commit. Better — make it a slash command (`/sdd-6-trio-check`) or a hook that runs on PR open.
 
 ---
 
 ## Slash commands worth having
 
-A repo doing SDD seriously usually has these in `.claude/commands/`. *(The shipped files in [`templates/.claude/`](../templates/.claude/) are namespaced and phase-numbered — `sdd-3-spec-new.md` → `/sdd-3-spec-new` — so they sort in pipeline order; this guide writes the short forms. Same commands; keep or drop the `sdd-N-` prefix as you like.)*
+A repo doing SDD seriously usually has these in `.claude/commands/`. *(The shipped files in [`templates/.claude/`](../templates/.claude/) are namespaced and phase-numbered — `sdd-3-spec-new.md` → `/sdd-3-spec-new` — so they sort in pipeline order; this guide refers to every command by its full name.)*
 
-- **`/prd-new <idea>`** — *(furthest upstream)* turns a 1–3 sentence idea into a lean PRD draft, then fills the gaps by asking you the open questions. See [`prd-guide.md`](prd-guide.md) § "AI-assisted PRD authoring".
-- **`/prd-review <path>`** — audits a draft PRD for gaps (specific users, measurable success criteria, ≥5 out-of-scope items, no implementation leakage) before you slice it. Read-only.
-- **`/features-from-prd`** — *(upstream of the trio)* slices an accepted PRD into a prioritized, vertically-sliced feature list, saved to `specs/FEATURES.md` as the project's feature/status index; each row becomes a spec. See [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".
-- **`/architecture-from-prd`** / **`/architecture-from-code`** — *(once-per-project foundation)* establish `ARCHITECTURE.md` plus a stub ADR per hard-to-reverse decision — greenfield by Q&A on the foundational choices (hosting, datastore, shape), or reverse-engineered from an existing codebase. `/plan-validate` then checks every plan against them.
-- **`/spec-new <feature-description>`** — drafts `SPEC.md` from a one-paragraph description ([prompt 1](#1-draft-specmd-from-a-one-paragraph-idea) above)
-- **`/spec-review <path>`** — runs the audit checklist (prompt 2)
-- **`/plan-from-spec`** — drafts `PLAN.md` from the active spec (prompt 3)
-- **`/plan-validate`** — checks `PLAN.md` against ADRs and ARCHITECTURE.md (prompt 4)
-- **`/tasks-from-plan`** — drafts `TASKS.md` from scratch (prompt 5)
-- **`/tasks-add <what>`** — appends/inserts task(s) into an existing `TASKS.md` (or a one-file trio's Tasks section), in order, each with a verify step
-- **`/trio-check`** — final consistency audit (prompt 6)
-- **`/implement`** — *(downstream of the trio)* works `TASKS.md` task-by-task red→green, commits each green task, then runs the break-the-code check. See [`flow-guide.md`](flow-guide.md) (Step 4) and [`testing-guide.md`](testing-guide.md).
+- **`/sdd-1-prd-new <idea>`** — *(furthest upstream)* turns a 1–3 sentence idea into a lean PRD draft, then fills the gaps by asking you the open questions. See [`prd-guide.md`](prd-guide.md) § "AI-assisted PRD authoring".
+- **`/sdd-1-prd-review <path>`** — audits a draft PRD for gaps (specific users, measurable success criteria, ≥5 out-of-scope items, no implementation leakage) before you slice it. Read-only.
+- **`/sdd-2-features-from-prd`** — *(upstream of the trio)* slices an accepted PRD into a prioritized, vertically-sliced feature list, saved to `specs/FEATURES.md` as the project's feature/status index; each row becomes a spec. See [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".
+- **`/sdd-2-architecture-from-prd`** / **`/sdd-2-architecture-from-code`** — *(once-per-project foundation)* establish `ARCHITECTURE.md` plus a stub ADR per hard-to-reverse decision — greenfield by Q&A on the foundational choices (hosting, datastore, shape), or reverse-engineered from an existing codebase. `/sdd-4-plan-validate` then checks every plan against them.
+- **`/sdd-3-spec-new <feature-description>`** — drafts `SPEC.md` from a one-paragraph description ([prompt 1](#1-draft-specmd-from-a-one-paragraph-idea) above)
+- **`/sdd-3-spec-review <path>`** — runs the audit checklist (prompt 2)
+- **`/sdd-4-plan-from-spec`** — drafts `PLAN.md` from the active spec (prompt 3)
+- **`/sdd-4-plan-validate`** — checks `PLAN.md` against ADRs and ARCHITECTURE.md (prompt 4)
+- **`/sdd-5-tasks-from-plan`** — drafts `TASKS.md` from scratch (prompt 5)
+- **`/sdd-5-tasks-add <what>`** — appends/inserts task(s) into an existing `TASKS.md` (or a one-file trio's Tasks section), in order, each with a verify step
+- **`/sdd-6-trio-check`** — final consistency audit (prompt 6)
+- **`/sdd-7-implement`** — *(downstream of the trio)* works `TASKS.md` task-by-task red→green, commits each green task, then runs the break-the-code check. See [`flow-guide.md`](flow-guide.md) (Step 4) and [`testing-guide.md`](testing-guide.md).
 
 Worked-example placement of these files:
 
@@ -835,7 +835,7 @@ Not every feature can be specced up front. Ops asks for *"a view of which export
     CHANGED during implementation (2026-06-12): building it, the ops reviewer
     pointed out they'd still have to eyeball every row to find the bad ones.
     Replaced with the stuck/looping signals the spike actually surfaced.
-    Spec still Active → in-place edit + re-ran /trio-check, not a new spec.
+    Spec still Active → in-place edit + re-ran /sdd-6-trio-check, not a new spec.
 
 ## Plan
 - One read-model query, no new tables: batches where `now - last_change > 2h` OR `attempt_count >= 3`
@@ -856,7 +856,7 @@ Not every feature can be specced up front. Ops asks for *"a view of which export
 2. **Each document references the previous one explicitly.** Without cross-refs, you have three documents that share a folder, not a coherent decision chain.
 3. **The agent drafts; you judge.** Especially for Context, Alternatives Rejected, and Acceptance Criteria — the agent's plausible-sounding fills are most likely to be wrong here.
 4. **Human gates between artifacts.** Spec → review → plan → review → tasks → verify. No skipping reviews because *"the agent said it was fine."*
-5. **A consistency check before the first commit.** Run `/trio-check` (or the equivalent prompt) before you start implementing; catch contradictions when they're cheap to fix.
+5. **A consistency check before the first commit.** Run `/sdd-6-trio-check` (or the equivalent prompt) before you start implementing; catch contradictions when they're cheap to fix.
 6. **Compress for small changes.** A bugfix doesn't need three documents. A short spec is enough. The trio is for changes worth the ceremony.
 7. **Out of scope is the most important section in SPEC.md.** It does more to prevent drift than any positive guidance.
 8. **Every AC traces to a task. Every task traces to an AC.** No orphans.

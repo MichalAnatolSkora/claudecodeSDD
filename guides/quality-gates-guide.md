@@ -55,9 +55,9 @@ For the building blocks themselves (skills, slash commands, subagents, hooks —
 
 - **Good docs the agent actually reads** — a fresh `CLAUDE.md`, a spec before each change. The gate that matters most, and it needs no automation.
 - **One human on the PR** — a second pair of eyes reading the diff against the spec's acceptance criteria. Judgment, not tooling (see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md)).
-- **The break-the-code check** — already built into `/implement` ([`testing-guide.md`](testing-guide.md)). It catches confidently-wrong green suites for free.
+- **The break-the-code check** — already built into `/sdd-7-implement` ([`testing-guide.md`](testing-guide.md)). It catches confidently-wrong green suites for free.
 
-Add exactly one mechanical gate when you feel a specific pain: a `pii-scan` pre-commit hook the first time someone nearly commits a customer name ([Pattern A](#pattern-a--pre-commit--git-hooks-mechanical)), or a `/trio-check` slash command the third time a trio ships with an uncovered AC ([Pattern D](#pattern-d--slash-commands-llm-evaluator-user-invoked)). Nothing else, until it earns its place.
+Add exactly one mechanical gate when you feel a specific pain: a `pii-scan` pre-commit hook the first time someone nearly commits a customer name ([Pattern A](#pattern-a--pre-commit--git-hooks-mechanical)), or a `/sdd-6-trio-check` slash command the third time a trio ships with an uncovered AC ([Pattern D](#pattern-d--slash-commands-llm-evaluator-user-invoked)). Nothing else, until it earns its place.
 
 **Everything below — the five patterns, the CI matrix, the full worked setup — is "when you outgrow ~10":** multiple contributors who don't share a memory, a real CI pipeline, ADR bodies worth protecting mechanically. Read it then. *(The hook/CI snippets are illustrative — Claude Code's hook interface and exit-code semantics vary by version; adapt the specifics to your harness rather than pasting verbatim.)*
 
@@ -118,7 +118,7 @@ Examples:
 - Does this plan contradict any active ADR?
 - Is the "Out of scope" section trivial (only listing obvious exclusions) or substantive?
 
-Implementation: configured subagent (`.claude/agents/trio-auditor.md`), slash command (`/spec-check`), or CI step that invokes the agent. (Note on names: the shipped command files in `templates/.claude/commands/` are namespaced and phase-numbered — `sdd-6-trio-check.md` → `/sdd-6-trio-check`, `sdd-3-spec-review.md` → `/sdd-3-spec-review`. This guide writes the short forms; keep or drop the prefix as you prefer.)
+Implementation: configured subagent (`.claude/agents/trio-auditor.md`), slash command (`/spec-check`), or CI step that invokes the agent. (Note on names: the shipped command files in `templates/.claude/commands/` are namespaced and phase-numbered — `sdd-6-trio-check.md` → `/sdd-6-trio-check`, `sdd-3-spec-review.md` → `/sdd-3-spec-review`. Example gate names like `/spec-check` and `/trio-auditor` below are illustrative ones you author yourself, not shipped commands.)
 
 **Strength:** can evaluate semantic content, catches what regex can't.
 **Weakness:** probabilistic (occasional false positives and negatives), takes tokens, slower than mechanical.
@@ -143,7 +143,7 @@ Implementation: code review, PR reviewer checklist, architecture meeting, retros
 
 ## What belongs in each category
 
-For each SDD artifact, a working split. This is a menu of what *could* be automated, not a list of requirements: a solo dev skips all of it, a 2–5 person team might lift one or two checks into a `/trio-check`-style command, and only toward 10 does wiring any of this into CI start to pay for itself.
+For each SDD artifact, a working split. This is a menu of what *could* be automated, not a list of requirements: a solo dev skips all of it, a 2–5 person team might lift one or two checks into a `/sdd-6-trio-check`-style command, and only toward 10 does wiring any of this into CI start to pay for itself.
 
 ### SPEC.md
 
@@ -474,7 +474,7 @@ The subagent reads, analyzes, and returns a structured report. The main session'
 
 ## Pattern D — Slash commands (LLM evaluator, user-invoked)
 
-Lighter than a subagent: user explicitly types `/trio-check` to run the audit. Useful when you want quick, repeatable evaluation without setting up a full subagent.
+Lighter than a subagent: user explicitly types `/sdd-6-trio-check` to run the audit. Useful when you want quick, repeatable evaluation without setting up a full subagent.
 
 **Use for:**
 - One-off audits when the user wants them
@@ -654,7 +654,7 @@ Putting all five patterns together for a single mid-size SDD repo. This is **opi
 
 (See the worked example earlier in Pattern C.)
 
-### `.claude/commands/spec-check.md` and `.claude/commands/trio-check.md`
+### `.claude/commands/spec-check.md` and `.claude/commands/sdd-6-trio-check.md`
 
 (See the slash command example in Pattern D.)
 
@@ -676,8 +676,8 @@ Putting all five patterns together for a single mid-size SDD repo. This is **opi
 | Session ends | Claude Code Stop hook | Remind about uncommitted specs |
 | User commits | Pre-commit hooks | PII scan, ADR body check, spec format |
 | PR opened or updated | GitHub Actions | Mechanical checks + trio-auditor LLM run |
-| User explicitly asks | `/spec-check <path>`, `/trio-check` | On-demand evaluation |
-| Implementation kickoff | `trio-auditor` subagent (manual or via `/trio-check`) | Full pre-implementation gate |
+| User explicitly asks | `/spec-check <path>`, `/sdd-6-trio-check` | On-demand evaluation |
+| Implementation kickoff | `trio-auditor` subagent (manual or via `/sdd-6-trio-check`) | Full pre-implementation gate |
 
 Each layer catches what the others miss. None alone is sufficient; together they're robust without being suffocating.
 
@@ -766,7 +766,7 @@ Slow hooks add to every commit/edit. Team finds workarounds.
 
 A `trio-auditor` exists in `.claude/agents/`. Nobody triggers it. Audits don't happen.
 
-**Fix:** wire it into a slash command (`/trio-check`) and a CI step. Don't rely on humans remembering to invoke it.
+**Fix:** wire it into a slash command (`/sdd-6-trio-check`) and a CI step. Don't rely on humans remembering to invoke it.
 
 ### 9. CI checks that block PRs on flaky LLM evaluations
 

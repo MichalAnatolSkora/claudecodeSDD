@@ -41,10 +41,10 @@ It assumes the agent does most of the typing. Your leverage is in the acceptance
 Three places, already in the method:
 
 - **`SPEC.md` § Acceptance criteria = the test contract.** Each AC is phrased so it *could be a test name* (*"POST /api/orders with no `X-Partner-Id` → 400"*). That's not a coincidence — the ACs are the tests, written in English first.
-- **`TASKS.md` = where tests get written.** The implementation steps are ordered red→green (failing test first), and the **Verification (against acceptance criteria)** section maps every AC to the task/test that proves it. `/trio-check` runs *before* implementation, so what it checks is that every AC has a **task** (and a Verification row) — the tests themselves arrive later, in the red→green loop of `/sdd-7-implement`.
+- **`TASKS.md` = where tests get written.** The implementation steps are ordered red→green (failing test first), and the **Verification (against acceptance criteria)** section maps every AC to the task/test that proves it. `/sdd-6-trio-check` runs *before* implementation, so what it checks is that every AC has a **task** (and a Verification row) — the tests themselves arrive later, in the red→green loop of `/sdd-7-implement`.
 - **`TESTING.md` = the conventions the agent reads.** So the tests it writes match your framework, layout, and mocking rules instead of its own defaults.
 
-> Command names here are the short forms; the shipped files are namespaced and phase-numbered (`/trio-check` ships as `/sdd-6-trio-check`) — keep or drop the `sdd-N-` prefix as you like.
+> Command names here are the shipped full names; the `sdd-N-` prefix just makes the files sort in pipeline order.
 
 So "adding testing to SDD" is mostly: write testable ACs, keep the red→green order, and give the agent a `TESTING.md`. The rest of this guide is doing that well.
 
@@ -196,7 +196,7 @@ Five reusable prompts (the agent types; you judge):
 3. **Testing the mock.** So much is mocked the test only proves the mocks were called. Mock the edges, not the unit.
 4. **Snapshot-everything.** Giant auto-generated snapshots nobody reads; they pass until they don't, and then everyone just re-blesses them. Use sparingly, for stable output only.
 5. **Chasing 100%.** Effort goes to trivia while the scary paths get one happy-path test. Test by risk.
-6. **A Verification section that doesn't map to tests.** If *"AC4 → covered"* points at no real test, it's a checkbox, not coverage. `/trio-check` flags vague rows before implementation; the break-the-code check is what proves the test is real.
+6. **A Verification section that doesn't map to tests.** If *"AC4 → covered"* points at no real test, it's a checkbox, not coverage. `/sdd-6-trio-check` flags vague rows before implementation; the break-the-code check is what proves the test is real.
 
 ---
 

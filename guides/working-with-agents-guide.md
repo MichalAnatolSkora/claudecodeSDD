@@ -1036,9 +1036,9 @@ The user says *"draft an ADR for switching from Postgres to MySQL"*, the skill f
 - Per-repo workflow steps: `/start-session` reads `CLAUDE.md` and the most recent spec; `/end-session` writes a session summary.
 - Team-shared commands ship in the repo and apply to every contributor.
 
-**Example: a `/spec-new` command**
+**Example: a `/draft-spec` command**
 
-`.claude/commands/spec-new.md`:
+`.claude/commands/draft-spec.md`:
 
 ```markdown
 Read CLAUDE.md, ARCHITECTURE.md, and specs/_template/spec.md.
@@ -1050,7 +1050,7 @@ List open questions at the end — don't fill them in yourself.
 Show me the draft before saving.
 ```
 
-Then `/spec-new add rate limiting to the orders endpoint` does the whole setup in one keystroke.
+Then `/draft-spec add rate limiting to the orders endpoint` does the whole setup in one keystroke.
 
 **Difference from skills:** slash commands are *user-invoked, single-shot prompts*. Skills are *auto-discoverable, multi-step procedures*. If you're tempted to write a skill for *"just a longer prompt I use a lot"*, write a slash command instead — much lighter weight.
 

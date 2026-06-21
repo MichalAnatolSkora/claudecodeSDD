@@ -175,7 +175,7 @@ At 2–3 people you'll usually skip formal **research** and a heavy **PRD** (a o
 4. **Implement + test** — [`working-with-agents-guide.md`](working-with-agents-guide.md) (the implementation loop) and [`testing-guide.md`](testing-guide.md) (how the agent writes the tests): the agent works `TASKS.md` red→green; the tests come straight from the spec's acceptance criteria.
 5. **Decisions** — [`adr-guide.md`](adr-guide.md): record the ones worth not relitigating.
 
-Under all of it sits the **stable layer** — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md` — the docs the agent reads every session. That's where you actually start on day one ([The Absolute Minimum](#the-absolute-minimum), next), adding the rest reactively. When `ARCHITECTURE.md` earns its place, `/architecture-from-prd` (greenfield) or `/architecture-from-code` (existing codebase) bootstraps it — structure plus a stub ADR per hard-to-reverse decision.
+Under all of it sits the **stable layer** — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md` — the docs the agent reads every session. That's where you actually start on day one ([The Absolute Minimum](#the-absolute-minimum), next), adding the rest reactively. When `ARCHITECTURE.md` earns its place, `/sdd-2-architecture-from-prd` (greenfield) or `/sdd-2-architecture-from-code` (existing codebase) bootstraps it — structure plus a stub ADR per hard-to-reverse decision.
 
 **For the full step-by-step** — every command and what it produces, with a cheat sheet — see [`flow-guide.md`](flow-guide.md).
 
@@ -539,7 +539,7 @@ See [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Cre
 
 ### Where to go deeper
 
-For a full worked example of `TASKS.md` alongside its `SPEC.md` + `PLAN.md` siblings, the AI prompt for drafting tasks from a plan, and the `/trio-check` consistency audit before implementation, see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). For per-role ownership (who writes `TASKS.md`, who reviews, who flips checkboxes), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle". For the agent-side implementation flow with concrete prompts, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation".
+For a full worked example of `TASKS.md` alongside its `SPEC.md` + `PLAN.md` siblings, the AI prompt for drafting tasks from a plan, and the `/sdd-6-trio-check` consistency audit before implementation, see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). For per-role ownership (who writes `TASKS.md`, who reviews, who flips checkboxes), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle". For the agent-side implementation flow with concrete prompts, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation".
 
 ---
 
@@ -845,7 +845,7 @@ This is what a *mature* SDD repo looks like — a mid-sized project, ~6–12 mon
 ├── .claude/                           # Claude Code config — shipped with the repo, used by every contributor
 │   ├── settings.json                  # hooks, permissions, env vars (see Claude Code Building Blocks)
 │   ├── commands/                      # slash commands — recurring prompts as files
-│   │   ├── spec-new.md                # /spec-new <slug> — drafts a new spec from the template
+│   │   ├── draft-spec.md              # /draft-spec <slug> — drafts a new spec from the template
 │   │   ├── audit-docs.md              # /audit-docs — reports staleness across guides + runbooks
 │   │   └── end-session.md             # /end-session — writes a session-notes file
 │   └── skills/                        # multi-step procedures Claude can auto-invoke
@@ -976,7 +976,7 @@ The mistake most teams make is trying to mechanize judgment items (like "is this
 - *False positive is expensive (blocks legit work), false negative is recoverable* → LLM evaluator that warns, not blocks
 - *Both depend on context* → human review
 
-A working SDD setup typically has: pre-commit hooks for PII and Accepted ADR protection, Claude Code hooks for in-session feedback (active ADR list, end-of-session reminders), a configured subagent (`trio-auditor`) for cross-artifact checks, slash commands (`/spec-check`, `/trio-check`) for user-invoked evaluation, and CI checks that block on mechanical issues but advise on LLM evaluations.
+A working SDD setup typically has: pre-commit hooks for PII and Accepted ADR protection, Claude Code hooks for in-session feedback (active ADR list, end-of-session reminders), a configured subagent (`trio-auditor`) for cross-artifact checks, slash commands (`/spec-check`, `/sdd-6-trio-check`) for user-invoked evaluation, and CI checks that block on mechanical issues but advise on LLM evaluations.
 
 For the full treatment — five implementation patterns (pre-commit hooks, Claude Code hooks, configured subagents, slash commands, CI/CD), what belongs in each category for each SDD artifact, a complete worked example of a setup, and the anti-patterns (over-strict hooks, no escape hatch, mechanical checks of subjective things, alert fatigue) — see [`quality-gates-guide.md`](quality-gates-guide.md).
 

@@ -10,19 +10,19 @@
  set up:  the commands + a starter CLAUDE.md   (then keep it updated)
      │
      ▼
-    /prd-new · /prd-review     idea → PRD   (skip if small/solo)
+    /sdd-1-prd-new · /sdd-1-prd-review     idea → PRD   (skip if small/solo)
      │
      ▼
- ┌─ /features-from-prd         PRD → vertical slices
+ ┌─ /sdd-2-features-from-prd               PRD → vertical slices
  │   │
  │   ▼
- │  /spec-new … /trio-check    the trio — gated, no code yet
+ │  /sdd-3-spec-new … /sdd-6-trio-check    the trio — gated, no code yet
  │   │
  │   ▼
- │  /implement                 agent, red→green per task
+ │  /sdd-7-implement                       agent, red→green per task
  │   │
  │   ▼
- │  ADR?                       record a decision worth keeping
+ │  ADR?                                  record a decision worth keeping
  │   │
  │   ▼
  │  merge & freeze
@@ -47,8 +47,8 @@ The docs the agent reads every session. Set them up on day one — then grow the
 
 - **`CLAUDE.md`** at the repo root — conventions, stack, what NOT to do. The one file the agent always reads. Start it now, then **add a line every time you correct the agent or accept an ADR** — it grows with the project (steps 5–6 feed back into it). → [`claude-md-guide.md`](claude-md-guide.md)
 - **`README.md`** — what the project is, how to run it.
-- Copy the slash commands into your repo: `npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude` — the shipped files are namespaced and phase-numbered (`sdd-1-prd-new.md` → `/sdd-1-prd-new`) so they sort in pipeline order; this guide writes the short forms (`/prd-new` etc.) — same commands, keep or drop the `sdd-N-` prefix as you like.
-- Add `ARCHITECTURE.md`, `DOMAIN.md`, `TESTING.md` **when they earn it** — not before. When `ARCHITECTURE.md` does earn its place, bootstrap it in one pass: `/architecture-from-prd` (greenfield — Q&A the foundational choices like hosting and datastore, stubbing an ADR per hard decision) or `/architecture-from-code` (existing codebase — reverse-engineer it). Either runs **once per project**; `/plan-validate` then checks every plan against the result. → [`adr-guide.md`](adr-guide.md)
+- Copy the slash commands into your repo: `npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude` — the shipped files are namespaced and phase-numbered (`sdd-1-prd-new.md` → `/sdd-1-prd-new`) so they sort in pipeline order; this guide refers to every command by its full name.
+- Add `ARCHITECTURE.md`, `DOMAIN.md`, `TESTING.md` **when they earn it** — not before. When `ARCHITECTURE.md` does earn its place, bootstrap it in one pass: `/sdd-2-architecture-from-prd` (greenfield — Q&A the foundational choices like hosting and datastore, stubbing an ADR per hard decision) or `/sdd-2-architecture-from-code` (existing codebase — reverse-engineer it). Either runs **once per project**; `/sdd-4-plan-validate` then checks every plan against the result. → [`adr-guide.md`](adr-guide.md)
 
 That's the floor. Everything below is per change.
 
@@ -57,7 +57,7 @@ That's the floor. Everything below is per change.
 ## Step 1 — Idea → PRD
 
 - **Before, optionally:** informal user/market research feeds the PRD — see [overview § Before the PRD](spec-driven-development-guide.md#before-the-prd-research-and-discovery). Most 1–10 teams skip it (a paragraph from a few customer conversations is plenty).
-- **Do:** `/prd-new "<1–3 sentences>"` — it sketches a lean PRD, then asks you the open questions and fills them in (you make the product calls). Then `/prd-review` — a read-only audit (specific users? measurable success criteria? ≥5 out-of-scope items?) before you slice.
+- **Do:** `/sdd-1-prd-new "<1–3 sentences>"` — it sketches a lean PRD, then asks you the open questions and fills them in (you make the product calls). Then `/sdd-1-prd-review` — a read-only audit (specific users? measurable success criteria? ≥5 out-of-scope items?) before you slice.
 - **Get:** `docs/prd/YYYY-MM-slug.md` — product-level *what & why*, humans-only (the agent implements from specs, not the PRD).
 - **Skip if:** solo, small, or the what/why already fits in your head — a one-paragraph issue is enough.
 
@@ -65,9 +65,9 @@ That's the floor. Everything below is per change.
 
 ## Step 2 — PRD → features
 
-- **Do:** `/features-from-prd` — slices the PRD into **vertical, independently-shippable features**, prioritized, walking-skeleton first.
+- **Do:** `/sdd-2-features-from-prd` — slices the PRD into **vertical, independently-shippable features**, prioritized, walking-skeleton first.
 - **Get:** a short prioritized list, saved to `specs/FEATURES.md` on your OK — the project's feature index. Each row becomes one feature → one trio, and its `Status` tracks `planned → spec'd → in progress → shipped`.
-- **Loop:** the slice list is a first guess, not a contract. A shipped slice often re-ranks it — re-run `/features-from-prd` to merge new or dropped slices in (it never resets your progress). The PRD freezes; the slice list doesn't.
+- **Loop:** the slice list is a first guess, not a contract. A shipped slice often re-ranks it — re-run `/sdd-2-features-from-prd` to merge new or dropped slices in (it never resets your progress). The PRD freezes; the slice list doesn't.
 - **Skip if:** you already know the single feature you're building.
 
 → [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features"
@@ -76,12 +76,12 @@ That's the floor. Everything below is per change.
 
 One `spec → plan → tasks` per feature, written **in order** — each locks down what the next needs. (The order is the discipline *within* a slice; across slices you loop — ship the thinnest, learn, slice the next.)
 
-1. **`/spec-new "<feature>"`** → `specs/YYYY-MM-slug/spec.md` — goal, **acceptance criteria** (the test contract), out of scope.
-2. **`/spec-review`** → audits it for gaps (read-only). Resolve the open questions.
-3. **`/plan-from-spec`** → `PLAN.md` — technical decisions, file structure, constraints (the *how*).
-4. **`/plan-validate`** → checks the plan against your ADRs + `ARCHITECTURE.md` (read-only).
-5. **`/tasks-from-plan`** → `TASKS.md` — ordered steps, each ending in `→ verify:`; a Verification section maps every AC.
-6. **`/trio-check`** → the gate: every AC has a task, no surprise files, no contradicted ADR. Run it **before** any code.
+1. **`/sdd-3-spec-new "<feature>"`** → `specs/YYYY-MM-slug/spec.md` — goal, **acceptance criteria** (the test contract), out of scope.
+2. **`/sdd-3-spec-review`** → audits it for gaps (read-only). Resolve the open questions.
+3. **`/sdd-4-plan-from-spec`** → `PLAN.md` — technical decisions, file structure, constraints (the *how*).
+4. **`/sdd-4-plan-validate`** → checks the plan against your ADRs + `ARCHITECTURE.md` (read-only).
+5. **`/sdd-5-tasks-from-plan`** → `TASKS.md` — ordered steps, each ending in `→ verify:`; a Verification section maps every AC.
+6. **`/sdd-6-trio-check`** → the gate: every AC has a task, no surprise files, no contradicted ADR. Run it **before** any code.
 
 **Compress to fit the change:** a small feature → the **one-file trio** (all three sections in one file); a bugfix → a short `SPEC.md` only.
 
@@ -89,7 +89,7 @@ One `spec → plan → tasks` per feature, written **in order** — each locks d
 
 ## Step 4 — Implement + test
 
-- **Do:** `/implement` — the agent works `TASKS.md` task by task, **red→green** (write the failing test from the AC first, implement the minimum, run, green) and **commits at each green task** (a cheap rollback point). It ends with the break-the-code check below.
+- **Do:** `/sdd-7-implement` — the agent works `TASKS.md` task by task, **red→green** (write the failing test from the AC first, implement the minimum, run, green) and **commits at each green task** (a cheap rollback point). It ends with the break-the-code check below.
 - **Don't trust green:** break the code on purpose; the test must go red. Review the agent's tests, especially the assertions.
 - **Stuck?** If the agent can't build from a finished trio, that's a *spec gap*, not a cue to vibe-code — shrink the task, feed the missing context, or resolve an open question.
 - **Before the PR (Step 6):** run the built-in `/code-review` for generic bugs and quality (and `/security-review` if the change touches a trust boundary), then read the diff yourself against the spec's acceptance criteria, `CLAUDE.md` conventions, and `plan.md` § File structure — does every AC actually hold, did the diff stay inside the planned files, any scope creep or dead code? This is a human gate, not a new pipeline command.
@@ -120,27 +120,27 @@ The pipeline above is one pass; real work loops. Three loops reuse the commands 
 **Discovery loop** — *you can't write the acceptance criteria yet (a new UX, an unfamiliar integration, an algorithm you have to feel out).*
 
 ```
-/spec-new "<feature>"   →  mark the spec `discovery`, leave the AC as Open Questions
+/sdd-3-spec-new "<feature>"   →  mark the spec `discovery`, leave the AC as Open Questions
 spike  (a throwaway branch — no command; it teaches you the AC, then you delete it)
-   →  fill in the AC the spike surfaced  →  /trio-check   (before the spike it reports
+   →  fill in the AC the spike surfaced  →  /sdd-6-trio-check   (before the spike it reports
       "discovery — pending spike" instead of failing; now it must pass)
-   →  /plan-from-spec  →  /tasks-from-plan  →  /implement
+   →  /sdd-4-plan-from-spec  →  /sdd-5-tasks-from-plan  →  /sdd-7-implement
 ```
 The spike is throwaway and never becomes the code. → [`spec-plan-tasks-guide.md` § Two modes](spec-plan-tasks-guide.md#two-modes-delivery-and-discovery)
 
 **Code→spec loop** — *implementation shows an acceptance criterion was wrong.*
 
 ```
-/implement   →  an AC turns out wrong (spec still Active, pre-merge)
-   →  edit the spec in place + a dated `CHANGED during implementation:` note  →  /trio-check  →  back to /implement
+/sdd-7-implement   →  an AC turns out wrong (spec still Active, pre-merge)
+   →  edit the spec in place + a dated `CHANGED during implementation:` note  →  /sdd-6-trio-check  →  back to /sdd-7-implement
 ```
 The freeze starts at merge; until then the spec is allowed to change. → [`spec-plan-tasks-guide.md` § When the code shows the spec was wrong](spec-plan-tasks-guide.md#when-the-code-shows-the-spec-was-wrong)
 
 **Re-slice loop** — *a shipped slice reshapes the backlog.*
 
 ```
-/implement ships slice N   →  /features-from-prd   (re-run: merges new / dropped / reordered slices, never resets progress)
-   →  pick the next slice  →  /spec-new …
+/sdd-7-implement ships slice N   →  /sdd-2-features-from-prd   (re-run: merges new / dropped / reordered slices, never resets progress)
+   →  pick the next slice  →  /sdd-3-spec-new …
 ```
 The PRD freezes; the slice list doesn't. → [`prd-guide.md` § Slicing](prd-guide.md#slicing-the-prd-into-features)
 
@@ -153,22 +153,22 @@ These aren't extra ceremony — they're the same commands, entered at the point 
 ```
 # set up (CLAUDE.md is living — keep adding to it; see steps 5–6)
 npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude    # + start CLAUDE.md
-/architecture-from-prd   # 0  foundation: ARCHITECTURE.md + ADRs, when it earns it (or /architecture-from-code for existing code)
+/sdd-2-architecture-from-prd # 0  foundation: ARCHITECTURE.md + ADRs, when it earns it (or /sdd-2-architecture-from-code for existing code)
 
 # per change — enter where you start, skip the rest
-/prd-new "<idea>"        # 1  idea → docs/prd/…              (skip if small/solo)
-/prd-review              #     audit the PRD, resolve gaps
-/features-from-prd       # 2  PRD  → prioritized features    (skip if you know the feature)
-/spec-new "<feature>"    # 3  → spec.md   (goal + acceptance criteria + out of scope)
-/spec-review             #     audit, resolve open questions
-/plan-from-spec          #     → plan.md  (the how)
-/plan-validate           #     check vs ADRs + ARCHITECTURE.md
-/tasks-from-plan         #     → tasks.md (ordered, verify per step)
-/trio-check              #     gate: every AC has a task, no surprises
-/implement               # 4  work tasks.md red→green, commit per task, break-the-code
+/sdd-1-prd-new "<idea>"      # 1  idea → docs/prd/…              (skip if small/solo)
+/sdd-1-prd-review            #     audit the PRD, resolve gaps
+/sdd-2-features-from-prd     # 2  PRD  → prioritized features    (skip if you know the feature)
+/sdd-3-spec-new "<feature>"  # 3  → spec.md   (goal + acceptance criteria + out of scope)
+/sdd-3-spec-review           #     audit, resolve open questions
+/sdd-4-plan-from-spec        #     → plan.md  (the how)
+/sdd-4-plan-validate         #     check vs ADRs + ARCHITECTURE.md
+/sdd-5-tasks-from-plan       #     → tasks.md (ordered, verify per step)
+/sdd-6-trio-check            #     gate: every AC has a task, no surprises
+/sdd-7-implement             # 4  work tasks.md red→green, commit per task, break-the-code
 # write an ADR if a real decision shows up; add it to CLAUDE.md
 # merge: link the spec, update the stable layer if it changed, freeze the spec
-# then loop: a shipped slice re-ranks the next — /features-from-prd to merge it in, then the next trio
+# then loop: a shipped slice re-ranks the next — /sdd-2-features-from-prd to merge it in, then the next trio
 ```
 
 ---

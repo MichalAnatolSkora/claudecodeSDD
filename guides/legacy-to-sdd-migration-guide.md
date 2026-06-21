@@ -93,7 +93,7 @@ Then cut hard. The agent invents conventions that aren't real, misses the unwrit
 
 ### Day 2–3 — `ARCHITECTURE.md`
 
-The shipped command **`/architecture-from-code`** does this for you — it scans the source, drafts `ARCHITECTURE.md`, and additionally stubs a *reactive* ADR for each load-bearing decision already in force (the ORM, the scheduler, the service shape). The prompt below is essentially what it runs, if you'd rather drive it by hand:
+The shipped command **`/sdd-2-architecture-from-code`** does this for you — it scans the source, drafts `ARCHITECTURE.md`, and additionally stubs a *reactive* ADR for each load-bearing decision already in force (the ORM, the scheduler, the service shape). The prompt below is essentially what it runs, if you'd rather drive it by hand:
 
 **Prompt:**
 
@@ -153,7 +153,7 @@ You don't have to hand-type the spec/plan/tasks prompts — the commands ship wi
 npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude
 ```
 
-Then it's `/sdd-3-spec-new` → `/sdd-4-plan-from-spec` → `/sdd-5-tasks-from-plan` → `/sdd-6-trio-check` — the shipped files are phase-numbered; rename them if you'd rather drop the `sdd-N-` prefix. (The whole loop, step by step: [`flow-guide.md`](flow-guide.md). The trio itself: [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).)
+Then it's `/sdd-3-spec-new` → `/sdd-4-plan-from-spec` → `/sdd-5-tasks-from-plan` → `/sdd-6-trio-check` — the shipped files are phase-numbered so they sort in pipeline order. (The whole loop, step by step: [`flow-guide.md`](flow-guide.md). The trio itself: [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).)
 
 ---
 

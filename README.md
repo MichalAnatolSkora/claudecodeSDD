@@ -58,7 +58,7 @@ Run *from inside your repo*. Pick based on whether you also want a starter `CLAU
 npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude
 ```
 
-That drops all thirteen commands — `/sdd-1-prd-new`, `/sdd-1-prd-review`, `/sdd-2-features-from-prd`, `/sdd-2-architecture-from-prd`, `/sdd-2-architecture-from-code`, `/sdd-3-spec-new`, `/sdd-3-spec-review`, `/sdd-4-plan-from-spec`, `/sdd-4-plan-validate`, `/sdd-5-tasks-from-plan`, `/sdd-5-tasks-add`, `/sdd-6-trio-check`, `/sdd-7-implement` — into `.claude/commands/`, ready to use. The `sdd-N-` prefix just makes them sort in pipeline order; rename to the short form (`/spec-new`, `/trio-check`, …) if you prefer — that's what the guides use.
+That drops all thirteen commands — `/sdd-1-prd-new`, `/sdd-1-prd-review`, `/sdd-2-features-from-prd`, `/sdd-2-architecture-from-prd`, `/sdd-2-architecture-from-code`, `/sdd-3-spec-new`, `/sdd-3-spec-review`, `/sdd-4-plan-from-spec`, `/sdd-4-plan-validate`, `/sdd-5-tasks-from-plan`, `/sdd-5-tasks-add`, `/sdd-6-trio-check`, `/sdd-7-implement` — into `.claude/commands/`, ready to use. The `sdd-N-` prefix just makes them sort in pipeline order; the guides refer to every command by its full name.
 
 **Commands + a starter `CLAUDE.md`** (plain git — degit can't grab the single `CLAUDE.md` file):
 

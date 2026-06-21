@@ -470,7 +470,7 @@ Don't fall into the trap of writing a new PRD every quarter to feel productive. 
 
 ## AI-assisted PRD authoring
 
-The agent can speed up PRD drafting and review meaningfully, *as long as you remember the agent can't make the product decisions for you*. Five reusable prompts — and prompt 1 is also packaged as the **`/prd-new`** command (same idea→draft, but interactive: it sketches a lean PRD, then asks you the open questions and fills them in). The shipped command files are namespaced and phase-numbered (`templates/.claude/commands/sdd-1-prd-new.md` installs as `/sdd-1-prd-new`); this guide writes the short forms — keep or drop the prefix in your repo.
+The agent can speed up PRD drafting and review meaningfully, *as long as you remember the agent can't make the product decisions for you*. Five reusable prompts — and prompt 1 is also packaged as the **`/sdd-1-prd-new`** command (same idea→draft, but interactive: it sketches a lean PRD, then asks you the open questions and fills them in). The shipped command files are namespaced and phase-numbered (`templates/.claude/commands/sdd-1-prd-new.md` installs as `/sdd-1-prd-new`); this guide refers to every command by its full name.
 
 ### 1. Draft a PRD from a one-paragraph idea
 
@@ -500,7 +500,7 @@ Mark anything you're inventing as [VERIFY]. Show me the draft before saving.
 
 ### 2. Review a draft PRD for completeness and clarity
 
-Use after a first draft (yours or the agent's) to catch gaps. Ships ready-made as `/prd-review` (`templates/.claude/commands/sdd-1-prd-review.md`).
+Use after a first draft (yours or the agent's) to catch gaps. Ships ready-made as `/sdd-1-prd-review` (`templates/.claude/commands/sdd-1-prd-review.md`).
 
 **Prompt:**
 
@@ -731,7 +731,7 @@ The kickoff's output — the spec backlog — is a list of **features**, each si
 
 **The output is a lightweight list, not an artifact.** A prioritized table — feature, the PRD outcome it serves, rough size, dependencies — is enough. It can live in the PRD or an issue tracker. Each row becomes a `specs/YYYY-MM-slug/` when you pick it up. Don't turn the backlog into a second heavy document.
 
-**Let the agent draft it, then you triage.** `/features-from-prd` (or the prompt below) turns the PRD into a candidate breakdown in seconds; you cut and reorder.
+**Let the agent draft it, then you triage.** `/sdd-2-features-from-prd` (or the prompt below) turns the PRD into a candidate breakdown in seconds; you cut and reorder.
 
 **Prompt:**
 
