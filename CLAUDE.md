@@ -53,7 +53,7 @@ Existing detail guides:
 - `guides/flow-guide.md` — the whole SDD flow as a runnable sequence: each step's command and output (idea → PRD → slice → trio → implement+test → ADR → merge), an entry-points table, and a cheat sheet. The spine; depth lives in the linked guides. Complements the "The whole flow" map section in the overview.
 - `guides/sdd-in-teams-guide.md` — running SDD with 2–10 people, kept deliberately light: who owns what (one name per artifact), lightweight PR review, spec lifecycle, ADRs as a shared decision log, the solo case, onboarding, small-team failure modes, and what to add only when you outgrow ~10. No RACI / enterprise ceremony.
 - `guides/legacy-to-sdd-migration-guide.md` — the one-time process of retrofitting SDD onto an existing codebase (audit, foundation, forward-only specs, reactive ADRs, agent prompts, worked examples)
-- `guides/who-uses-sdd.md` — who uses SDD and what they call it: plain "who uses what" tables for AI-coding tools + pre-AI orgs, and the older ideas it borrows from
+- `guides/who-uses-sdd.md` — who uses SDD and what they call it: plain "who uses what" tables for AI-coding tools + pre-AI orgs, the older ideas it borrows from, plus a positioning section on why today's tools land too generic or too binding and where this repo's lighter markdown middle fits
 
 **Do NOT restructure `spec-driven-development-guide.md` without explicit instruction.** The owner will say when something should move out into a detail file. Until then, leave structural shape alone — content edits within sections are fine; pulling sections out into new files is not.
 

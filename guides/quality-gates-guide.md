@@ -118,7 +118,7 @@ Examples:
 - Does this plan contradict any active ADR?
 - Is the "Out of scope" section trivial (only listing obvious exclusions) or substantive?
 
-Implementation: configured subagent (`.claude/agents/trio-auditor.md`), slash command (`/spec-check`), or CI step that invokes the agent. (Note on names: the shipped command files in `templates/.claude/commands/` are namespaced and phase-numbered — `sdd-6-trio-check.md` → `/sdd-6-trio-check`, `sdd-3-spec-review.md` → `/sdd-3-spec-review`. Example gate names like `/spec-check` and `/trio-auditor` below are illustrative ones you author yourself, not shipped commands.)
+Implementation: configured subagent (`.claude/agents/trio-auditor.md`), slash command (`/spec-check`), or CI step that invokes the agent. (Note on names: the shipped command files in `templates/.claude/commands/` are namespaced and phase-numbered — `sdd-6-trio-check.md` → `/sdd-6-trio-check`, `sdd-3-spec-review.md` → `/sdd-3-spec-review`. Example names like `/spec-check` (a slash command) and `trio-auditor` (a subagent) below are illustrative ones you author yourself, not shipped commands.)
 
 **Strength:** can evaluate semantic content, catches what regex can't.
 **Weakness:** probabilistic (occasional false positives and negatives), takes tokens, slower than mechanical.

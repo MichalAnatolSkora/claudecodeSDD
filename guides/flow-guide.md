@@ -22,7 +22,7 @@
  │  /sdd-7-implement                       agent, red→green per task
  │   │
  │   ▼
- │  ADR?                                  record a decision worth keeping
+ │  ADR?                                   record a decision worth keeping
  │   │
  │   ▼
  │  merge & freeze

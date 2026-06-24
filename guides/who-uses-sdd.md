@@ -8,7 +8,7 @@
 
 "Spec-driven development" is a new name (2024–2025, out of the AI-coding-agent world) for an old habit: **decide what you're building and why, in writing, before you write the code.** AI agents made the habit pay off visibly — give the agent structured context up front and it stops guessing — but the habit itself is decades old.
 
-So two groups show up below: the new AI-coding tools that bake it in, and the engineering orgs that have done it for years under other names.
+So two groups show up below: the new AI-coding tools that bake it in, and the engineering orgs that have done it for years under other names. None of the AI tools has nailed it, though — they land either *too generic* or *too binding* (more below).
 
 This is a notes page, not a survey — adoption moves fast, so treat it as a starting point.
 
@@ -31,6 +31,21 @@ Every serious AI-coding tool landed on the same idea: **one file the agent alway
 | **Cline** | `.clinerules` | Per-repo rules. |
 
 Different filenames, same move: **tell the agent your conventions instead of letting it guess.**
+
+---
+
+## There's no single "SDD" — and every tool picks a side
+
+Read that table again and the uncomfortable part is that **none of these is *the* answer.** "Spec-driven development" isn't one method with a canonical implementation — it's a loose family, and today's tools cluster at two unhappy extremes:
+
+- **Too generic.** The rules-file tools (`CLAUDE.md`, `.cursor/rules`, `AGENTS.md`, `.clinerules`, Aider conventions) give you *one file the agent reads* — and stop there. That's the floor, not a method: nothing makes you write a spec before a plan, a plan before tasks, or freeze the spec at merge. You get a convention, not a loop.
+- **Too binding.** The full products give you the loop but make you rent it. **Kiro** is an entire IDE — adopt it and your specs live in *its* `requirements.md` / `design.md` / `tasks.md` format, in *its* tool, on *its* terms. **spec-kit** is lighter (agent-agnostic, open source) but still ships a scaffolder and a fixed ceremony — `/constitution`, `/clarify`, `/analyze`, generated files — that you mostly take whole. A real method, with a real switching cost.
+
+The middle — **structured enough to be a method, light enough not to own you** — is the gap this repo aims at: plain markdown you control, a spec → plan → tasks loop any file-reading agent can run, no scaffolder, no IDE, no format you can't walk away from. The discipline lives in *how you write three files*, not in a product you adopt.
+
+That's the quiet payoff of staying this light: **simple enough to start in an afternoon, and cheap to leave.** The artifacts are just markdown you own, so you're never locked in — outgrow this and decide spec-kit's ceremony or Kiro's IDE is finally worth it, and your specs are already plain files you carry straight over. The migration only runs the easy way, too: markdown → tool is a copy; tool → markdown is an export you'll wish you never needed. So adopt the heavy thing *if and when* it earns its keep — not on day one, as a bet you can't unwind.
+
+So the honest framing isn't *"SDD is solved — pick a tool."* It's: the idea is real and worth doing, the existing tools force a trade-off you don't have to accept, and markdown plus a habit gets you most of the way there.
 
 ---
 
