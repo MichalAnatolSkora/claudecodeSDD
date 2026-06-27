@@ -525,6 +525,7 @@ The implementation proceeds anyway. Code reviewer catches the gap. Now you're pa
 A repo doing SDD seriously usually has these in `.claude/commands/`. *(The shipped files in [`templates/.claude/`](../templates/.claude/) are namespaced and phase-numbered — `sdd-3-spec-new.md` → `/sdd-3-spec-new` — so they sort in pipeline order; this guide refers to every command by its full name.)*
 
 - **`/sdd-1-prd-new <idea>`** — *(furthest upstream)* turns a 1–3 sentence idea into a lean PRD draft, then fills the gaps by asking you the open questions. See [`prd-guide.md`](prd-guide.md) § "AI-assisted PRD authoring".
+- **`/sdd-1-prd-from-poc`** — reverses a lean PRD out of a working proof-of-concept: reads the PoC for *what* it does, then asks you the *why* (users, problem, success) before drafting. The on-ramp when the prototype exists but nothing's written. See [`prd-guide.md`](prd-guide.md) § "AI-assisted PRD authoring".
 - **`/sdd-1-prd-review <path>`** — audits a draft PRD for gaps (specific users, measurable success criteria, ≥5 out-of-scope items, no implementation leakage) before you slice it. Read-only.
 - **`/sdd-2-features-from-prd`** — *(upstream of the trio)* slices an accepted PRD into a prioritized, vertically-sliced feature list, saved to `specs/FEATURES.md` as the project's feature/status index; each row becomes a spec. See [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".
 - **`/sdd-2-architecture-from-prd`** / **`/sdd-2-architecture-from-code`** — *(once-per-project foundation)* establish `ARCHITECTURE.md` plus a stub ADR per hard-to-reverse decision — greenfield by Q&A on the foundational choices (hosting, datastore, shape), or reverse-engineered from an existing codebase. `/sdd-4-plan-validate` then checks every plan against them.
@@ -543,6 +544,7 @@ Worked-example placement of these files:
 .claude/
 └── commands/
     ├── sdd-1-prd-new.md                # /sdd-1-prd-new
+    ├── sdd-1-prd-from-poc.md           # /sdd-1-prd-from-poc
     ├── sdd-1-prd-review.md             # /sdd-1-prd-review
     ├── sdd-2-features-from-prd.md      # /sdd-2-features-from-prd
     ├── sdd-2-architecture-from-prd.md  # /sdd-2-architecture-from-prd
@@ -557,7 +559,7 @@ Worked-example placement of these files:
     └── sdd-7-implement.md              # /sdd-7-implement
 ```
 
-**Ready-made copies of all thirteen commands live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
+**Ready-made copies of all fourteen commands live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
 
 See [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks) for the mechanics of writing slash commands.
 

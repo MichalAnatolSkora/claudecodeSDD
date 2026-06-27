@@ -2,19 +2,19 @@
 
 > **Built for teams of 1–10.** A small team wielding AI coding agents can now ship what used to take hundreds of engineers — but raw speed isn't the moat. The moat is keeping the agents aligned with your intent as the codebase grows. This repo gives you that discipline **and the commands that run it.**
 
-Most SDD writeups hand you a *method*. This repo's strong point is the method **plus a runnable pipeline of 13 slash commands** — and, more importantly, **the discipline for operating them** so they fit real work instead of hardening into a waterfall.
+Most SDD writeups hand you a *method*. This repo's strong point is the method **plus a runnable pipeline of 14 slash commands** — and, more importantly, **the discipline for operating them** so they fit real work instead of hardening into a waterfall.
 
 ---
 
 ## The strong point: commands that *run* SDD — and how to operate them
 
-**The pipeline — 13 `/sdd-*` slash commands, idea to merge.** Each does one narrow thing and **stops for your judgment**: drafts are shown before saving, audits are read-only, open questions are surfaced rather than invented. The agent types; you stay the decision-maker.
+**The pipeline — 14 `/sdd-*` slash commands, idea to merge.** Each does one narrow thing and **stops for your judgment**: drafts are shown before saving, audits are read-only, open questions are surfaced rather than invented. The agent types; you stay the decision-maker.
 
 ```
     idea
      │
      ▼
-    /sdd-1-prd-new · /sdd-1-prd-review
+    /sdd-1-prd-new · /sdd-1-prd-from-poc · /sdd-1-prd-review
      │
      ▼
  ┌─ /sdd-2-features-from-prd
@@ -31,9 +31,9 @@ Most SDD writeups hand you a *method*. This repo's strong point is the method **
  └───┘ loop: a shipped slice re-ranks the next slice
 ```
 
-The skill isn't running all 13 in a row — it's **operating** them. Three rules:
+The skill isn't running all 14 in a row — it's **operating** them. Three rules:
 
-1. **Enter where your change starts; skip the rest.** You rarely run the whole pipeline. A one-line fix is a short spec and `/sdd-7-implement`. A known feature starts at `/sdd-3-spec-new`. A new product starts at `/sdd-1-prd-new`. → [entry table](guides/flow-guide.md#at-a-glance)
+1. **Enter where your change starts; skip the rest.** You rarely run the whole pipeline. A one-line fix is a short spec and `/sdd-7-implement`. A known feature starts at `/sdd-3-spec-new`. A new product starts at `/sdd-1-prd-new` — or, if you've already built a working PoC (how most new products actually start), at `/sdd-1-prd-from-poc`, which backfills the PRD from it without faking specs. → [entry table](guides/flow-guide.md#at-a-glance)
 
 2. **Compress to fit the change.** A one-liner → just a PR. A bug → a short `SPEC.md`. A small feature → a one-file trio (spec/plan/tasks in one file). A real feature → the full three-file trio. Match the ceremony to the size; when in doubt, write the shorter one.
 
@@ -58,7 +58,7 @@ Run *from inside your repo*. Pick based on whether you also want a starter `CLAU
 npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude
 ```
 
-That drops all thirteen commands — `/sdd-1-prd-new`, `/sdd-1-prd-review`, `/sdd-2-features-from-prd`, `/sdd-2-architecture-from-prd`, `/sdd-2-architecture-from-code`, `/sdd-3-spec-new`, `/sdd-3-spec-review`, `/sdd-4-plan-from-spec`, `/sdd-4-plan-validate`, `/sdd-5-tasks-from-plan`, `/sdd-5-tasks-add`, `/sdd-6-trio-check`, `/sdd-7-implement` — into `.claude/commands/`, ready to use. The `sdd-N-` prefix just makes them sort in pipeline order; the guides refer to every command by its full name.
+That drops all fourteen commands — `/sdd-1-prd-new`, `/sdd-1-prd-from-poc`, `/sdd-1-prd-review`, `/sdd-2-features-from-prd`, `/sdd-2-architecture-from-prd`, `/sdd-2-architecture-from-code`, `/sdd-3-spec-new`, `/sdd-3-spec-review`, `/sdd-4-plan-from-spec`, `/sdd-4-plan-validate`, `/sdd-5-tasks-from-plan`, `/sdd-5-tasks-add`, `/sdd-6-trio-check`, `/sdd-7-implement` — into `.claude/commands/`, ready to use. The `sdd-N-` prefix just makes them sort in pipeline order; the guides refer to every command by its full name.
 
 **Commands + a starter `CLAUDE.md`** (plain git — degit can't grab the single `CLAUDE.md` file):
 
@@ -152,7 +152,7 @@ The guides assume a mid-sized project context (.NET, Quartz, SFTP integrations, 
 
 The artifacts the commands produce and the agent reads. Copy into your project and fill in the brackets:
 
-- **[.claude/ command pipeline](templates/.claude/)** — the 13 Claude Code slash commands (`/sdd-1-prd-new` … `/sdd-7-implement`) that take a change from idea through the trio into implementation. This is the operating layer; see [Get the commands](#get-the-commands) above to install.
+- **[.claude/ command pipeline](templates/.claude/)** — the 14 Claude Code slash commands (`/sdd-1-prd-new` … `/sdd-7-implement`) that take a change from idea through the trio into implementation. This is the operating layer; see [Get the commands](#get-the-commands) above to install.
 - **[CLAUDE.md](templates/CLAUDE.md)** — agent instruction hub with two layers: literal-copied behavioral guidelines (from [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md), kept verbatim with attribution) + bracketed project-specific sections you fill in
 - **[ARCHITECTURE.md](templates/ARCHITECTURE.md)** — the stable architecture layer: components, boundaries, and the main data flow the agent reads before touching a feature (the *why* lives in ADRs)
 - **[PRD.md](templates/PRD.md)** — product requirements document (problem, users, success criteria, constraints) — the *starting* artifact, freezes after v1

@@ -35,6 +35,7 @@
 | You have… | Start at | Skip |
 |-----------|----------|------|
 | a new product / a real change of direction | step 1 (PRD) | nothing |
+| a working PoC, nothing written down yet | step 1 (PRD), via `/sdd-1-prd-from-poc` | the blank-page draft (it reads the PoC instead) |
 | a rough idea, or an accepted PRD | step 2 (slice) | sometimes the PRD |
 | a known single feature | step 3 (trio) | steps 1–2 |
 | a one-line fix | step 3, short spec only | steps 1–2, plan, tasks |
@@ -58,6 +59,7 @@ That's the floor. Everything below is per change.
 
 - **Before, optionally:** informal user/market research feeds the PRD — see [overview § Before the PRD](spec-driven-development-guide.md#before-the-prd-research-and-discovery). Most 1–10 teams skip it (a paragraph from a few customer conversations is plenty).
 - **Do:** `/sdd-1-prd-new "<1–3 sentences>"` — it sketches a lean PRD, then asks you the open questions and fills them in (you make the product calls). Then `/sdd-1-prd-review` — a read-only audit (specific users? measurable success criteria? ≥5 out-of-scope items?) before you slice.
+- **Already have a working PoC?** Skip the blank page: `/sdd-1-prd-from-poc` reads the prototype, asks you the *why* it can't infer (users, problem, success), and writes the lean PRD — then continue at `/sdd-1-prd-review`.
 - **Get:** `docs/prd/YYYY-MM-slug.md` — product-level *what & why*, humans-only (the agent implements from specs, not the PRD).
 - **Skip if:** solo, small, or the what/why already fits in your head — a one-paragraph issue is enough.
 
@@ -157,6 +159,7 @@ npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude    # + start
 
 # per change — enter where you start, skip the rest
 /sdd-1-prd-new "<idea>"      # 1  idea → docs/prd/…              (skip if small/solo)
+/sdd-1-prd-from-poc          #     PoC already built? reverse a lean PRD out of it
 /sdd-1-prd-review            #     audit the PRD, resolve gaps
 /sdd-2-features-from-prd     # 2  PRD  → prioritized features    (skip if you know the feature)
 /sdd-3-spec-new "<feature>"  # 3  → spec.md   (goal + acceptance criteria + out of scope)

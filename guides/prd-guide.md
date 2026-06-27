@@ -470,7 +470,7 @@ Don't fall into the trap of writing a new PRD every quarter to feel productive. 
 
 ## AI-assisted PRD authoring
 
-The agent can speed up PRD drafting and review meaningfully, *as long as you remember the agent can't make the product decisions for you*. Five reusable prompts — and prompt 1 is also packaged as the **`/sdd-1-prd-new`** command (same idea→draft, but interactive: it sketches a lean PRD, then asks you the open questions and fills them in). The shipped command files are namespaced and phase-numbered (`templates/.claude/commands/sdd-1-prd-new.md` installs as `/sdd-1-prd-new`); this guide refers to every command by its full name.
+The agent can speed up PRD drafting and review meaningfully, *as long as you remember the agent can't make the product decisions for you*. Five reusable prompts — and two ship as commands: prompt 1 as the **`/sdd-1-prd-new`** command (same idea→draft, but interactive: it sketches a lean PRD, then asks the open questions and fills them in), and its PoC variant as **`/sdd-1-prd-from-poc`** (reverses a lean PRD out of a working prototype — prompt 1b below). The shipped command files are namespaced and phase-numbered (`templates/.claude/commands/sdd-1-prd-new.md` installs as `/sdd-1-prd-new`); this guide refers to every command by its full name.
 
 ### 1. Draft a PRD from a one-paragraph idea
 
@@ -497,6 +497,41 @@ test strategy. Those go in spec/plan/ADRs after the PRD is accepted.
 
 Mark anything you're inventing as [VERIFY]. Show me the draft before saving.
 ```
+
+### 1b. Reverse a PRD out of a working PoC
+
+Use when you already have a running prototype but nothing written down. The agent can read *what* the PoC does, but only you know *why* — it must ask, not invent the product calls. Packaged as the **`/sdd-1-prd-from-poc`** command (`templates/.claude/commands/sdd-1-prd-from-poc.md`).
+
+**Prompt:**
+
+```text
+I have a working proof-of-concept but no PRD. Read the PoC first:
+[paste a path / point at the repo or directory, plus any README or demo notes].
+
+From the code, infer what the PoC currently does — features, flows, data it touches.
+Then DON'T guess the product context. Ask me the things the code can't tell you:
+- Who is this for (primary user, and who it's explicitly NOT for)?
+- What problem does it solve, and what does that cost them today?
+- What does success look like (1-3 measurable outcomes, rough numbers + timeframe)?
+- What did the PoC cut that the real thing needs — and what is deliberately out of scope?
+
+Wait for my answers. Then draft a lean PRD using this structure:
+- Summary (3-5 sentences)
+- The problem (1-2 paragraphs, with specific user pain)
+- Target users (primary, secondary, explicitly NOT a target)
+- Solution overview (product-level — describe the PoC's value, NOT its implementation)
+- Success metrics (1-3 measurable outcomes with rough numbers and timeframes)
+- Constraints (technical, legal, business)
+- Out of scope (be explicit; list at least 5 things — include PoC shortcuts you'd keep cut)
+- Risks and assumptions (3-5)
+- References (the PoC, plus placeholders if you don't know)
+
+DO NOT carry implementation detail up from the PoC: no language, framework, database,
+class names, file layout. Those stay in the code and get re-decided in spec/plan/ADRs.
+Mark anything you're inferring as [VERIFY]. Show me the draft before saving.
+```
+
+The PoC isn't the spec. Once the PRD is accepted, the spec-before-code discipline starts with your *next* change — either harden the prototype through a fresh spec → trio, or treat it as legacy (forward-only specs). The prototype's code is a reference, not a contract.
 
 ### 2. Review a draft PRD for completeness and clarity
 

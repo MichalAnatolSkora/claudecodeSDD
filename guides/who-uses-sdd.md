@@ -45,6 +45,8 @@ The middle — **structured enough to be a method, light enough not to own you**
 
 That's the quiet payoff of staying this light: **simple enough to start in an afternoon, and cheap to leave.** The artifacts are just markdown you own, so you're never locked in — outgrow this and decide spec-kit's ceremony or Kiro's IDE is finally worth it, and your specs are already plain files you carry straight over. The migration only runs the easy way, too: markdown → tool is a copy; tool → markdown is an export you'll wish you never needed. So adopt the heavy thing *if and when* it earns its keep — not on day one, as a bet you can't unwind.
 
+And there's a gap on a different axis entirely — not *how heavy* a tool is, but *when you're allowed to start*. The tools that are actually a method — spec-kit, Kiro — are all **spec-first**: they assume you begin by writing a spec (or a constitution, or a requirements doc) before any code. A new product usually doesn't begin there. It begins with a **PoC**, the smallest thing that proves the idea is worth pursuing, and only then is there anything worth specifying. No spec-first tool offers an honest way in from that proven prototype, so the most normal way real businesses start is the one case these tools skip. This repo doesn't skip it: `/sdd-1-prd-from-poc` reads the PoC and backfills a PRD from it — no faked specs, the spec-before-code discipline simply begins with your *next* change. **Start messy; formalize once it's earned.**
+
 So the honest framing isn't *"SDD is solved — pick a tool."* It's: the idea is real and worth doing, the existing tools force a trade-off you don't have to accept, and markdown plus a habit gets you most of the way there.
 
 ---
