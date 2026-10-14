@@ -103,7 +103,7 @@ Add the next document only when **something pulls it into being** — a real rea
 
 A repo with 5 always-fresh files beats one with 30 stale ones. Discipline over completeness.
 
-When you genuinely need the depth: the map to all of it is the [overview](spec-driven-development-guide.md) (this page distills its [Absolute Minimum](spec-driven-development-guide.md#the-absolute-minimum) section), and the one deep guide worth reading is the [Feature Trio](spec-plan-tasks-guide.md).
+When you genuinely need the depth: the map to all of it is the [overview](spec-driven-development-guide.md) (its [Absolute Minimum](spec-driven-development-guide.md#the-absolute-minimum) adds the full table of when to add which file), and the one deep guide worth reading is the [Feature Trio](spec-plan-tasks-guide.md).
 
 ---
 *Part of the [SDD guides repo](../README.md). This page is the front door; the method's heart is [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).*

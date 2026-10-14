@@ -149,7 +149,20 @@ A runbook attracts unrelated content unless you draw the line clearly.
 
 ## How Runbooks Relate to Postmortems
 
-Runbooks and postmortems both deal with incidents, but on different timescales. The main SDD guide has a full comparison table in [§ "Runbook vs Postmortem"](spec-driven-development-guide.md#runbook-vs-postmortem); this section covers the operational side: when each gets written, and how they feed each other.
+Runbooks and postmortems both deal with incidents, but on different timescales — and new teams routinely confuse them, or pick one assuming it covers the other:
+
+|  | Runbook | Postmortem |
+|---|---|---|
+| **When read** | During an incident (3 a.m., half awake) | Days or weeks after the incident |
+| **Time frame** | *"What do I do right now?"* | *"What happened, why, and what changes?"* |
+| **Audience** | On-call engineer under stress | Engineering team + management, in a calm review |
+| **Format** | Symptoms → diagnosis → recovery → verification | Summary → timeline → root cause → lessons → action items |
+| **Updated when** | Within 24 h of every incident (plus quarterly audit) | Once, after the incident — then frozen |
+| **Lifetime** | Living (continuously updated) | Frozen artifact, archived |
+| **Lives in** | `docs/runbooks/<symptom-slug>.md` | `docs/postmortems/YYYY-MM-DD-<incident-slug>.md` |
+| **Goal** | Mean-time-to-recovery ↓ | Mean-time-between-incidents ↓ |
+
+They aren't alternatives, they're a sequence — and each avoids a different trap. **A runbook without postmortems** stays shallow: nobody asks *why* incidents recur, so the same root cause produces three more incidents, each patched in the runbook, none named. **Postmortems without a runbook** produce real lessons — and at 3 a.m. the on-call still has to figure out the recovery from scratch. This section covers when each gets written, and how they feed each other.
 
 ### The post-incident sequence
 
