@@ -129,7 +129,7 @@ When two people collide on one artifact, the rules are short:
 - **Driver and reviewer deadlocked on scope** — the keeper breaks the tie, inside the same 24-hour timebox.
 - **Never edit someone else's in-flight spec.** Comment on the PR instead; the driver makes the edit.
 
-For *how* to actually write each of `SPEC.md` / `PLAN.md` / `TASKS.md` — with the AI-authoring prompts and the consistency check — see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md), the centerpiece guide.
+For *how* to actually write each of `SPEC.md` / `PLAN.md` / `TASKS.md` — with the command for each step and the consistency check — see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md), the centerpiece guide.
 
 ---
 

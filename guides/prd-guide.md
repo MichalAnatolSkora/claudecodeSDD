@@ -1,6 +1,6 @@
 # Writing a Good PRD (Per Era, For Humans)
 
-> The practical companion to [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer). That section gives you the principles (PRD vs spec, the agent implements from specs not the PRD, the era pattern, the Frankenstein trap). This guide gives you the *practice*: formats, worked examples, era-boundary heuristics, AI-authoring prompts, and the review process.
+> The practical companion to [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer). That section gives you the principles (PRD vs spec, the agent implements from specs not the PRD, the era pattern, the Frankenstein trap). This guide gives you the *practice*: formats, worked examples, era-boundary heuristics, AI-assisted authoring, and the review process.
 
 ---
 
@@ -50,7 +50,7 @@ This guide is the practice:
 - **Anatomy section by section** with concrete advice on what to write (and not write) in each
 - **Two complete worked examples** — what a real, well-shaped PRD actually looks like
 - **Era boundary heuristics** — concrete signals that you're at a new era and should write a new PRD
-- **AI-assisted authoring** — copy-pasteable prompts for drafting, reviewing, and translating a PRD into specs
+- **AI-assisted authoring** — the shipped commands for drafting, reviewing, and slicing a PRD, plus two by-hand prompts (era check, competitive analysis)
 - **Stakeholder review process** — who reviews, in what order, what they look for
 - **Success metrics deep-dive** — how to write *"what success looks like"* measurably without overcommitting
 - **Cross-functional handoff** — getting from *"PRD accepted"* to *"first specs in flight"*
@@ -470,100 +470,20 @@ Don't fall into the trap of writing a new PRD every quarter to feel productive. 
 
 ## AI-assisted PRD authoring
 
-The agent can speed up PRD drafting and review meaningfully, *as long as you remember the agent can't make the product decisions for you*. Five reusable prompts — and two ship as commands: prompt 1 as the **`/sdd-1-prd-new`** command (same idea→draft, but interactive: it sketches a lean PRD, then asks the open questions and fills them in), and its PoC variant as **`/sdd-1-prd-from-poc`** (reverses a lean PRD out of a working prototype — prompt 1b below). The shipped command files are namespaced and phase-numbered (`templates/.claude/commands/sdd-1-prd-new.md` installs as `/sdd-1-prd-new`); this guide refers to every command by its full name.
+The agent can speed up PRD drafting and review meaningfully, *as long as you remember the agent can't make the product decisions for you*. The recurring steps ship as slash commands, so each prompt lives in exactly one place — its command file. Not on Claude Code? Each file is a plain-markdown prompt: open it and paste the body into any agent, with your input in place of `$ARGUMENTS`.
 
-### 1. Draft a PRD from a one-paragraph idea
+| Step | Command | What it does |
+|------|---------|--------------|
+| Draft a PRD from a 1–3 sentence idea | [`/sdd-1-prd-new`](../templates/.claude/commands/sdd-1-prd-new.md) | Sketches a lean PRD with no implementation detail and `[VERIFY]` on every guess, then asks you the genuinely open questions (who exactly the user is, success in numbers, out of scope, hard constraints) a few at a time and fills in your answers |
+| Reverse a PRD out of a working PoC | [`/sdd-1-prd-from-poc`](../templates/.claude/commands/sdd-1-prd-from-poc.md) | Reads what the PoC does, asks you the *why* the code can't supply (problem, user, success, what's deliberately out), and backfills a lean PRD — never a spec, never invented acceptance criteria |
+| Review a draft for completeness and clarity | [`/sdd-1-prd-review`](../templates/.claude/commands/sdd-1-prd-review.md) | Read-only audit: specific users, a problem with a cost today, measurable success with a timeframe, ≥ 5 out-of-scope items, no implementation leakage, risks with consequences, still a page or two |
+| Turn an accepted PRD into the era's first specs | [`/sdd-2-features-from-prd`](../templates/.claude/commands/sdd-2-features-from-prd.md) | Slices the PRD into vertical, prioritized features, walking skeleton first — see [§ Slicing the PRD into features](#slicing-the-prd-into-features) |
 
-Use when you have a rough sense of what to build but need help structuring.
+**The PoC isn't the spec.** Once a backfilled PRD is accepted, the spec-before-code discipline starts with your *next* change — either harden the prototype through a fresh spec → trio, or treat it as legacy (forward-only specs). The prototype's code is a reference, not a contract.
 
-**Prompt:**
+Two jobs have no command — they're occasional and judgment-heavy, so run them by hand:
 
-```text
-We want to build the following: [one-paragraph description].
-
-Draft a lean PRD using this structure:
-- Summary (3-5 sentences)
-- The problem (1-2 paragraphs, with specific user pain)
-- Target users (primary, secondary, explicitly NOT a target)
-- Solution overview (product-level, no implementation detail)
-- Success metrics (1-3 measurable outcomes with rough numbers and timeframes — flag [VERIFY] if guessing)
-- Constraints (technical, legal, business)
-- Out of scope (be explicit; list at least 5 things)
-- Risks and assumptions (3-5)
-- References (placeholders if you don't know)
-
-DO NOT include: programming language, framework, database, API design, class names,
-test strategy. Those go in spec/plan/ADRs after the PRD is accepted.
-
-Mark anything you're inventing as [VERIFY]. Show me the draft before saving.
-```
-
-### 1b. Reverse a PRD out of a working PoC
-
-Use when you already have a running prototype but nothing written down. The agent can read *what* the PoC does, but only you know *why* — it must ask, not invent the product calls. Packaged as the **`/sdd-1-prd-from-poc`** command (`templates/.claude/commands/sdd-1-prd-from-poc.md`).
-
-**Prompt:**
-
-```text
-I have a working proof-of-concept but no PRD. Read the PoC first:
-[paste a path / point at the repo or directory, plus any README or demo notes].
-
-From the code, infer what the PoC currently does — features, flows, data it touches.
-Then DON'T guess the product context. Ask me the things the code can't tell you:
-- Who is this for (primary user, and who it's explicitly NOT for)?
-- What problem does it solve, and what does that cost them today?
-- What does success look like (1-3 measurable outcomes, rough numbers + timeframe)?
-- What did the PoC cut that the real thing needs — and what is deliberately out of scope?
-
-Wait for my answers. Then draft a lean PRD using this structure:
-- Summary (3-5 sentences)
-- The problem (1-2 paragraphs, with specific user pain)
-- Target users (primary, secondary, explicitly NOT a target)
-- Solution overview (product-level — describe the PoC's value, NOT its implementation)
-- Success metrics (1-3 measurable outcomes with rough numbers and timeframes)
-- Constraints (technical, legal, business)
-- Out of scope (be explicit; list at least 5 things — include PoC shortcuts you'd keep cut)
-- Risks and assumptions (3-5)
-- References (the PoC, plus placeholders if you don't know)
-
-DO NOT carry implementation detail up from the PoC: no language, framework, database,
-class names, file layout. Those stay in the code and get re-decided in spec/plan/ADRs.
-Mark anything you're inferring as [VERIFY]. Show me the draft before saving.
-```
-
-The PoC isn't the spec. Once the PRD is accepted, the spec-before-code discipline starts with your *next* change — either harden the prototype through a fresh spec → trio, or treat it as legacy (forward-only specs). The prototype's code is a reference, not a contract.
-
-### 2. Review a draft PRD for completeness and clarity
-
-Use after a first draft (yours or the agent's) to catch gaps. Ships ready-made as `/sdd-1-prd-review` (`templates/.claude/commands/sdd-1-prd-review.md`).
-
-**Prompt:**
-
-```text
-Read the draft PRD at docs/prd/[filename].md.
-
-Audit it against this checklist:
-1. Is the "Target users" section specific (job title + company size or equivalent)
-   or generic ("users")?
-2. Does the problem statement describe a specific behavior or cost today, not
-   just "users want X"?
-3. Are success metrics measurable (numbers and timeframe), or vague?
-4. Is "Out of scope" at least 5 items long? Are any of them surprising / things a
-   reader might assume are in scope?
-5. Does the solution section avoid implementation detail (languages, frameworks,
-   class names)? Flag any leakage.
-6. Are risks named with consequences ("if X, then Y"), or are they generic?
-7. Are there any contradictions between sections (e.g., out-of-scope item
-   appears as a constraint)?
-8. Is it still a page or two? A PRD that needs a table of contents is doing a
-   spec's job.
-9. Is it factual and skimmable — claims, numbers, decisions, not marketing prose
-   or filler? A short PRD can still be padded and vague.
-
-Return a numbered list of concerns. Don't modify the file — list the gaps.
-```
-
-### 3. Detect an era boundary from a roadmap
+### 1. Detect an era boundary from a roadmap
 
 Use periodically (annually or per planning cycle) to check whether you should be writing a new PRD vs. a series of specs.
 
@@ -584,7 +504,7 @@ Conclude: "Likely era boundary" / "Feature accumulation, not era boundary" /
 "Inconclusive — needs human discussion." Cite specific evidence.
 ```
 
-### 4. Generate a competitive-analysis section
+### 2. Generate a competitive-analysis section
 
 For PR-FAQ or full PRD formats. Useful for confirming you've thought about
 adjacent solutions.
@@ -605,31 +525,6 @@ don't fabricate. Mark uncertainty as [VERIFY].
 ```
 
 The "don't fabricate" instruction is important — agents will invent plausible-sounding company names. Always verify the named competitors actually exist before publishing.
-
-### 5. Translate an accepted PRD into era's first set of specs
-
-Use when a PRD is accepted and engineering is kicking off the era. This prompt does one narrow thing: name the first 2–3 specs to start with. For the real slicing pass — vertical slices, the walking skeleton, prioritization — use the prompt in [§ "Slicing the PRD into features"](#slicing-the-prd-into-features).
-
-**Prompt:**
-
-```text
-Read the accepted PRD at docs/prd/[filename].md.
-
-Propose the first 2-3 specs needed to start implementing this era.
-For each:
-- Proposed filename (specs/YYYY-MM-feature-slug/)
-- One-sentence scope
-- The PRD section(s) it derives from
-- A note on dependencies (which spec must ship before which)
-
-This is NOT writing the specs — just identifying what specs we'd need. The
-engineering team will then write each spec individually.
-
-Don't include implementation detail. Specs at this stage are placeholders with
-scope only.
-```
-
-This is the bridge from PRD-as-strategy to specs-as-implementation. The output is the starting set; the full feature backlog comes from the slicing pass.
 
 ---
 
@@ -766,20 +661,7 @@ The kickoff's output — the spec backlog — is a list of **features**, each si
 
 **The output is a lightweight list, not an artifact.** A prioritized table — feature, the PRD outcome it serves, rough size, dependencies — is enough. It can live in the PRD or an issue tracker. Each row becomes a `specs/YYYY-MM-slug/` when you pick it up. Don't turn the backlog into a second heavy document.
 
-**Let the agent draft it, then you triage.** `/sdd-2-features-from-prd` (or the prompt below) turns the PRD into a candidate breakdown in seconds; you cut and reorder.
-
-**Prompt:**
-
-```text
-Read docs/prd/<name>.md. Propose a feature breakdown as vertical slices —
-each independently shippable and user-visible (NOT "DB layer" / "API layer").
-Size each to ~a few days (a spec under ~150 lines); split anything bigger.
-Flag the walking skeleton (thinnest end-to-end slice that proves the core),
-then order the rest by value × dependency and mark dependencies. No feature
-may violate the PRD's Out of scope. Output a table:
-feature | PRD outcome it serves | rough size | depends on | P1/P2/P3.
-Don't write specs — just the breakdown.
-```
+**Let the agent draft it, then you triage.** [`/sdd-2-features-from-prd`](../templates/.claude/commands/sdd-2-features-from-prd.md) turns the PRD into a candidate breakdown in seconds — the rules above applied for you: vertical slices sized to a trio, the walking skeleton flagged, the rest ordered by value × dependency, nothing that violates Out of scope, no specs written. You cut and reorder; only once you accept the list does it save it (to `specs/FEATURES.md`, if you keep one).
 
 **Anti-patterns:** horizontal slices (layers that ship nothing); one giant spec for the whole PRD (big-bang); slicing by team or component instead of user value; building all the infrastructure before any user-visible slice; decomposition that never ends (if you're on the third re-slice, pick the obvious P1 and start).
 

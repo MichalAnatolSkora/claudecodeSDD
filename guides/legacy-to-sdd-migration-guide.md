@@ -93,19 +93,7 @@ Then cut hard. The agent invents conventions that aren't real, misses the unwrit
 
 ### Day 2–3 — `ARCHITECTURE.md`
 
-The shipped command **`/sdd-2-architecture-from-code`** does this for you — it scans the source, drafts `ARCHITECTURE.md`, and additionally stubs a *reactive* ADR for each load-bearing decision already in force (the ORM, the scheduler, the service shape). The prompt below is essentially what it runs, if you'd rather drive it by hand:
-
-**Prompt:**
-
-```text
-Read src/ thoroughly. Propose ARCHITECTURE.md with:
-1. A high-level Mermaid diagram of the main components and their dependencies.
-2. One paragraph per major component.
-3. The key boundaries (what's allowed to call what).
-4. Where cross-cutting concerns live (logging, errors, auth).
-
-10,000-foot view, no implementation detail. Mark uncertainties [VERIFY].
-```
+Run the shipped command [**`/sdd-2-architecture-from-code`**](../templates/.claude/commands/sdd-2-architecture-from-code.md). It scans the source and follows imports to the real boundaries (not the folder names), then drafts a short, structural `ARCHITECTURE.md`: components one line each, where I/O and cross-cutting concerns live, and the main data flow including the failure path. It also stubs a *reactive* ADR for each load-bearing decision already in force (the ORM, the scheduler, the service shape), and marks every inference `[VERIFY]`. It describes what's there rather than what should be. Not on Claude Code? Paste the command file's body into your agent.
 
 Review it with someone who knows the system — the agent draws boundaries that aren't enforced and misses ones that are.
 
@@ -204,14 +192,7 @@ Don't do this in week 1. The prompts that *look* recurring on day 1 are mostly w
 
 The foundation prompts are in Week 1. A few more for digging:
 
-**Find implicit decisions:**
-
-```text
-Find code that looks like a deliberate decision (custom code where a library
-exists, unusual patterns, commented workarounds). For each: what was decided,
-your best guess at why (cite comments/commits), and whether it's worth an ADR.
-List candidates — don't write the ADRs. I'll pick.
-```
+**Find implicit decisions** — the prompt lives in [`adr-guide.md` § Find implicit decisions worth an ADR](adr-guide.md#find-implicit-decisions-worth-an-adr). Run it after the foundation is in, then pick the one or two candidates that earn an ADR.
 
 **Find undocumented conventions:**
 

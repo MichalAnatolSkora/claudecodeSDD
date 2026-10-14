@@ -673,15 +673,7 @@ All the documentation in the world is useless if you don't actually use it when 
 
 Begin every non-trivial session by anchoring the agent in the relevant context. Don't assume it remembers anything from before — even in long-running tools like Claude Code, fresh context windows are the norm.
 
-**For a new feature** — **Prompt:**
-
-```text
-Read CLAUDE.md, ARCHITECTURE.md, and DOMAIN.md.
-Then read specs/_template/spec.md to understand our spec format.
-We're starting a new feature: [short description].
-Before writing any code, draft specs/[date-slug]/spec.md based on the template.
-List open questions at the end — don't fill them in yourself.
-```
+**For a new feature** — run [`/sdd-3-spec-new`](../templates/.claude/commands/sdd-3-spec-new.md) `<one-paragraph idea>`. It drafts `specs/<date-slug>/spec.md` from the spec template before any code exists, and lists the open questions instead of answering them itself. (The trio's other steps each have their own command — see [`spec-plan-tasks-guide.md` § AI-assisted authoring](spec-plan-tasks-guide.md#ai-assisted-authoring-one-command-per-step).)
 
 **For modifying an existing feature** — **Prompt:**
 
@@ -696,7 +688,7 @@ Before changing anything, summarize:
 3. What you would do — wait for my approval before writing code.
 ```
 
-The pattern is the same in both: **load context → state intent → propose plan → wait for green light**. Don't let the agent jump straight to code.
+The pattern is the same in both — the command bakes it in, the prompt spells it out: **load context → state intent → propose plan → wait for green light**. Don't let the agent jump straight to code.
 
 ### Ending a Session
 
@@ -747,41 +739,17 @@ Please:
    or needs updating to point to ADR-014.
 ```
 
-**For documenting a decision after the fact** — **Prompt:**
-
-```text
-We just decided to use [X] instead of [Y] for [reason].
-Draft an ADR following the template in docs/adr/_template.md.
-Use the next available number. Status: Accepted, today's date.
-Fill in Context, Decision, Consequences, and Alternatives Rejected.
-Leave References empty — I'll add them.
-Show me the draft before creating the file.
-```
+**For documenting a decision after the fact** — use the *"Draft a new ADR from a decision summary"* prompt in [`adr-guide.md` § Agent-assisted drafting](adr-guide.md#agent-assisted-drafting); it lives there only, so it can't drift.
 
 ### After Creating a Spec — Starting Implementation
 
 A spec is ready. Now you want the agent to implement it. Don't just say *"code it up."*
 
-(For *authoring* the spec / plan / tasks themselves with AI help — the prompts that draft each artifact, the trio consistency check, the iteration loops — see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). The patterns below assume the trio is already written and reviewed.)
+(For *authoring* the spec / plan / tasks themselves with AI help — the command for each artifact, the trio consistency check, the iteration loops — see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). This assumes the trio is already written and reviewed.)
 
-**Prompt:**
+Run [`/sdd-7-implement`](../templates/.claude/commands/sdd-7-implement.md) `[spec folder]`. It reads the trio plus `TESTING.md` and `CLAUDE.md`, refuses to build on a trio that clearly hasn't passed `/sdd-6-trio-check`, then works `TASKS.md` one task at a time: failing test first, the minimum code to turn it green, the task's `→ verify:` step, one commit per green task — touching only the files listed in `plan.md`. When a task can't be built it stops and names the spec gap instead of improvising, and after the last task it runs the break-the-code check.
 
-```text
-We're implementing specs/[date-slug]/.
-Read spec.md, plan.md, and tasks.md in that folder.
-Also read CLAUDE.md and the referenced source files in plan.md.
-
-Work task by task from tasks.md:
-1. Before each task, restate what you're about to do
-2. Write the test first (if applicable per TESTING.md)
-3. Implement
-4. Wait for me to confirm before moving to the next task
-
-Do NOT skip ahead. Do NOT add features not in the spec.
-If something in the spec is unclear, stop and ask — don't guess.
-```
-
-For smaller specs you can compress this, but the principle holds: **task by task, with checkpoints**.
+Every commit is a checkpoint you can roll back to. If you'd rather approve each task before the next one starts, say so when you invoke it — either way the principle holds: **task by task, with checkpoints**.
 
 ### After Implementing — Updating Documentation
 
@@ -1036,21 +1004,9 @@ The user says *"draft an ADR for switching from Postgres to MySQL"*, the skill f
 - Per-repo workflow steps: `/start-session` reads `CLAUDE.md` and the most recent spec; `/end-session` writes a session summary.
 - Team-shared commands ship in the repo and apply to every contributor.
 
-**Example: a `/draft-spec` command**
+**Example: the shipped `/sdd-3-spec-new`**
 
-`.claude/commands/draft-spec.md`:
-
-```markdown
-Read CLAUDE.md, ARCHITECTURE.md, and specs/_template/spec.md.
-
-We're starting a new feature: $ARGUMENTS
-
-Draft specs/YYYY-MM-<slug>/spec.md based on the template.
-List open questions at the end — don't fill them in yourself.
-Show me the draft before saving.
-```
-
-Then `/draft-spec add rate limiting to the orders endpoint` does the whole setup in one keystroke.
+This repo ships fourteen ready-made commands in [`templates/.claude/commands/`](../templates/.claude/commands/) — open [`sdd-3-spec-new.md`](../templates/.claude/commands/sdd-3-spec-new.md) for the shape: a short frontmatter (`description`, `argument-hint`) and a plain-markdown prompt body in which `$ARGUMENTS` is whatever you typed after the command. Then `/sdd-3-spec-new add rate limiting to the orders endpoint` drafts the spec in one keystroke. Write your own the same way.
 
 **Difference from skills:** slash commands are *user-invoked, single-shot prompts*. Skills are *auto-discoverable, multi-step procedures*. If you're tempted to write a skill for *"just a longer prompt I use a lot"*, write a slash command instead — much lighter weight.
 

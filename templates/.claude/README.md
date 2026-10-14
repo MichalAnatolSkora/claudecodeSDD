@@ -17,6 +17,7 @@ your-project/.claude/
 ├── README.md                       # this cheat sheet
 └── commands/
     ├── sdd-1-prd-new.md
+    ├── sdd-1-prd-from-poc.md
     ├── sdd-1-prd-review.md
     ├── sdd-2-features-from-prd.md
     ├── sdd-2-architecture-from-prd.md
@@ -38,6 +39,7 @@ The number **is** the phase in the flow. `<...>` is required input; `[path]` is 
 | Phase | Command | What it does |
 |-------|---------|--------------|
 | **1 · PRD** | `/sdd-1-prd-new <1–3 sentences>` | Sketch a lean PRD from a seed idea, then fill the gaps by Q&A |
+| | `/sdd-1-prd-from-poc [path]` | Already built a working PoC? Read it (default `src/`), ask you the *why* the code can't tell, backfill a lean PRD — never a spec |
 | | `/sdd-1-prd-review [path]` | Audit a draft PRD for gaps (read-only) |
 | **2 · Features + Architecture** | `/sdd-2-features-from-prd [path]` | Slice an accepted PRD into a prioritized, vertically-sliced feature list (read-only) |
 | | `/sdd-2-architecture-from-prd [path]` | Greenfield: Q&A the foundational choices (hosting, datastore, shape) → `ARCHITECTURE.md` + a stub ADR per hard decision |
@@ -51,7 +53,7 @@ The number **is** the phase in the flow. `<...>` is required input; `[path]` is 
 | **6 · Check** | `/sdd-6-trio-check [path]` | Final consistency audit across spec/plan/tasks — the gate before code (read-only) |
 | **7 · Implement** | `/sdd-7-implement [path]` | Work `tasks.md` red→green, commit per task, then the break-the-code check |
 
-**Full run:** `/sdd-1-prd-new` → `/sdd-1-prd-review` → `/sdd-2-features-from-prd` → per feature: `/sdd-3-spec-new` → `/sdd-3-spec-review` → `/sdd-4-plan-from-spec` → `/sdd-4-plan-validate` → `/sdd-5-tasks-from-plan` → `/sdd-6-trio-check` → `/sdd-7-implement`.
+**Full run:** `/sdd-1-prd-new` (or `/sdd-1-prd-from-poc`, if a PoC came first) → `/sdd-1-prd-review` → `/sdd-2-features-from-prd` → per feature: `/sdd-3-spec-new` → `/sdd-3-spec-review` → `/sdd-4-plan-from-spec` → `/sdd-4-plan-validate` → `/sdd-5-tasks-from-plan` → `/sdd-6-trio-check` → `/sdd-7-implement`.
 
 **Foundation (once per project, not per feature):** run **one** of `/sdd-2-architecture-from-prd` (greenfield, from the PRD) or `/sdd-2-architecture-from-code` (existing codebase) to establish `ARCHITECTURE.md` + the foundational ADRs. `/sdd-4-plan-validate` checks every plan against them.
 

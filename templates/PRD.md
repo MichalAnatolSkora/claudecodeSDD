@@ -6,7 +6,7 @@
 > New direction → new PRD (per the era pattern), never edits to this one.
 >
 > Lean PRD format below. For PR-FAQ, full PRD, one-pager alternatives,
-> two complete worked examples, AI-authoring prompts, and the review process,
+> two complete worked examples, AI-assisted authoring, and the review process,
 > see [`guides/prd-guide.md`](../guides/prd-guide.md).
 
 ## Problem

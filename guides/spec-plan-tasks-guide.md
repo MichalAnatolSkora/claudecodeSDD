@@ -18,7 +18,7 @@
 
 **How**
 5. [How the three documents reference each other](#how-the-three-documents-reference-each-other)
-6. [AI-assisted authoring: prompts per artifact](#ai-assisted-authoring-prompts-per-artifact)
+6. [AI-assisted authoring: one command per step](#ai-assisted-authoring-one-command-per-step)
 7. [Iteration patterns — sharpening a draft](#iteration-patterns--sharpening-a-draft)
 8. [Cross-artifact consistency checks](#cross-artifact-consistency-checks)
 9. [Cross-trio anti-patterns](#cross-trio-anti-patterns)
@@ -40,7 +40,7 @@ This is the definitive, hands-on treatment of the trio — the centerpiece of th
 What you get here:
 
 - **Three worked examples** — a non-trivial feature as the full three-file trio (all three documents filled in, cross-references explicit), a small feature as a one-file trio, and a discovery feature whose first acceptance criterion was wrong (the messy, realistic case) — all ready to copy as starting points
-- **AI-assisted authoring prompts** — copy-pasteable prompts for drafting each artifact, reviewing it, refining it, and validating it against the others
+- **AI-assisted authoring** — the shipped `/sdd-*` command for each step (draft, review, validate each artifact against the others), plus the prompts for refining a draft
 - **Iteration patterns** — how a rough draft becomes a tight spec, then a clear plan, then an executable task list
 - **Cross-artifact consistency checks** — concrete rules that keep the three documents honest (every acceptance criterion has a task; every "out of scope" survives into the plan; every open question resolves into a decision or an ADR)
 
@@ -226,162 +226,21 @@ A trio without cross-references is three documents that happen to share a folder
 
 ---
 
-## AI-assisted authoring: prompts per artifact
+## AI-assisted authoring: one command per step
 
-The agent does most of the typing; you do the judging. Six reusable prompts, one per common authoring step.
+The agent does most of the typing; you do the judging. Every authoring step ships as a slash command, so the prompt lives in exactly one place — the command file — and there's no second copy here to drift from it. Not on Claude Code? Each file is a plain-markdown prompt: open it and paste the body into any agent, with your input in place of `$ARGUMENTS`.
 
-### 1. Draft `SPEC.md` from a one-paragraph idea
+| Step | Command | What it does | Gate |
+|------|---------|--------------|------|
+| Draft `SPEC.md` from a one-paragraph idea | [`/sdd-3-spec-new`](../templates/.claude/commands/sdd-3-spec-new.md) | Goal, in / out of scope, acceptance criteria phrased as test names, impact on existing code (real paths from `src/`), open questions left open, `[VERIFY]` on every guess | shows the draft before saving |
+| Review the spec for missing pieces | [`/sdd-3-spec-review`](../templates/.claude/commands/sdd-3-spec-review.md) | Seven checks: goal as a problem, ≥ 3 out-of-scope items, testable ACs, real file paths, genuine open questions, ADR numbers that exist, nothing in scope contradicting an ADR | read-only |
+| Draft `PLAN.md` from the reviewed spec | [`/sdd-4-plan-from-spec`](../templates/.claude/commands/sdd-4-plan-from-spec.md) | Technical decisions citing active ADRs, data model only if there's persistent state, concrete file structure, constraints carried forward from Out of scope | shows the draft |
+| Validate the plan against ADRs and `ARCHITECTURE.md` | [`/sdd-4-plan-validate`](../templates/.claude/commands/sdd-4-plan-validate.md) | A table: plan decision → ADR / section it touches → consistent / contradicts / not addressed | read-only |
+| Draft `TASKS.md` from the plan | [`/sdd-5-tasks-from-plan`](../templates/.claude/commands/sdd-5-tasks-from-plan.md) | Red→green order, ` → verify:` on every task, a Verification section that maps every AC, only paths from the plan | shows the draft |
+| Add task(s) to an existing list | [`/sdd-5-tasks-add`](../templates/.claude/commands/sdd-5-tasks-add.md) | Inserts in execution order without rewriting unrelated tasks; works on a one-file trio's Tasks section too | shows the diff |
+| Trio consistency check — the gate before code | [`/sdd-6-trio-check`](../templates/.claude/commands/sdd-6-trio-check.md) | Every AC has a task, every planned file has a task, out of scope respected, open questions resolved, no Accepted ADR contradicted, no paths outside the plan (a `discovery` spec reports *"pending spike"* instead of failing) | read-only |
 
-Use when you have a rough idea and want to turn it into a structured spec.
-
-**Prompt:**
-
-```text
-We want a new feature: [one-paragraph description of the idea].
-
-Draft specs/YYYY-MM-feature-slug/spec.md using templates/spec.md as the structure.
-
-Fill in: Goal (1-3 sentences), In scope, Out of scope (deliberately, not now),
-Acceptance criteria as testable checkboxes, Impact on existing code (specific
-file paths after scanning src/), Open questions (don't fill them in yourself —
-list what's genuinely undecided), References (related ADRs by number, related
-specs by slug, integrations if relevant).
-
-For each acceptance criterion, phrase it so it could become a test name.
-
-Mark any [VERIFY] uncertainty — for example, file paths you guessed.
-
-Show me the draft before saving.
-```
-
-The agent produces a starting point in 30 seconds; you spend 5 minutes editing instead of 30 minutes drafting from scratch.
-
-### 2. Review a draft `SPEC.md` for missing pieces
-
-Use after you've drafted a spec (yours or the agent's) and want a sanity check.
-
-**Prompt:**
-
-```text
-Read specs/YYYY-MM-feature-slug/spec.md.
-
-Audit it against this checklist:
-1. Is the Goal phrased as a sentence about a problem, not a feature?
-2. Does "Out of scope" exclude at least three things a reader might assume?
-3. Are acceptance criteria specific enough to write tests from?
-4. Does "Impact on existing code" list real file paths (verify against src/)?
-5. Are Open Questions genuine uncertainties, or things the author should
-   have decided already?
-6. Are references current (verify ADR numbers exist in docs/adr/)?
-7. Does anything in scope contradict an existing ADR?
-
-Return a numbered list of concerns. Don't modify the file — list the gaps.
-```
-
-This catches the "spec looked complete but missed three obvious AC's" failure that wastes a full review cycle.
-
-### 3. Draft `PLAN.md` from `SPEC.md`
-
-Once the spec is reviewed and Open Questions are resolved.
-
-**Prompt:**
-
-```text
-Read specs/YYYY-MM-feature-slug/spec.md.
-Also read CLAUDE.md, ARCHITECTURE.md, and docs/adr/ (active list).
-
-Draft plan.md in the same folder using templates/plan.md as the structure.
-
-Translate the spec into:
-- Technical decisions (must align with active ADRs — cite them)
-- Data model (if persistent state involved)
-- File structure (concrete paths under src/)
-- Constraints (carry forward "Out of scope" and any plan-level "do nots")
-
-Open Questions in plan.md should only exist for HOW questions that
-remain after the spec's Open Questions are resolved.
-
-Show me the draft. Mark anything you're uncertain about as [VERIFY].
-```
-
-### 4. Validate `PLAN.md` against existing ADRs and `ARCHITECTURE.md`
-
-Run this *before* implementation starts. Catches plan/architecture conflicts early.
-
-**Prompt:**
-
-```text
-Read specs/YYYY-MM-feature-slug/plan.md.
-Read all Accepted ADRs in docs/adr/.
-Read ARCHITECTURE.md.
-
-For each "Technical decision" in the plan:
-- Does an existing ADR speak to this? If yes, does the plan match the ADR
-  or contradict it? Quote the relevant ADR text.
-- Does ARCHITECTURE.md establish a boundary the plan crosses?
-
-For each "File structure" entry:
-- Does the path conform to the existing layout in ARCHITECTURE.md?
-
-Return a markdown table: plan decision, ADR/section it relates to, status
-(consistent / contradicts / not addressed). Do not modify the plan — list
-findings.
-```
-
-A plan that quietly contradicts ADR-007 will produce code reviewers hate. Catch it before code.
-
-### 5. Draft `TASKS.md` from `PLAN.md`
-
-After plan review, before implementation.
-
-**Prompt:**
-
-```text
-Read specs/YYYY-MM-feature-slug/spec.md and plan.md.
-
-Draft tasks.md in the same folder using templates/tasks.md as the structure.
-
-For each acceptance criterion in spec.md, identify which tasks (one or
-more) would prove it. The Verification section should map every AC.
-
-Order tasks so that earlier tasks let you write a failing test (red),
-then the implementing tasks make it pass (green). Group related tasks
-under headings if the count exceeds ~8.
-
-Each task should end with " → verify: [how to confirm]". A task without
-a verification step is incomplete.
-
-Show me the draft. Mark anything you're guessing as [VERIFY].
-```
-
-### 6. Trio consistency check
-
-Run before implementation as a final gate.
-
-**Prompt:**
-
-```text
-Read all three of: specs/YYYY-MM-feature-slug/spec.md, plan.md, tasks.md.
-
-Verify:
-1. Every acceptance criterion in spec.md has at least one task in tasks.md
-   (and at least one entry in the Verification section).
-2. Every file mentioned in plan.md § File structure has at least one task
-   that creates or modifies it.
-3. Every "Out of scope" item in spec.md is respected — no task touches it.
-4. Every Open Question in spec.md is marked [x] (resolved) or moved to
-   an ADR; none are still [ ].
-5. plan.md technical decisions don't contradict any Accepted ADR.
-6. tasks.md uses only file paths listed in plan.md's File structure.
-
-Return a markdown table: check, status (pass / fail), evidence (cite
-specific lines from the trio).
-
-Don't modify any files. Surface only — I'll decide which gaps to fix
-before starting implementation.
-```
-
-This is your "ready to ship to implementation" gate. Run it before issuing an `/sdd-7-implement` prompt.
+Run them in that order, with a human look between each — the gates are what keep the order honest ([anti-pattern 4](#4-trio-written-all-at-once-by-ai-without-human-verification)). The agent's draft takes 30 seconds; your edit takes 5 minutes instead of the 30 a blank page would. The two read-only audits are the cheap ones to skip and the expensive ones to miss: a spec that "looked complete" but missed three obvious ACs, or a plan that quietly contradicts ADR-007, is far cheaper to catch here than in code review. Once `/sdd-6-trio-check` passes, `/sdd-7-implement` takes the trio into code ([`flow-guide.md`](flow-guide.md) Step 4).
 
 ---
 
@@ -516,7 +375,7 @@ Three documents in `specs/YYYY-MM-feature-slug/`. Each looks complete in isolati
 
 The implementation proceeds anyway. Code reviewer catches the gap. Now you're patching specs after the fact.
 
-**Fix:** Run [the trio consistency check](#cross-artifact-consistency-checks) before the first commit. Better — make it a slash command (`/sdd-6-trio-check`) or a hook that runs on PR open.
+**Fix:** Run `/sdd-6-trio-check` ([the checks it makes](#cross-artifact-consistency-checks)) before the first commit — or wire it into a hook that runs on PR open.
 
 ---
 
@@ -529,13 +388,7 @@ A repo doing SDD seriously usually has these in `.claude/commands/`. *(The shipp
 - **`/sdd-1-prd-review <path>`** — audits a draft PRD for gaps (specific users, measurable success criteria, ≥5 out-of-scope items, no implementation leakage) before you slice it. Read-only.
 - **`/sdd-2-features-from-prd`** — *(upstream of the trio)* slices an accepted PRD into a prioritized, vertically-sliced feature list, saved to `specs/FEATURES.md` as the project's feature/status index; each row becomes a spec. See [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".
 - **`/sdd-2-architecture-from-prd`** / **`/sdd-2-architecture-from-code`** — *(once-per-project foundation)* establish `ARCHITECTURE.md` plus a stub ADR per hard-to-reverse decision — greenfield by Q&A on the foundational choices (hosting, datastore, shape), or reverse-engineered from an existing codebase. `/sdd-4-plan-validate` then checks every plan against them.
-- **`/sdd-3-spec-new <feature-description>`** — drafts `SPEC.md` from a one-paragraph description ([prompt 1](#1-draft-specmd-from-a-one-paragraph-idea) above)
-- **`/sdd-3-spec-review <path>`** — runs the audit checklist (prompt 2)
-- **`/sdd-4-plan-from-spec`** — drafts `PLAN.md` from the active spec (prompt 3)
-- **`/sdd-4-plan-validate`** — checks `PLAN.md` against ADRs and ARCHITECTURE.md (prompt 4)
-- **`/sdd-5-tasks-from-plan`** — drafts `TASKS.md` from scratch (prompt 5)
-- **`/sdd-5-tasks-add <what>`** — appends/inserts task(s) into an existing `TASKS.md` (or a one-file trio's Tasks section), in order, each with a verify step
-- **`/sdd-6-trio-check`** — final consistency audit (prompt 6)
+- **`/sdd-3-spec-new` … `/sdd-6-trio-check`** — the trio itself: draft and review `SPEC.md`, draft and validate `PLAN.md`, draft or extend `TASKS.md`, then the consistency gate. One row each in [§ AI-assisted authoring](#ai-assisted-authoring-one-command-per-step) above.
 - **`/sdd-7-implement`** — *(downstream of the trio)* works `TASKS.md` task-by-task red→green, commits each green task, then runs the break-the-code check. See [`flow-guide.md`](flow-guide.md) (Step 4) and [`testing-guide.md`](testing-guide.md).
 
 Worked-example placement of these files:
@@ -858,7 +711,7 @@ Not every feature can be specced up front. Ops asks for *"a view of which export
 2. **Each document references the previous one explicitly.** Without cross-refs, you have three documents that share a folder, not a coherent decision chain.
 3. **The agent drafts; you judge.** Especially for Context, Alternatives Rejected, and Acceptance Criteria — the agent's plausible-sounding fills are most likely to be wrong here.
 4. **Human gates between artifacts.** Spec → review → plan → review → tasks → verify. No skipping reviews because *"the agent said it was fine."*
-5. **A consistency check before the first commit.** Run `/sdd-6-trio-check` (or the equivalent prompt) before you start implementing; catch contradictions when they're cheap to fix.
+5. **A consistency check before the first commit.** Run `/sdd-6-trio-check` (or paste its command file into your agent) before you start implementing; catch contradictions when they're cheap to fix.
 6. **Compress for small changes.** A bugfix doesn't need three documents. A short spec is enough. The trio is for changes worth the ceremony.
 7. **Out of scope is the most important section in SPEC.md.** It does more to prevent drift than any positive guidance.
 8. **Every AC traces to a task. Every task traces to an AC.** No orphans.

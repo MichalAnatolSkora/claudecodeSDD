@@ -282,7 +282,7 @@ Treating PRD as living causes two problems:
 
 Keep each PRD pristine. Archive in `docs/prd/` with a date. New direction → new PRD; *never* edits to an old one.
 
-For the practical side — format alternatives (PR-FAQ, lean PRD, one-pager, full template), two complete worked examples, era boundary heuristics, AI-authoring prompts, stakeholder review process, and PRD-specific anti-patterns — see [`prd-guide.md`](prd-guide.md).
+For the practical side — format alternatives (PR-FAQ, lean PRD, one-pager, full template), two complete worked examples, era boundary heuristics, AI-assisted authoring (commands + prompts), stakeholder review process, and PRD-specific anti-patterns — see [`prd-guide.md`](prd-guide.md).
 
 ### PRD vs spec — two layers, same question
 
@@ -389,7 +389,7 @@ A `SPEC.md` answers: *what are we building, why, and how do we know it works?* I
 
 A spec is **per-feature** and **frozen after merge** — different from a PRD (whole-product per era, frozen after that era's release) and from a plan (the *how*, written alongside the spec — see [the next section](#writing-a-good-planmd)).
 
-> **The full method lives in [The Feature Trio: spec → plan → tasks](spec-plan-tasks-guide.md) — the centerpiece of this repo.** The next three sections give you the principles and templates; the trio guide is where you see them filled in for real features, with the AI-authoring prompts and the consistency checks that keep the three documents honest. If you read one guide, read that one.
+> **The full method lives in [The Feature Trio: spec → plan → tasks](spec-plan-tasks-guide.md) — the centerpiece of this repo.** The next three sections give you the principles and templates; the trio guide is where you see them filled in for real features, with the command for each authoring step and the consistency checks that keep the three documents honest. If you read one guide, read that one.
 
 ### Principles that work
 
@@ -431,7 +431,7 @@ The most common rot pattern: specs sitting in *Draft* indefinitely. A spec older
 
 ### Where to go deeper
 
-The template above plus [`templates/spec.md`](../templates/spec.md) cover ~90% of features. For a full worked example of `SPEC.md` + `PLAN.md` + `TASKS.md` filled in for one feature, plus AI-authoring prompts (*drafting a spec from an idea*, *reviewing for gaps*, *the trio consistency check*), see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) — the centerpiece guide of this repo. For the per-role ownership of spec lifecycle (who drafts, who reviews, who approves, who updates status), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle." For how the agent reads specs and implements them task-by-task, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation."
+The template above plus [`templates/spec.md`](../templates/spec.md) cover ~90% of features. For a full worked example of `SPEC.md` + `PLAN.md` + `TASKS.md` filled in for one feature, plus the command for each authoring step (`/sdd-3-spec-new`, `/sdd-3-spec-review`, … `/sdd-6-trio-check`), see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) — the centerpiece guide of this repo. For the per-role ownership of spec lifecycle (who drafts, who reviews, who approves, who updates status), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle." For how the agent reads specs and implements them task-by-task, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation."
 
 ---
 
@@ -458,7 +458,7 @@ Keep `PLAN.md` short — if it exceeds ~200 lines, the *how* has outgrown one ch
 
 After each iteration, move items from "Open questions" to "Technical decisions." The plan is alive, but decision history must stay visible — so the agent (and you, in a month) know *why* something is the way it is.
 
-For a full worked example of PLAN.md alongside its sibling SPEC.md and TASKS.md (with cross-document references, AI-authoring prompts for drafting `PLAN.md` from `SPEC.md`, and the validation prompt that checks the plan against existing ADRs and `ARCHITECTURE.md`), see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).
+For a full worked example of PLAN.md alongside its sibling SPEC.md and TASKS.md (with cross-document references, `/sdd-4-plan-from-spec` for drafting `PLAN.md` from `SPEC.md`, and `/sdd-4-plan-validate`, which checks the plan against existing ADRs and `ARCHITECTURE.md`), see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).
 
 ---
 
@@ -539,7 +539,7 @@ See [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Cre
 
 ### Where to go deeper
 
-For a full worked example of `TASKS.md` alongside its `SPEC.md` + `PLAN.md` siblings, the AI prompt for drafting tasks from a plan, and the `/sdd-6-trio-check` consistency audit before implementation, see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). For per-role ownership (who writes `TASKS.md`, who reviews, who flips checkboxes), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle". For the agent-side implementation flow with concrete prompts, see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation".
+For a full worked example of `TASKS.md` alongside its `SPEC.md` + `PLAN.md` siblings, `/sdd-5-tasks-from-plan` for drafting tasks from a plan, and the `/sdd-6-trio-check` consistency audit before implementation, see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). For per-role ownership (who writes `TASKS.md`, who reviews, who flips checkboxes), see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md) § "Spec lifecycle". For the agent-side implementation flow (`/sdd-7-implement`), see [`working-with-agents-guide.md`](working-with-agents-guide.md) § "After Creating a Spec — Starting Implementation".
 
 ---
 
