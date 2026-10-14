@@ -289,7 +289,7 @@ Past ~10 people — contributors who don't share a memory, a real CI pipeline, A
 
 - **The same scripts in CI.** The pre-commit scripts above run unchanged as required PR checks (`adr-frozen-check.sh --ci` diffs against `origin/main`; check out with full history — `fetch-depth: 0` on GitHub Actions — so that ref exists). Pre-commit only catches local commits; CI catches every PR from any source.
 - **An advisory LLM audit on PRs.** Run the trio-check prompt headless (`claude -p` with the body of `sdd-6-trio-check.md`, pointed at the changed spec folder) and post the result as a PR comment or step summary — never as a required check ([golden rule 3](#golden-rules)).
-- **A configured audit subagent** (`.claude/agents/`) once the audit's file reading would swamp the main session — mechanics in [`working-with-agents-guide.md` § Subagents](working-with-agents-guide.md#subagents).
+- **A configured audit subagent** (`.claude/agents/`) once the audit's file reading would swamp the main session — where it lives and when it pays: [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks).
 
 Lift the one piece you need, not the whole apparatus.
 

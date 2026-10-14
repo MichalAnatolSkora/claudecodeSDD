@@ -610,16 +610,45 @@ Every time you say *"good thing I remembered to check X — that wasn't in the r
 
 ## Working with the Agent
 
-Concrete prompts for the situations a runbook actually shows up in — drafting a new entry after an incident, extracting one from a post-mortem, generating diagnostic scripts from runbook content, auditing for staleness, requiring runbook entries before merging operational features — live in the companion guide [`working-with-agents-guide.md`](working-with-agents-guide.md), in its "Working on Runbooks and Operational Tasks" section. That guide also covers the mechanics behind those prompts:
+The agent plays two roles here — consumer and co-author (see [Writing for AI Agents](#writing-for-ai-agents)) — and two prompts cover most of the work. In both, the agent drafts and you verify every command before it's saved: an unverified entry is worse than none ([anti-pattern 9](#9-auto-generated-runbooks-from-ai)).
 
-- **When the agent loads a file** (and why it sometimes feels random)
-- **How many files is too many** before the agent gets lost in your repo
-- **Token economy** — keeping long runbook-audit sessions affordable
-- **Claude Code building blocks** — skills, slash commands, subagents, hooks: e.g. a `/audit-runbooks` slash command, a subagent that walks `docs/runbooks/` and reports staleness, or a hook that flags runbook gaps after a new background-job feature lands
-- Universal prompting patterns (`Plan before code`, `Cite your source`, …) that apply to runbook work just as much as to feature work
-- Anti-patterns in agent interaction
+**Drafting a new entry after an incident** — inside the 24-hour window, while the recovery steps are fresh. **Prompt:**
 
-Reading those sections once is the single most leveraged way to make this runbook guide pay off in practice.
+```text
+We just resolved an incident: [one-line summary].
+Root cause was [X]. Recovery steps were [Y, Z].
+
+Draft a new runbook entry at docs/runbooks/[slug].md using the template at
+docs/runbooks/_template.md.
+
+Fill in:
+- Symptoms (what the on-call would see at the start)
+- Pre-checks, Diagnosis, Recovery
+- Verification
+- Escalation
+- Related entries (search existing runbooks for any that should link)
+
+Mark "Last verified: today's date" and "Owner: [team]".
+Show me the draft before saving.
+```
+
+**Generating a diagnostic script from runbook content.** **Prompt:**
+
+```text
+Read docs/runbooks/[slug].md.
+
+Generate a single bash script that runs all the diagnostic steps from the
+"Diagnosis" section, prints output for each, and exits with:
+- 0 if all checks pass
+- 1 if any check fails
+
+Use exactly the commands and expected outputs in the runbook — do NOT invent.
+If something in the runbook is unclear, list it as a question instead of guessing.
+```
+
+This pattern — *runbook is the spec, script is the artifact* — is much more reliable than asking the agent to invent diagnostics from scratch.
+
+The other recurring situations don't need a prompt of their own: a postmortem that exposes gaps → [When the postmortem reveals runbook gaps](#when-the-postmortem-reveals-runbook-gaps); an infrastructure change or an entry going stale → [Maintenance Discipline](#maintenance-discipline); a new background job or integration → it ships with its entry ([golden rule 8](#golden-rules)). For how the agent reads files and keeps long sessions affordable, see [`working-with-agents-guide.md`](working-with-agents-guide.md).
 
 ---
 

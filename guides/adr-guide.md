@@ -612,7 +612,7 @@ For each candidate:
 Return a list. Don't draft the ADRs — I'll pick which to formalize.
 ```
 
-(Also useful as a configured subagent — see [`working-with-agents-guide.md` § Subagents](working-with-agents-guide.md#subagents).)
+(Running it often? Package it as a configured subagent — see [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks).)
 
 ---
 
