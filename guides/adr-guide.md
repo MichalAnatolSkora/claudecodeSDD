@@ -147,21 +147,9 @@ A *richer* template than Nygard, not a lighter one: on top of Context and the de
 
 Format: same one-markdown-file-per-decision shape, more required sections. Document the choice in `CLAUDE.md` so the team is consistent.
 
-### Y-statements
-
-A one-paragraph compressed form:
-
-> *"In the context of `<scenario>`, facing `<concern>`, we decided for `<option>` and against `<rejected option>`, to achieve `<benefit>`, accepting `<downside>`."*
-
-Y-statements work for very low-stakes decisions, or as a way to draft an ADR fast and expand it later. Bad for any decision worth real archaeology — too compressed to survive.
-
 ### The compact variant (this repo's example)
 
 The repo's own worked example, [`ADR-015`](../examples/order-export/docs/adr/ADR-015-delivery-retry-backoff.md), uses a sanctioned compact layout, a good fit for 1–10 teams: title as `# ADR-015 — <title>`, a one-line `**Status:** Accepted · **Date:** 2026-02` instead of a Status section, `## Alternatives considered` instead of "Alternatives rejected", and Consequences as **Good:** / **Cost:** / **Follow-up:** bullets. Same information, less scaffolding. The Nygard layout above stays the default.
-
-### Custom hybrid
-
-Many mature teams write their own variant: standard sections plus a `Migration` section for decisions that supersede prior ones, plus a `Validation` section for how they'll know the decision was right. Document the variant in `CLAUDE.md` or a `docs/adr/_template.md`.
 
 The format matters less than the *consistency*. Pick one; use it everywhere.
 
@@ -520,23 +508,7 @@ How ADRs connect to the spec → plan → tasks loop (see [`spec-plan-tasks-guid
 
 ## The ADR review process
 
-An ADR moves from `Proposed` to `Accepted` through some form of review. Two patterns work well; pick one.
-
-### Pattern A: PR-based review
-
-The ADR is committed as `Proposed` in a PR. Reviewers comment inline; the author iterates. When the team agrees, a separate small PR flips Status to `Accepted` and adds the date — the date is the merge date of that status-flip PR.
-
-Pros: standard tooling, async, leaves a trail.
-Cons: can drag on if no one drives the merge.
-
-### Pattern B: Meeting-driven
-
-The ADR is drafted in a doc, discussed at the next architecture meeting, then committed as `Accepted` after the meeting.
-
-Pros: faster decisions; everyone hears the same context.
-Cons: no async record of the discussion; remote-unfriendly.
-
-Many teams combine: PR-based for routine ADRs, meeting-driven for ADRs touching multiple teams.
+An ADR moves from `Proposed` to `Accepted` through a PR. Commit it as `Proposed`; reviewers comment inline and the author iterates. When the team agrees, a separate small PR flips the Status to `Accepted` and adds the date — the merge date of that status-flip PR. Async, standard tooling, and it leaves a trail; the one risk is a PR nobody drives to merge, which is why the keeper ratifies within days ([`sdd-in-teams-guide.md` § ADRs](sdd-in-teams-guide.md#adrs-the-shared-decision-log)). Solo, you accept your own ([ADRs and the trio](#adrs-and-the-trio)).
 
 ### What reviewers check
 
@@ -642,8 +614,6 @@ The ADR reads as *"we did X because we did X."*
 
 *(To mechanically prevent this — block edits to bodies of ADRs with `Status: Accepted` via a pre-commit hook or Claude Code `PreToolUse` hook — see [`quality-gates-guide.md`](quality-gates-guide.md) § "Pre-commit hooks" and § "Claude Code hooks" — the ADR lock.)*
 
-
-
 You notice ADR-003 has a typo, or its Context is now inaccurate, and you edit the body.
 
 **Fix:** body of `Accepted` ADRs is immutable. Fix typos in `Proposed` ADRs only. For factual updates, write a Supersedes. The point of the rule isn't pedantry — it's that the history must be reconstructible.
@@ -702,13 +672,9 @@ some detail is necessarily reconstructed.
 
 Treat retroactive ADRs as exceptions, not the default. See [`legacy-to-sdd-migration-guide.md` § Phase 1 Day 5](legacy-to-sdd-migration-guide.md#day-5--the-first-adr).
 
-### When you outgrow a flat `docs/adr/` (past ~10 people, or a monorepo)
+### When you outgrow a flat `docs/adr/`
 
-Three scaling concerns a 1–10 team doesn't start with — quick rules for when they show up:
-
-- **Sub-ADRs / groups** — one big decision with many sub-decisions (e.g. adopting microservices): write each as an independent top-level ADR that cross-references the others; don't fake hierarchy with numbered sub-ADRs (`ADR-002.1`) — they break sort order and cross-references.
-- **Format migrations** (Nygard ↔ MADR) — don't rewrite old ones; new ADRs use the new format, old stay as written, note the switch in `CLAUDE.md`. Mild inconsistency beats rewriting history.
-- **Monorepos** — per-service `docs/adr/` for local decisions, a global `docs/adr/` for cross-cutting ones (logging, auth, observability); document which is which in the root `CLAUDE.md`.
+Past ~10 people, or in a monorepo: split `docs/adr/` into per-service folders for local decisions plus a global one for cross-cutting ones, write a big multi-part decision as independent top-level ADRs that cross-reference each other (never `ADR-002.1`), and if you switch formats, let new ADRs use the new one without rewriting the old. Named here, not documented: a 1–10 team doesn't start there.
 
 ---
 
@@ -740,7 +706,7 @@ After the quarterly audit, the Active list in CLAUDE.md should reflect reality. 
 
 ### Ownership
 
-ADRs need a maintainer. Usually the engineer who runs the architecture-review cadence; in smaller teams, the most senior engineer. Their job is *not* to write every ADR — it's to make sure the Active list stays accurate and stale ADRs get superseded promptly.
+ADRs need a maintainer — on a small team, the keeper: the most senior engineer or the founder ([`sdd-in-teams-guide.md` § Who owns what](sdd-in-teams-guide.md#who-owns-what--one-name-per-artifact)). Their job is *not* to write every ADR — it's to make sure the Active list stays accurate and stale ADRs get superseded promptly.
 
 ---
 

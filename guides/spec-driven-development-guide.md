@@ -696,7 +696,7 @@ This is what makes ADRs valuable a year later: someone reading the repo can trac
 
 ### Going deeper
 
-The full how-to — Nygard format section-by-section, alternative formats (MADR, Y-statements), four worked examples (Accepted, Superseded pair before/after, Proposed under discussion, Deprecated), the lifecycle in depth, numbering conventions, cross-referencing patterns, review process, agent-assisted drafting prompts, anti-patterns with corrections, edge cases (sub-ADRs, retroactive, monorepos), tooling, maintenance discipline, golden rules — lives in [`adr-guide.md`](adr-guide.md).
+The full how-to — Nygard format section-by-section, alternative formats (MADR, the compact variant), four worked examples (Accepted, Superseded pair before/after, Proposed under discussion, Deprecated), the lifecycle in depth, numbering conventions, cross-referencing patterns, a lightweight PR-based review, agent-assisted drafting prompts, anti-patterns with corrections, edge cases (retroactive ADRs, and what changes past ~10 people or in a monorepo), tooling, maintenance discipline, golden rules — lives in [`adr-guide.md`](adr-guide.md).
 
 Read it before writing your first few ADRs; the difference between an ADR that survives a year and one that rots in three months is mostly about the rules in that guide.
 

@@ -13,10 +13,9 @@
 5. [Sizing by project scale](#sizing-by-project-scale)
 6. [The many-docs case](#the-many-docs-case)
 7. [Anti-patterns](#anti-patterns)
-8. [A starter template](#a-starter-template)
-9. [A fully worked example](#a-fully-worked-example)
-10. [Maintenance discipline](#maintenance-discipline)
-11. [Golden rules](#golden-rules)
+8. [Template and worked example](#template-and-worked-example)
+9. [Maintenance discipline](#maintenance-discipline)
+10. [Golden rules](#golden-rules)
 
 ---
 
@@ -112,7 +111,7 @@ This converts CLAUDE.md from a passive instruction file into an active routing l
 Tell the agent what *not* to read. Especially valuable as the repo grows.
 
 > - Do NOT read `docs/_archived/` unless I explicitly ask — it's historical.
-> - Do NOT read `docs/research/` for implementation guidance — those are spike notes, not authoritative.
+> - Do NOT treat shipped specs under `specs/` as current instructions — they're history; the code wins.
 > - Do NOT load `docs/postmortems/` for routine work — only relevant when an incident is being investigated.
 
 ### 8. How to update this file (optional but underrated)
@@ -158,7 +157,7 @@ If a section grows past 30 lines, that's a signal to extract it into a linked de
 
 Don't try to anticipate every rule. Add a line when:
 
-- You've corrected the agent on the same thing three times (the "third-time rule")
+- You've corrected the agent on the same thing more than once ([the "third time" rule](#7-the-third-time-rule))
 - The agent makes a mistake worth preventing
 - A new ADR is accepted
 - An old line is wrong and you noticed
@@ -337,248 +336,22 @@ The file exists. Nobody owns it. Two years later, it documents a system that doe
 
 ---
 
-## A starter template
+## Template and worked example
 
-Drop this into a fresh repo and fill in the brackets. Cut anything you don't need; don't add anything you can't justify in a sentence.
+Two ready files, so this guide doesn't repeat them:
 
-```markdown
-# CLAUDE.md
+- **[`templates/CLAUDE.md`](../templates/CLAUDE.md)** — the starter. A project-agnostic **behavioral layer** on top (four sections: *Think Before Coding*, *Simplicity First*, *Surgical Changes*, *Goal-Driven Execution*), then a separator, then the **project layer** — the sections from [What goes in CLAUDE.md](#what-goes-in-claudemd), bracketed for you to fill in. Cut what you don't need; don't add anything you can't justify in a sentence.
+- **[`examples/order-export/CLAUDE.md`](../examples/order-export/CLAUDE.md)** — the project layer filled in for a fictional app: stack, conventions, Do NOT, a curated Active decisions list, a doc map, what to skip.
 
-> Conventions and meta-rules for working in this repository. The agent reads this
-> before doing anything. Read it before editing code.
-
-## What this project is
-
-[1 paragraph. What the system does, who uses it, what success looks like.]
-
-## Stack
-
-- [Language + version]
-- [Framework + version]
-- [Data layer: ORM choice, database, etc.]
-- [Logging library + contract / correlation rules]
-- [Testing framework + conventions]
-- [Anything else the agent must treat as fixed]
-
-## Conventions
-
-- [Pattern 1, with example file reference]
-- [Pattern 2, with example file reference]
-- [Naming convention with concrete examples]
-- [Cross-cutting concern: logging, error handling, validation — and where it lives]
-
-## Do NOT
-
-- [Anti-pattern by name, with ADR reference if applicable]
-- [Library or feature explicitly not used here]
-- [Common LLM default that's wrong for this project]
-
-## Active decisions (Accepted ADRs)
-
-- **ADR-NNN** — [topic] — [one-line summary]
-- **ADR-NNN** — [topic] — [one-line summary]
-
-## Documentation map
-
-| Task | Read first |
-|------|------------|
-| [Recurring task type] | [Doc and section to read] |
-| [Recurring task type] | [Doc and section to read] |
-
-## What to skip
-
-- [Folder or file that looks authoritative but is not — e.g. `docs/_archived/`]
-- [Spike / research material not for implementation use]
-
-## How to update this file
-
-- Add a line to **Conventions** the third time you correct the agent on the same thing.
-- Update **Active decisions** when an ADR is added or superseded.
-- Trim any line older than 6 months you can't justify in one sentence (use `git blame` to date lines).
-- If this file passes ~300 lines, move detail into a linked doc.
-```
-
----
-
-## A fully worked example
-
-The starter template above is the skeleton. Below is what a *fully populated* `CLAUDE.md` looks like for a real project. It illustrates two things at once:
-
-1. **The behavioral layer (sections 1–4)** — project-agnostic rules about how the agent should think and code. These don't change between projects; you can copy them verbatim from one repo to the next.
-2. **The project layer (everything below the separator)** — project-specific conventions: stack, doc map, ADR list, DO NOT, what to skip. These are where your repo's reality lives.
-
-The two layers are independent. Behavioral rules don't go stale as your codebase evolves; project rules do. Keeping them visibly separated in the file (and in your maintenance cadence) keeps both layers honest.
-
-The behavioral layer below is a **literal copy** from [`multica-ai/andrej-karpathy-skills/CLAUDE.md`](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md) — kept verbatim with an attribution block at the top. If you copy this example into your own repo, **keep the attribution**. The four behavioral sections are not original to this guide.
-
-A copy-pasteable starting template version of this example also lives at [`templates/CLAUDE.md`](../templates/CLAUDE.md) — same shape, with project-specific fields bracketed for you to fill in.
-
-````markdown
-# CLAUDE.md
-
-> **Attribution:** Sections 1–4 below ("Think Before Coding", "Simplicity First",
-> "Surgical Changes", "Goal-Driven Execution") are a **literal copy** from
-> https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md —
-> kept verbatim as this project's "behavioral layer." Project-specific
-> conventions follow below the `---` separator. If you fork or adapt this
-> file, please keep this attribution so the source remains traceable.
-
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
-
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
-
-## 1. Think Before Coding
-
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
-
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
-
-## 2. Simplicity First
-
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-## 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
----
-
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
-
----
-
-# Project-specific conventions (this section is yours; edit freely)
-
-## What this project is
-
-A B2B order export platform. Processes order data from internal databases,
-generates partner-specific files (XML/CSV), delivers them via SFTP to ~12
-banking and logistics partners. Used by operations team and partner-integration
-engineers. Success = files delivered on time, with auditable history of
-every transmission.
-
-## Stack
-
-- .NET 8, ASP.NET Core (minimal APIs)
-- Dapper 2.x (NOT EF Core — see ADR-007)
-- MS SQL Server 2022
-- Quartz.NET 3.x for scheduling
-- Serilog for logging, with `IBaseHandler<TSelf>` correlation contract
-- FluentValidation for input validation
-- NUnit + Testcontainers for integration tests
-
-## Conventions
-
-- All repositories follow `src/Repositories/OrderRepository.cs`: SQL in
-  `const string` at the top of the class, public methods named by intent
-  (`GetOrdersByStatus`, not `Get`). No business logic inside repositories.
-- Handlers are pure (no I/O); I/O lives in repositories. See
-  `src/Application/Handlers/_pattern.md`.
-- SQL keywords UPPERCASE, identifiers lowercase snake_case (`app.order_log`,
-  `id`, `created_at`).
-- Logging: every method touching the database calls `_logger.LogInformation`
-  with the operation name and the order id (or batch id).
-- Date-slug folders for specs: `specs/YYYY-MM-feature-slug/`.
-
-## Do NOT
-
-- Do NOT propose Entity Framework, DbContext, or LINQ-to-SQL (see ADR-007).
-- Do NOT add MediatR or CQRS. Handlers are called directly from controllers.
-- Do NOT use `Console.WriteLine` for logging — Serilog only.
-- Do NOT create new top-level folders without an ADR.
-- Do NOT write code in `docs/_archived/` — it's reference-only.
-
-## Active decisions (Accepted ADRs)
-
-- **ADR-001** — Repository per aggregate, hand-written, SQL in constants
-- **ADR-007** — Dapper for data access (not EF Core)
-- **ADR-014** — Per-environment Quartz config in DB (supersedes ADR-003 from 2026-Q3)
-
-## Documentation map
-
-| Task | Read first |
-|------|------------|
-| Adding a new SQL query | `DOMAIN.md`, `src/Repositories/OrderRepository.cs` |
-| New API endpoint | `ARCHITECTURE.md` § API, `docs/adr/ADR-005-rest-conventions.md` |
-| Background job | `ARCHITECTURE.md` § Scheduling, `docs/adr/ADR-014-quartz-db-config.md` |
-| Production incident | `docs/runbooks/` (find by symptom) |
-| New external integration | `docs/integrations/_template.md`, `ARCHITECTURE.md` § Integrations |
-| Deployment / rollback | `OPERATIONS.md` § Release |
-
-## What to skip
-
-- Do NOT read `docs/_archived/` unless I explicitly ask — historical only.
-- Do NOT read `docs/research/` for implementation guidance — spike notes, not authoritative.
-- Do NOT load `docs/postmortems/` for routine work — only during incident investigations.
-
-## How to update this file
-
-- Add a line to **Conventions** the third time you correct the agent on the same thing.
-- Update **Active decisions** when an ADR is added or superseded.
-- Trim any line older than 6 months you can't justify in a sentence (use `git blame` to date lines).
-- If this file passes ~300 lines, move detail into a linked doc.
-- **Don't edit the attribution block or sections 1–4** — those are upstream from
-  multica-ai/andrej-karpathy-skills. If you want to change behavioral rules,
-  fork those into your own clearly-marked section below the separator.
-````
-
-### Why this layering works
+### Why two layers
 
 - **The behavioral layer addresses meta-mistakes** the LLM makes by default — assuming, hiding confusion, overcomplicating, drifting beyond scope. These rules apply regardless of stack or domain.
 - **The project layer addresses repo-specific mistakes** the agent would make from its priors (proposing EF when you use Dapper; reaching for MediatR; inventing file paths).
 - **Different cadences.** The behavioral layer is roughly stable forever; the project layer changes weekly. Maintenance reviews can focus on the project layer.
-- **Portable.** When you copy this file to a new project, you keep the behavioral layer verbatim and rewrite only the project layer. The attribution block carries forward; future readers can trace the lineage.
+- **Portable.** On a new project you keep the behavioral layer verbatim and rewrite only the project layer.
 - **There's a third home for truly personal rules.** Claude Code also reads a user-level `~/.claude/CLAUDE.md` across all your projects. If a behavioral rule is your personal preference rather than a team convention, it can live there instead — keeping the repo file purely about what the *project* needs.
 
-### About the attribution
-
-The behavioral guidelines aren't original to this guide. They're a literal copy of [community-shared coding rules](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md) (in turn inspired by Andrej Karpathy's style of LLM-coding discipline). If you adopt this pattern:
-
-- **Keep the attribution block** at the top of your `CLAUDE.md`. The source remains traceable; the rules' lineage is honest.
-- **If you adapt or paraphrase** sections 1–4, mark which parts are verbatim, which are adapted, and which you wrote yourself. *"Adapted from X"* is fine; *"verbatim from X"* is fine; silently rewriting and dropping attribution is not.
-- **Don't fight the upstream wording.** The four behavioral sections have been iterated on by many people; their current phrasing is tighter than most teams' first draft. Adopt before you adapt.
+**About the attribution.** The behavioral layer isn't original to this repo: it's a literal copy of [community-shared coding rules](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md) (in turn inspired by Andrej Karpathy's style of LLM-coding discipline), and the template carries an attribution block. Keep it. If you adapt sections 1–4, mark what's verbatim, what's adapted, and what you wrote yourself — silently rewriting and dropping the attribution is the one thing not to do. And adopt before you adapt: the upstream wording is tighter than most teams' first draft.
 
 ---
 
@@ -619,7 +392,7 @@ The agent often surfaces real candidates you forgot. You filter; you commit.
 3. **Cap at ~300 lines.** Above that, attention dilutes. The cure is trimming, not adding.
 4. **Active decisions must be current.** A stale ADR list is the single most damaging form of rot.
 5. **The doc map matters more the more docs you have.** It's the difference between a repo where the agent finds the right file and one where it grep-gambles.
-6. **Mark what to skip.** Negative space (archived/, research/, draft/) is as important as positive guidance.
+6. **Mark what to skip.** Negative space (archived docs, shipped specs, drafts) is as important as positive guidance.
 7. **Update reactively, not preemptively.** Third-time rule. Surgical edits compound; bulk rewrites add rot.
 8. **One owner.** A file with no maintainer is dead by month 6.
 9. **The agent can help maintain it.** Ask, in a session, what conventions kept coming up. Filter and commit.

@@ -7,19 +7,18 @@
 ## Table of Contents
 
 1. [Why write a PRD — and when](#why-write-a-prd--and-when)
-2. [What this guide adds](#what-this-guide-adds)
-3. [PRD formats — pick the right shape](#prd-formats--pick-the-right-shape)
-4. [Anatomy of a PRD, section by section](#anatomy-of-a-prd-section-by-section)
-5. [Worked example 1 — Original launch (B2B billing platform)](#worked-example-1--original-launch-b2b-billing-platform)
-6. [Worked example 2 — Era 2 (multi-currency expansion)](#worked-example-2--era-2-multi-currency-expansion)
-7. [Era boundary heuristics — when do you need a new PRD?](#era-boundary-heuristics--when-do-you-need-a-new-prd)
-8. [AI-assisted PRD authoring](#ai-assisted-prd-authoring)
-9. [Success metrics — defining "what does success look like"](#success-metrics--defining-what-does-success-look-like)
-10. [Stakeholder review process](#stakeholder-review-process)
-11. [Cross-functional handoff — PRD to engineering](#cross-functional-handoff--prd-to-engineering)
+2. [PRD formats — pick the right shape](#prd-formats--pick-the-right-shape)
+3. [Anatomy of a PRD, section by section](#anatomy-of-a-prd-section-by-section)
+4. [Worked example 1 — Original launch (B2B billing platform)](#worked-example-1--original-launch-b2b-billing-platform)
+5. [Worked example 2 — Era 2 (multi-currency expansion)](#worked-example-2--era-2-multi-currency-expansion)
+6. [Era boundary heuristics — when do you need a new PRD?](#era-boundary-heuristics--when-do-you-need-a-new-prd)
+7. [AI-assisted PRD authoring](#ai-assisted-prd-authoring)
+8. [Success metrics — defining "what does success look like"](#success-metrics--defining-what-does-success-look-like)
+9. [Stakeholder review process](#stakeholder-review-process)
+10. [From PRD to features](#from-prd-to-features)
     - [Slicing the PRD into features](#slicing-the-prd-into-features)
-12. [PRD-specific anti-patterns](#prd-specific-anti-patterns)
-13. [Golden rules](#golden-rules)
+11. [PRD-specific anti-patterns](#prd-specific-anti-patterns)
+12. [Golden rules](#golden-rules)
 
 ---
 
@@ -34,28 +33,9 @@
 - **It freezes intent so it doesn't drift.** Without a written *what & why*, the goal quietly mutates feature by feature, and six months in nobody agrees what you're building.
 - **It's the root of the SDD chain.** PRD → slice into features → `SPEC.md` → `PLAN.md` → `TASKS.md`. Skip it and the *codebase* becomes the de-facto spec — a pile of decisions nobody chose on purpose.
 
-**When you actually need one.** A PRD earns its place when **more than one person has to agree**, or the bet is big enough that building the wrong thing is expensive. Skip it — or shrink it to a one-paragraph issue — when you're solo, the change is small, or the *what & why* already fits in your head. (When in doubt, the one-pager format below is the lightest real PRD.)
+**When you actually need one.** A PRD earns its place when **more than one person has to agree**, or the bet is big enough that building the wrong thing is expensive. Skip it — or shrink it to a one-paragraph issue — when you're solo, the change is small, or the *what & why* already fits in your head. (When in doubt, the one-pager format below is the lightest real PRD.) Either way, ground it: a PRD that cites what you learned — even *"~6 customer conversations"* — is mostly evidence; one without is mostly opinion (see [overview § Before the PRD](spec-driven-development-guide.md#before-the-prd-research-and-discovery)).
 
 **When to write a *v2* (a new era).** A PRD **freezes after v1 ships** — you do *not* edit it for every new feature (features get specs, not PRD edits; an ever-edited PRD becomes a Frankenstein). You write a **new** PRD when the product's *direction* shifts materially: a new market or segment, a major new capability, a pivot, or a post-reorg change of direction. Routine features are not a new era. For the concrete test, see [Era boundary heuristics](#era-boundary-heuristics--when-do-you-need-a-new-prd) below; for the layered model (PRD vs spec, the three documentation layers), see [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer).
-
----
-
-## What this guide adds
-
-The section above is the *why* and *when*. The main SDD guide places the PRD in the bigger picture — PRD vs spec, the three documentation layers.
-
-This guide is the practice:
-
-- **Multiple PRD formats** — PR-FAQ vs lean PRD vs one-pager vs full template — and when each fits
-- **Anatomy section by section** with concrete advice on what to write (and not write) in each
-- **Two complete worked examples** — what a real, well-shaped PRD actually looks like
-- **Era boundary heuristics** — concrete signals that you're at a new era and should write a new PRD
-- **AI-assisted authoring** — the shipped commands for drafting, reviewing, and slicing a PRD, plus two by-hand prompts (era check, competitive analysis)
-- **Stakeholder review process** — who reviews, in what order, what they look for
-- **Success metrics deep-dive** — how to write *"what success looks like"* measurably without overcommitting
-- **Cross-functional handoff** — getting from *"PRD accepted"* to *"first specs in flight"*
-
-For the underlying principles, go back to [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer). For the upstream side — research and discovery that feeds the PRD — see [`spec-driven-development-guide.md` § Before the PRD](spec-driven-development-guide.md#before-the-prd-research-and-discovery). A PRD without grounding is mostly opinion; a PRD that cites what you learned (even *"~6 customer conversations"*) is mostly evidence.
 
 ---
 
@@ -481,9 +461,9 @@ The agent can speed up PRD drafting and review meaningfully, *as long as you rem
 
 **The PoC isn't the spec.** Once a backfilled PRD is accepted, the spec-before-code discipline starts with your *next* change — either harden the prototype through a fresh spec → trio, or treat it as legacy (forward-only specs). The prototype's code is a reference, not a contract.
 
-Two jobs have no command — they're occasional and judgment-heavy, so run them by hand:
+One job has no command — it's occasional and judgment-heavy, so run it by hand:
 
-### 1. Detect an era boundary from a roadmap
+### Detect an era boundary from a roadmap
 
 Use periodically (annually or per planning cycle) to check whether you should be writing a new PRD vs. a series of specs.
 
@@ -503,28 +483,6 @@ Apply these signals — return one paragraph of analysis per signal:
 Conclude: "Likely era boundary" / "Feature accumulation, not era boundary" /
 "Inconclusive — needs human discussion." Cite specific evidence.
 ```
-
-### 2. Generate a competitive-analysis section
-
-For PR-FAQ or full PRD formats. Useful for confirming you've thought about
-adjacent solutions.
-
-**Prompt:**
-
-```text
-For the product idea: [one paragraph description].
-
-Generate a competitive analysis section covering:
-- 3-5 named competitors or adjacent solutions (use real names you know exist —
-  do NOT invent companies)
-- For each: what they do, what they don't do, where we differ
-- A summary paragraph: what's our specific wedge or differentiation
-
-If you don't know the space well enough to name real competitors, say so —
-don't fabricate. Mark uncertainty as [VERIFY].
-```
-
-The "don't fabricate" instruction is important — agents will invent plausible-sounding company names. Always verify the named competitors actually exist before publishing.
 
 ---
 
@@ -571,37 +529,7 @@ If you can't name your *primary* metric, the PRD isn't ready. If you have 5+ pri
 
 A PRD that's been written but not reviewed isn't yet a PRD — it's a draft.
 
-**For 1–10 people, PRD review is you + one other person.** The author drafts; one reviewer — usually the tech lead or whoever will build it — reads it against the [checklist below](#what-reviewers-check-universal) and says *go / not-yet*, async, in 24–72 hours. That's the whole process; don't stage a committee. The two named patterns and the seven-role roster below scale *up* from there — they're what a regulated or multi-team org grows into ("when you outgrow ~10"), not a checklist for three people who collapse all seven roles into one or two.
-
-### Pattern A: Async PR-style review
-
-The PRD is committed as a `Status: Draft` PR. Reviewers comment inline. Once consensus emerges, a second small PR flips to `Status: Accepted` and adds the freeze date.
-
-**Reviewers (the full roster — for a regulated or multi-team org; below ~10 these collapse to one or two people):**
-
-- **Founding team / executive sponsor** — does this match strategic direction?
-- **Engineering lead** — is this feasible given the constraints and team?
-- **Product manager** (if not the author) — does this make commercial sense?
-- **Design lead** — does the user framing make sense from a UX standpoint?
-- **Finance** — are the success metrics realistic? Budget assumptions hold?
-- **Legal/compliance** — for regulated industries, any showstoppers in constraints?
-- **Sales / customer success lead** — does this match what customers are asking for?
-
-Not every reviewer is mandatory — match to the PRD's scope. A small internal tool might only need engineering + the requesting team's lead.
-
-**Pros:** standard tooling, async-friendly, comment trail.
-**Cons:** can drag on without an owner forcing closure.
-
-### Pattern B: Review meeting (Amazon-style)
-
-For PR-FAQs especially. The PRD is distributed in advance; the meeting begins with 20 minutes of silent reading; then group discussion. Decision made (and noted) by end of meeting.
-
-**Pros:** forcing function for closure; everyone hears the same context.
-**Cons:** remote-unfriendly; requires senior alignment of calendars.
-
-### Hybrid
-
-Many teams: async comment phase to surface issues, then one short alignment meeting to ratify. Most efficient for medium-sized teams.
+**For 1–10 people, PRD review is you + one other person.** The author commits the PRD as `Status: Draft` in a PR; one reviewer — usually the tech lead or whoever will build it — reads it against the [checklist below](#what-reviewers-check-universal) and says *go / not-yet*, async, in 24–72 hours, with no more than two rounds. A second small PR flips it to `Status: Accepted` and adds the freeze date. That's the whole process; don't stage a committee. (Reviewer rosters and Amazon-style review meetings are what a regulated or multi-team org grows into — "when you outgrow ~10", not documented here.)
 
 ### What reviewers check (universal)
 
@@ -616,34 +544,17 @@ A working PRD review checklist:
 - [ ] **Constraints** don't contradict the solution
 - [ ] **References** point to sources (research, prior PRDs, decision docs) — not fabricated
 
-### How long should review take?
-
-For a lean PRD: 24–72 hours, with no more than two review rounds.
-For a PR-FAQ: 1–2 weeks, possibly with multiple feedback cycles.
-For a full PRD: 2–6 weeks (the format implies the slow review).
-
 PRDs that sit in `Draft` for months are dead PRDs. Either ratify or kill.
 
 ---
 
-## Cross-functional handoff — PRD to engineering
+## From PRD to features
 
-The PRD is accepted. Now what? The handoff from PRD-as-strategy to specs-as-implementation is a high-leverage moment.
-
-### The kickoff meeting
-
-A 60-minute meeting with PM, eng lead, design (if applicable), and 1–2 senior engineers who will own the work. Agenda:
-
-1. **PM walks the PRD** (15 min) — focus on Problem, Target user, Success metrics, Out of scope. Skip what's obvious.
-2. **Engineering reads through Constraints + Risks** (10 min, often silent) — surface technical concerns.
-3. **Open discussion** (25 min) — what's unclear? Where are the biggest risks? What's the right shape for the first 3–5 specs?
-4. **Output: spec backlog** (10 min) — list of specs to create, with rough order and ownership.
-
-The output of the kickoff is *not* the specs themselves. It's the *list* of specs to write next.
+The PRD is accepted. Now what? The step from PRD-as-strategy to specs-as-implementation is a high-leverage moment — and for 1–10 people it's mostly one skill, not a meeting.
 
 ### Slicing the PRD into features
 
-The kickoff's output — the spec backlog — is a list of **features**, each sized to its own spec → plan → tasks trio. Getting that list right is mostly one skill: **slicing**. (Solo? You do this on your own; the meeting is optional, the slicing isn't.)
+What comes out of an accepted PRD is a list of **features**, each sized to its own spec → plan → tasks trio. Getting that list right is mostly one skill: **slicing**.
 
 **Slice vertically, not horizontally.** The most common mistake is slicing by layer — "the database work," "the API work," "the UI work." None of those ship anything a user can use, and none can be verified end-to-end. Slice by **capability** instead: a thin path that runs through every layer and delivers one visible outcome. (Standard terms: *vertical slice*, *walking skeleton*.)
 
@@ -669,7 +580,7 @@ Each feature you pick up becomes a spec — for the mechanics, see [`spec-plan-t
 
 ### The first specs
 
-From the backlog identified in the kickoff, the engineering team writes the first 2–3 specs in parallel. These specs:
+From the top of that list — the walking skeleton first — write the first 2–3 specs. These specs:
 
 - Reference the PRD by path in their `## References` section
 - Don't violate the PRD's `Out of scope`
@@ -677,17 +588,6 @@ From the backlog identified in the kickoff, the engineering team writes the firs
 - Don't try to cover the entire PRD in one spec — pick the foundational pieces first
 
 For full mechanics of spec authoring, see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).
-
-### PM's role post-PRD
-
-After the PRD is accepted:
-
-- PM **doesn't** write specs (engineers do)
-- PM **does** review specs for scope alignment with PRD
-- PM **does** sign off on `STATUS: shipped` for each spec
-- PM **does** track success metrics as features ship
-
-The PRD is the contract. Specs are the implementation of that contract. PM keeps the contract honest.
 
 ---
 

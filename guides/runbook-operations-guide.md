@@ -7,19 +7,17 @@
 ## Table of Contents
 
 1. [Core Philosophy](#core-philosophy)
-2. [RUNBOOK vs OPERATIONS — Naming and Scope](#runbook-vs-operations--naming-and-scope)
+2. [One file, then a folder — naming and organization](#one-file-then-a-folder--naming-and-organization)
 3. [The 3 a.m. Test](#the-3-am-test)
 4. [What Belongs in a Runbook (and What Does Not)](#what-belongs-in-a-runbook-and-what-does-not)
 5. [How Runbooks Relate to Postmortems](#how-runbooks-relate-to-postmortems)
 6. [Anatomy of a Runbook Entry](#anatomy-of-a-runbook-entry)
 7. [Full Entry Template](#full-entry-template)
-8. [Common Entry Categories](#common-entry-categories)
-9. [Organization: Single File vs Folder Structure](#organization-single-file-vs-folder-structure)
-10. [Writing for AI Agents](#writing-for-ai-agents)
-11. [Maintenance Discipline](#maintenance-discipline)
-12. [Working with the Agent](#working-with-the-agent)
-13. [Anti-Patterns](#anti-patterns)
-14. [Golden Rules](#golden-rules)
+8. [Writing for AI Agents](#writing-for-ai-agents)
+9. [Maintenance Discipline](#maintenance-discipline)
+10. [Working with the Agent](#working-with-the-agent)
+11. [Anti-Patterns](#anti-patterns)
+12. [Golden Rules](#golden-rules)
 
 ---
 
@@ -47,39 +45,36 @@ For most projects, one file or one folder under any of these names works. Don't 
 
 ---
 
-## RUNBOOK vs OPERATIONS — Naming and Scope
+## One file, then a folder — naming and organization
 
-The two filenames cover overlapping but not identical territory. Pick one early and stick with it.
+Two filenames cover overlapping territory. Pick one early and stick with it:
 
-### `RUNBOOK.md` — narrower, incident-oriented
+- **`RUNBOOK.md`** — narrower, incident-oriented: *"X is broken, here's how to fix it"*, *"Z alert fired, here's what it means and what to do."* Fits when the file is overwhelmingly recovery and incident response — common with an on-call rotation.
+- **`OPERATIONS.md`** — broader, lifecycle-oriented: recovery *plus* routine maintenance (old data, credential rotation, log retention), deployment and rollback, monitoring, backup and restore. The operational handbook for the whole system, not just the panic-button manual.
 
-Best when the content is mostly:
-- *"X is broken, here's how to fix it"*
-- *"Y is stuck, here's how to unstick it"*
-- *"Z alert fired, here's what it means and what to do"*
+**Start with one file** — usually `OPERATIONS.md`. Under ~15 procedures, one file wins: one Cmd+F finds everything, the table of contents stays accurate, and the agent can load it whole. Resist creating five small files on day one; you'll wind up updating none of them. One file you actually open beats four perfectly organized ones you ignore.
 
-Use this name if the file is overwhelmingly about *recovery* and *incident response*. Common in projects with on-call rotation.
+**Split when it hurts** — typically past ~500 lines or ~15 distinct procedures, or once entries need different owners. Do it as one splitting refactor, not a gradual sprawl:
 
-### `OPERATIONS.md` — broader, lifecycle-oriented
+1. Create `docs/runbooks/`.
+2. Move each procedure to its own file, keeping the title as the filename slug.
+3. Replace each procedure in `OPERATIONS.md` with a one-line link — it stays as the index plus global routines (release and monitoring guides can move out to `docs/deployment.md` / `docs/monitoring.md` the same way).
+4. Add a `README.md` index and a `_template.md` to the folder.
 
-Best when the content includes:
-- Recovery procedures (the runbook part)
-- Routine maintenance (clearing old data, rotating credentials, vacuuming, log retention)
-- Deployment procedures (how to release, how to roll back, what to verify)
-- Monitoring guide (what to watch, what's normal, what's not)
-- Backup and restore procedures
+```
+docs/
+├── OPERATIONS.md                    # index + global routines
+└── runbooks/
+    ├── README.md                    # alphabetical index with one-line descriptions
+    ├── sftp-delivery-stuck.md
+    ├── quartz-job-stuck.md
+    ├── database-connection-pool-exhausted.md
+    ├── _template.md                 # blank entry to copy
+    └── archived/                    # outdated procedures, kept for context
+        └── 2025-old-load-balancer.md
+```
 
-Use this name if the file is the operational handbook for the whole system, not just the panic-button manual.
-
-### My recommendation
-
-For a mid-sized project: start with `OPERATIONS.md`. The moment that file crosses ~500 lines or ~15 distinct procedures, split it:
-- `OPERATIONS.md` stays as the high-level index + routine procedures
-- `docs/runbooks/` becomes a folder of focused, per-incident entries
-- `docs/deployment.md` extracts release procedures
-- `docs/monitoring.md` extracts the watching guide
-
-Resist creating five small files on day one. You'll wind up updating none of them. One file you actually open beats four perfectly organized ones you ignore.
+The folder buys per-entry ownership, diffs scoped to one procedure, and per-entry "Last verified" dates. It costs discovery: it needs good filenames, the index, and a pointer from `CLAUDE.md` — otherwise one entry rots without anyone noticing.
 
 ---
 
@@ -387,141 +382,6 @@ After any recovery path:
 ````
 
 This template looks long because it's *complete*. Real entries shorter than this exist (a routine credential rotation might be 30 lines), but the shape — symptoms, pre-checks, diagnosis, recovery, verification, escalation, post-incident — stays the same.
-
----
-
-## Common Entry Categories
-
-A mature runbook tends to grow these categories naturally. Use them as a checklist when bootstrapping.
-
-### 1. Incident Recovery (the classic runbook)
-
-One entry per known failure mode. Triggered by an alert or a user report.
-
-Examples:
-- `sftp-delivery-stuck.md`
-- `database-connection-pool-exhausted.md`
-- `quartz-job-stuck.md`
-- `disk-space-low-on-app-server.md`
-- `redis-memory-evicting.md`
-
-### 2. Routine Maintenance (cron-eligible but often manual)
-
-Procedures done on a schedule. Document them so they survive the original author leaving.
-
-Examples:
-- `quarterly-credential-rotation.md`
-- `monthly-archive-cleanup.md`
-- `weekly-failed-job-replay.md`
-- `tls-certificate-renewal.md`
-
-### 3. Deployment & Release
-
-How to ship code safely.
-
-Examples:
-- `release-procedure.md` — full release walkthrough
-- `rollback-procedure.md` — when a release goes bad
-- `database-migration-procedure.md` — migrations that need coordination
-- `feature-flag-rollout.md` — gradual rollout protocol
-
-### 4. Backup & Restore
-
-How to back up, how to restore, how to test that restore works.
-
-Examples:
-- `database-backup-schedule.md`
-- `database-restore-from-backup.md`
-- `disaster-recovery-drill.md`
-
-### 5. Monitoring & Observability
-
-What to watch and how to interpret it.
-
-Examples:
-- `dashboards-overview.md` — what each Grafana board shows
-- `alerts-reference.md` — every alert, what it means, which runbook it points to
-- `log-locations.md` — where every component's logs live
-- `tracing-quickstart.md` — how to pull a distributed trace
-
-### 6. Access & Onboarding (operations-side)
-
-Not application onboarding (that's `ONBOARDING.md`) — *operational* access.
-
-Examples:
-- `granting-production-access.md`
-- `vpn-setup-for-oncall.md`
-- `secrets-management.md`
-
-### 7. Diagnostic Recipes
-
-Not tied to a specific incident — general "how do I figure out X" recipes.
-
-Examples:
-- `how-to-trace-a-stuck-order.md`
-- `how-to-find-the-slow-query.md`
-- `how-to-correlate-logs-across-services.md`
-
----
-
-## Organization: Single File vs Folder Structure
-
-There is no universally right answer. It depends on how big your runbook grows and how often people search it.
-
-### Single `OPERATIONS.md` (early stage)
-
-Good for projects with fewer than ~15 distinct procedures.
-
-**Pros:**
-- Everything is searchable in one Cmd+F
-- Easy to keep the Table of Contents accurate
-- Less navigation overhead
-- Easy for an AI agent to load fully into context
-
-**Cons:**
-- Becomes unwieldy past ~500 lines
-- Diff noise grows (every change touches the same file)
-- Hard to assign per-section ownership
-
-### Folder `docs/runbooks/` with index (mature stage)
-
-Good once you have 15+ procedures and multiple owners.
-
-```
-docs/
-├── OPERATIONS.md                    # index + global routines
-└── runbooks/
-    ├── README.md                    # alphabetical index with one-line descriptions
-    ├── sftp-delivery-stuck.md
-    ├── quartz-job-stuck.md
-    ├── database-connection-pool-exhausted.md
-    ├── disk-space-low.md
-    ├── _template.md                 # blank entry to copy
-    └── archived/                    # outdated procedures, kept for context
-        └── 2025-old-load-balancer.md
-```
-
-**Pros:**
-- Per-file ownership and per-file review
-- Diffs stay scoped to the affected procedure
-- Easier to assign "last verified" dates per entry
-- New entries don't require rewriting one big TOC
-
-**Cons:**
-- Discovery requires good filenames and an index
-- AI agents need pointers to load the right file
-- Easier to let one entry rot without anyone noticing
-
-### Transition strategy
-
-Don't pre-organize. Start with `OPERATIONS.md`. When it becomes painful to navigate (typically around ~500 lines or ~15 distinct procedures), do a single splitting refactor:
-
-1. Create `docs/runbooks/`
-2. Move each procedure to its own file, keeping the title as the filename slug
-3. Replace each procedure in `OPERATIONS.md` with a one-line link
-4. Add a `_template.md` and a `README.md` index to the folder
-
-Do this once, when you feel the pain. Not in advance.
 
 ---
 
