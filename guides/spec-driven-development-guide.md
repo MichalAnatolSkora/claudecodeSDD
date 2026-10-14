@@ -274,19 +274,10 @@ New entries are added; old ones never change. If you change your mind, write a n
 
 ## Workflow for Changes
 
-Each feature (sliced out of the PRD — see [The whole flow](#the-whole-flow)) goes through the **trio**: `SPEC.md` → `PLAN.md` → `TASKS.md`. How much of the trio you write scales with the change — you compress small changes, you don't skip the discipline. The full model is in [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md) § "When to skip parts of the trio".
+Each feature (sliced out of the PRD — see [The whole flow](#the-whole-flow)) goes through the **trio**, compressed to fit the change — you compress small changes, you don't skip the discipline. A one-line tweak is a PR description, a bugfix a short `SPEC.md`, a small feature a one-file trio, a real feature the three-file trio; the full table is [`spec-plan-tasks-guide.md` § When to skip parts of the trio](spec-plan-tasks-guide.md#when-to-skip-parts-of-the-trio). Two rules sit on top of it:
 
-### Small change (bugfix, minor feature)
-
-A **bugfix** is one short `SPEC.md` (goal + acceptance criteria), implementation, done — no `PLAN.md` / `TASKS.md`, don't touch `ARCHITECTURE.md`. A **small feature** that still has real *how* and *order* decisions fits the **one-file trio** — `spec` / `plan` / `tasks` as three sections in a single file — instead of three separate ones.
-
-### Medium change (new module, endpoint, integration)
-
-The full three-file trio — `SPEC.md` + `PLAN.md` + `TASKS.md` in `specs/`. If it changes what `ARCHITECTURE.md` shows — a component, a boundary, a data flow, a new external dependency — the **PR author updates `ARCHITECTURE.md` in the same PR**. If it adds a domain concept — same rule, `DOMAIN.md`.
-
-### Large change (refactor, stack change, new pattern)
-
-First write an ADR (why, alternatives rejected, consequences). Only then write an implementation spec that references the ADR.
+- **If the change moves the stable layer, the same PR updates it.** A new component, boundary, data flow, or external dependency → the PR author updates `ARCHITECTURE.md`; a new domain concept → `DOMAIN.md`.
+- **A large change (refactor, stack change, new pattern) starts with an ADR** — why, alternatives rejected, consequences — and only then an implementation spec that references it.
 
 ### Concrete Example
 

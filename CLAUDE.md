@@ -17,9 +17,7 @@ Long-form guides + copy-pasteable templates for spec-driven development with AI 
 │   └── .claude/commands/              # the sdd-1 … sdd-7 slash-command pipeline for user repos
 ├── examples/                          # worked end-to-end SDD doc sets (illustrative, docs-only)
 │   └── order-export/                  # one fictional app: PRD → trio → ADR, cross-linked
-├── pdf-style.html                     # full PDF style (not used by default)
-├── pdf-style-compact.html             # compact PDF style (narrower 1cm-margin variant)
-└── pdf-style-wide.html                # full-width PDF style — DEFAULT
+└── pdf-style-wide.html                # the PDF style (full-width, small font, page footers)
 ```
 
 Built PDFs live in `pdf/` (a per-guide PDF for each `guides/*.md`, plus `claudecodeSDD-bundle.pdf`) and are **gitignored** — generated artifacts, never committed. The whole `pdf/` folder is ignored.
@@ -78,9 +76,10 @@ If the owner explicitly asks for a guide change that needs an example with one o
 Build with pandoc + Prince. Default invocation:
 
 ```bash
-pandoc guides/spec-driven-development-guide.md \
-       guides/working-with-agents-guide.md \
-       guides/runbook-operations-guide.md \
+pandoc guides/sdd-in-5-files.md \
+       guides/flow-guide.md \
+       guides/spec-plan-tasks-guide.md \
+       guides/spec-driven-development-guide.md \
        -o pdf/claudecodeSDD-bundle.pdf \
        --pdf-engine=prince \
        -H pdf-style-wide.html \
@@ -95,11 +94,11 @@ pandoc guides/spec-driven-development-guide.md \
       -H pdf-style-wide.html --metadata title="$(grep -m1 '^# ' "$f" | sed 's/^# *//')"
   done
   ```
-  The bundle above is the 3-guide reading-flow PDF; the loop is the full per-guide set.
+  The bundle above is the 4-guide reading-flow PDF; the loop is the full per-guide set.
 
-- Use `pdf-style-wide.html` — the **single unified style** for every PDF (per-guide builds and the bundle above). It keeps the small compact font but drops the side margins to `0.3cm` and overrides pandoc's centered-column cap (`body { max-width: none }`), so text runs full-width on A4 while page-number footers stay. Do **not** use `pdf-style.html` (full template) or `pdf-style-compact.html` (narrower 1cm-margin variant) unless explicitly asked.
+- Use `pdf-style-wide.html` — the **single style** for every PDF (per-guide builds and the bundle above). It keeps a small font but drops the side margins to `0.3cm` and overrides pandoc's centered-column cap (`body { max-width: none }`), so text runs full-width on A4 while page-number footers stay.
 - Do **NOT** pass `--toc`. Each guide already has its own Table of Contents section in markdown; an auto-TOC duplicates them.
-- Guide order in the PDF: spec-driven-development → working-with-agents → runbook-operations (matches the README's "How to read" flow).
+- Guide order in the bundle: sdd-in-5-files → flow-guide → spec-plan-tasks → spec-driven-development (matches the README's "Start here" order).
 - The `unsupported properties: overflow-x` warning from Prince is harmless — Prince ignores web-only CSS.
 
 ## Working style

@@ -10,28 +10,6 @@ Drop the whole `.claude/` into your repo (commands **+ this cheat sheet**):
 npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude
 ```
 
-Or copy `commands/` by hand:
-
-```
-your-project/.claude/
-├── README.md                       # this cheat sheet
-└── commands/
-    ├── sdd-1-prd-new.md
-    ├── sdd-1-prd-from-poc.md
-    ├── sdd-1-prd-review.md
-    ├── sdd-2-features-from-prd.md
-    ├── sdd-2-architecture-from-prd.md
-    ├── sdd-2-architecture-from-code.md
-    ├── sdd-3-spec-new.md
-    ├── sdd-3-spec-review.md
-    ├── sdd-4-plan-from-spec.md
-    ├── sdd-4-plan-validate.md
-    ├── sdd-5-tasks-from-plan.md
-    ├── sdd-5-tasks-add.md
-    ├── sdd-6-trio-check.md
-    └── sdd-7-implement.md
-```
-
 ## Cheat sheet — commands by phase
 
 The number **is** the phase in the flow. `<...>` is required input; `[path]` is optional and defaults to the most recent folder under `specs/` (or the PRD under `docs/prd/`).

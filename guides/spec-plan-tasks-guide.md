@@ -381,40 +381,13 @@ The implementation proceeds anyway. Code reviewer catches the gap. Now you're pa
 
 ## Slash commands worth having
 
-A repo doing SDD seriously usually has these in `.claude/commands/`. *(The shipped files in [`templates/.claude/`](../templates/.claude/) are namespaced and phase-numbered — `sdd-3-spec-new.md` → `/sdd-3-spec-new` — so they sort in pipeline order; this guide refers to every command by its full name.)*
+The whole pipeline ships ready-made as fourteen commands in [`templates/.claude/commands/`](../templates/.claude/commands/) — copy the folder into your project's `.claude/` and adjust the paths inside to match your layout. The files are namespaced and phase-numbered (`sdd-3-spec-new.md` → `/sdd-3-spec-new`), so they sort in pipeline order; this guide refers to every command by its full name. Around the trio:
 
-- **`/sdd-1-prd-new <idea>`** — *(furthest upstream)* turns a 1–3 sentence idea into a lean PRD draft, then fills the gaps by asking you the open questions. See [`prd-guide.md`](prd-guide.md) § "AI-assisted PRD authoring".
-- **`/sdd-1-prd-from-poc`** — reverses a lean PRD out of a working proof-of-concept: reads the PoC for *what* it does, then asks you the *why* (users, problem, success) before drafting. The on-ramp when the prototype exists but nothing's written. See [`prd-guide.md`](prd-guide.md) § "AI-assisted PRD authoring".
-- **`/sdd-1-prd-review <path>`** — audits a draft PRD for gaps (specific users, measurable success criteria, ≥5 out-of-scope items, no implementation leakage) before you slice it. Read-only.
-- **`/sdd-2-features-from-prd`** — *(upstream of the trio)* slices an accepted PRD into a prioritized, vertically-sliced feature list, saved to `specs/FEATURES.md` as the project's feature/status index; each row becomes a spec. See [`prd-guide.md`](prd-guide.md) § "Slicing the PRD into features".
-- **`/sdd-2-architecture-from-prd`** / **`/sdd-2-architecture-from-code`** — *(once-per-project foundation)* establish `ARCHITECTURE.md` plus a stub ADR per hard-to-reverse decision — greenfield by Q&A on the foundational choices (hosting, datastore, shape), or reverse-engineered from an existing codebase. `/sdd-4-plan-validate` then checks every plan against them.
-- **`/sdd-3-spec-new` … `/sdd-6-trio-check`** — the trio itself: draft and review `SPEC.md`, draft and validate `PLAN.md`, draft or extend `TASKS.md`, then the consistency gate. One row each in [§ AI-assisted authoring](#ai-assisted-authoring-one-command-per-step) above.
-- **`/sdd-7-implement`** — *(downstream of the trio)* works `TASKS.md` task-by-task red→green, commits each green task, then runs the break-the-code check. See [`flow-guide.md`](flow-guide.md) (Step 4) and [`testing-guide.md`](testing-guide.md).
+- **Upstream** — `/sdd-1-prd-new`, `/sdd-1-prd-from-poc`, and `/sdd-1-prd-review` draft, backfill (from a working PoC), and review a PRD; `/sdd-2-features-from-prd` slices it into features; `/sdd-2-architecture-from-prd` / `/sdd-2-architecture-from-code` lay the once-per-project foundation — `ARCHITECTURE.md` plus a stub ADR per hard-to-reverse decision — that `/sdd-4-plan-validate` later checks every plan against. Details: [`prd-guide.md`](prd-guide.md).
+- **The trio** — `/sdd-3-spec-new` … `/sdd-6-trio-check`, one row each in [§ AI-assisted authoring](#ai-assisted-authoring-one-command-per-step) above.
+- **Downstream** — `/sdd-7-implement` works `TASKS.md` task by task red→green, commits each green task, then runs the break-the-code check ([`flow-guide.md`](flow-guide.md) Step 4, [`testing-guide.md`](testing-guide.md)).
 
-Worked-example placement of these files:
-
-```
-.claude/
-└── commands/
-    ├── sdd-1-prd-new.md                # /sdd-1-prd-new
-    ├── sdd-1-prd-from-poc.md           # /sdd-1-prd-from-poc
-    ├── sdd-1-prd-review.md             # /sdd-1-prd-review
-    ├── sdd-2-features-from-prd.md      # /sdd-2-features-from-prd
-    ├── sdd-2-architecture-from-prd.md  # /sdd-2-architecture-from-prd
-    ├── sdd-2-architecture-from-code.md # /sdd-2-architecture-from-code
-    ├── sdd-3-spec-new.md               # /sdd-3-spec-new
-    ├── sdd-3-spec-review.md            # /sdd-3-spec-review
-    ├── sdd-4-plan-from-spec.md         # /sdd-4-plan-from-spec
-    ├── sdd-4-plan-validate.md          # /sdd-4-plan-validate
-    ├── sdd-5-tasks-from-plan.md        # /sdd-5-tasks-from-plan
-    ├── sdd-5-tasks-add.md              # /sdd-5-tasks-add
-    ├── sdd-6-trio-check.md             # /sdd-6-trio-check
-    └── sdd-7-implement.md              # /sdd-7-implement
-```
-
-**Ready-made copies of all fourteen commands live in [`templates/.claude/`](../templates/.claude/)** — copy that folder into your project's `.claude/` and adjust the paths inside to match your layout.
-
-See [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks) for the mechanics of writing slash commands.
+The one-screen list of all fourteen, by phase, is the cheat sheet in [`templates/.claude/README.md`](../templates/.claude/README.md); the order you run them in is [`flow-guide.md`](flow-guide.md). For writing your own, see [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks).
 
 ---
 
@@ -670,36 +643,24 @@ Reach for the one-file trio when a change has genuine *how* and *order* decision
 
 Not every feature can be specced up front. Ops asks for *"a view of which export batches need attention."* You can't write the acceptance criteria — **nobody knows what "needs attention" means** until someone looks at real batches. This is [discovery mode](#two-modes-delivery-and-discovery): spike first, let the AC emerge, then spec.
 
-**Spike (throwaway).** A half-day branch dumps every batch with its status, age, and retry count into a plain table; an ops operator looks at it. What you learn: they don't care about *status* — they scan for **stuck** batches (no progress in > 2h) and **retry-looping** ones (≥ 3 delivery attempts). *"Needs attention"* just got a definition. Delete the branch.
+**Spike (throwaway).** A half-day branch dumps every batch with its order statuses and age into a plain table; an ops operator looks at it. What you learn: they don't care about *status* — they scan for **stuck** batches (orders still `RDY` more than 2 h after the batch was created) and **partial** ones (some orders `SENT`, some still `RDY`). *"Needs attention"* just got a definition. Delete the branch.
 
-**Now the thin spec — `specs/2026-06-batch-attention.md` (one-file trio):**
+**Then the thin spec** — a one-file trio. The part worth seeing is its acceptance criteria once implementation had started:
 
 ```markdown
-# Batch attention view
-
-> Discovery feature. Spike done 2026-06-10 (deleted); the AC below came out of it, not from a guess.
-
-## Spec
-**Goal.** One view of the batches that need a human — defined, after the spike, as *stuck* or *retry-looping*.
-**Out of scope.** Healthy batches (a list of everything is what we're replacing); per-batch actions (a later slice).
 **Acceptance criteria**
-- [ ] AC1: a batch with no status change in > 2h shows as `stuck`, with hours-idle
-- [ ] AC2: a batch with ≥ 3 delivery attempts shows as `looping`, with the attempt count
-- [ ] AC3: healthy batches are absent (not greyed out, not zero-count rows)
+- [x] AC1: a batch whose orders are still `RDY` more than 2h after it was created shows as `stuck`, with the hours-idle
+- [x] AC2: a batch with some orders `SENT` and some still `RDY` shows as `partial`, with the unsent count
+- [x] AC3: fully-sent batches are absent (not greyed out, not zero-count rows)
   - ~~AC1 (v1, WRONG): list all batches ordered by status, newest first~~
-    CHANGED during implementation (2026-06-12): building it, the ops reviewer
-    pointed out they'd still have to eyeball every row to find the bad ones.
-    Replaced with the stuck/looping signals the spike actually surfaced.
-    Spec still Active → in-place edit + re-ran /sdd-6-trio-check, not a new spec.
-
-## Plan
-- One read-model query, no new tables: batches where `now - last_change > 2h` OR `attempt_count >= 3`
-- Read from `order_batch` + `delivery_attempt`
-## Tasks
-- [ ] 1. Failing test: a 3h-idle batch → `stuck` → verify: red (no query yet)
-- [ ] 2. Read-model query + unit tests for both signals → verify: AC1, AC2 green
-- [ ] 3. Wire the view, exclude healthy → verify: AC3 green
+    **CHANGED during implementation (2026-03-04):** building it, the ops reviewer
+    pointed out they'd still have to eyeball every row to find the bad ones — a list
+    of statuses isn't a "needs attention" view. Replaced with the `stuck` / `partial`
+    signals the spike had actually surfaced. The spec was still **Active**, so this
+    was an in-place edit + a re-run of `/sdd-6-trio-check`, not a new spec.
 ```
+
+The whole file — spec, plan, and tasks, with the spike recorded as step 0 — is in the example app: [`examples/order-export/specs/2026-03-batch-status-view.md`](../examples/order-export/specs/2026-03-batch-status-view.md). There it also shows re-slicing: the feature was pulled ahead of another one once operators kept asking *"did my batch actually go out?"*
 
 **Why this is the honest case.** The first acceptance criterion (the struck-through line) was *wrong* — and that isn't a failure, it's discovery working. Because the spec was still **Active** (pre-merge), fixing it was a one-line edit with a dated `CHANGED during implementation:` note ([§ When the code shows the spec was wrong](#when-the-code-shows-the-spec-was-wrong)), not a new spec. The freeze starts at merge; everything before it is allowed to be wrong on the way to right. Keep the struck line and the note — that fossil is more useful than a clean rewrite.
 

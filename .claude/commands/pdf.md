@@ -35,7 +35,7 @@ Arguments: `$ARGUMENTS`
    ```
    - **No `--toc`**: each guide already has its own Table of Contents in markdown; an auto-TOC duplicates it.
    - `pdf-style-wide.html` is the unified house style (full-width text, small font, page-number footer). If it does not exist in the current working directory, omit the `-H` flag (use Prince defaults).
-   - If the user wants to override the style, they can pass `-H pdf-style-compact.html` (narrower) or `-H <other.html>` — but only if explicitly asked; do not auto-create style files.
+   - If the user wants a different style, they can pass `-H <other.html>` — but only if explicitly asked; do not auto-create style files.
 
 5. **Report:**
    - Output path (absolute)
@@ -46,5 +46,5 @@ Arguments: `$ARGUMENTS`
 
 - Do NOT modify the source markdown.
 - Do NOT install dependencies without confirmation.
-- Do NOT change the existing `pdf-style-*.html` files without confirmation.
+- Do NOT change `pdf-style-wide.html` without confirmation.
 - Do NOT auto-open the PDF unless the user asks.

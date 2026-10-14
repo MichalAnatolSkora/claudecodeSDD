@@ -1,11 +1,11 @@
 # PRD: [Project / Product name]
 
 > Starting artifact. Captures *what* and *why* before any code exists.
-> **PRD is for humans only — the agent reads `SPEC.md`, not this.**
+> **PRD is for humans — the agent never implements from it.** It reads this only to draft, review, or slice it into features; code comes from `SPEC.md`.
 > Freeze after this era's initial release ships; archive to `docs/prd/YYYY-MM-<era-slug>.md`.
 > New direction → new PRD (per the era pattern), never edits to this one.
 >
-> Lean PRD format below. For PR-FAQ, full PRD, one-pager alternatives,
+> Lean PRD format below. For the one-pager and the PR-FAQ trick for big bets,
 > two complete worked examples, AI-assisted authoring, and the review process,
 > see [`guides/prd-guide.md`](../guides/prd-guide.md).
 
