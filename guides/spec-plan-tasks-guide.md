@@ -334,7 +334,7 @@ The consistency checks I'd add as either subagent calls or `/sdd-6-trio-check` s
 
 A trio that passes these seven checks is ready for implementation. A trio that fails on (1) or (4) usually loops back through review.
 
-For mechanizing these checks — as a configured subagent (`trio-auditor`), a slash command (`/sdd-6-trio-check`), a pre-commit hook, or a CI step — see [`quality-gates-guide.md`](quality-gates-guide.md) § "Pattern C — Configured subagent" and the worked-example setup.
+`/sdd-6-trio-check` runs checks 1–5 as a read-only audit (plus: every planned file has a task); 6 and 7 are yours on review. For when an LLM check should warn rather than block, and what's worth mechanizing at all, see [`quality-gates-guide.md`](quality-gates-guide.md).
 
 ---
 

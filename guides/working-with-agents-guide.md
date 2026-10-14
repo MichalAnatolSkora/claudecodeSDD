@@ -957,7 +957,7 @@ Plain prompting takes you a long way, but Claude Code (and similar agent tools) 
 
 This section explains what each is, where it earns its place in your SDD workflow, an example, and the anti-pattern that comes with it. The decision table at the end is the *"which do I reach for?"* summary.
 
-> **Reach-for-it reference, not core reading.** This is the longest section in the guide, and you don't read it front-to-back. Skim the four blocks once so you know they exist, then come back to the relevant one *when you actually build it*. For a solo dev the trio plus the shipped `/sdd-*` commands already cover the day-to-day; skills, subagents, and hooks earn their place only when you have a recurring workflow worth encoding. **The hook examples below are illustrative** — Claude Code's hook interface (event names, how input is passed, which exit code blocks an action) varies by version, so treat them as shape-not-spec and check them against your harness before wiring them up.
+> **Reach-for-it reference, not core reading.** This is the longest section in the guide, and you don't read it front-to-back. Skim the four blocks once so you know they exist, then come back to the relevant one *when you actually build it*. For a solo dev the trio plus the shipped `/sdd-*` commands already cover the day-to-day; skills, subagents, and hooks earn their place only when you have a recurring workflow worth encoding. Hook mechanics and the ready-made SDD hooks live in [`quality-gates-guide.md`](quality-gates-guide.md#claude-code-hooks-in-session); this section only says what a hook is for.
 
 ### Skills
 
@@ -1199,184 +1199,13 @@ The general principle: subagents are an option the model considers, not an oblig
 
 ### Hooks
 
-**What they are:** automation triggered by events, configured in `.claude/settings.json` (project) or `~/.claude/settings.json` (user). The *harness* runs them, not the agent. Hooks can **block** actions (exit code `2`), **inject context** (output goes back to the model), or **run side effects** (lint, build, regenerate artifacts, log).
+**What they are:** automation the *harness* runs on events — before or after a tool call, when you submit a prompt, when a session ends — configured in `.claude/settings.json`. The agent doesn't run them and can't skip them. A hook can **block** an action, **feed context** back to the agent, or **run a side effect**.
 
-For SDD-specific hook recipes — blocking edits to Accepted ADRs, scanning PII in research files, injecting the active ADR list, end-of-session reminders, and how to choose between hooks and other patterns (pre-commit, subagent, slash command, CI) — see [`quality-gates-guide.md`](quality-gates-guide.md). This subsection covers the mechanics; that guide covers the full discipline.
+**Where they fit in SDD:** enforcing the invariants people forget. The body of an Accepted ADR stays frozen; a spec the agent just wrote keeps its required sections; the active ADR list is in front of the agent on every prompt. Plus side effects like re-linting a doc after an edit.
 
-#### Events
+The mechanics — events, the JSON a hook reads on stdin, which exit code blocks — and a ready `settings.json` with the SDD hooks live in one place: [`quality-gates-guide.md` § Claude Code hooks](quality-gates-guide.md#claude-code-hooks-in-session).
 
-| Event | Fires when | Typical use |
-|-------|------------|------------|
-| `PreToolUse` | Before any tool call | Block destructive actions, gate edits, lint inputs |
-| `PostToolUse` | After a tool call completes | Trigger side effects (rebuild, regenerate, notify) |
-| `UserPromptSubmit` | User submits a new prompt | Inject context, log session |
-| `Stop` | The main agent finishes responding (end of every turn — not session end) | Per-turn checks: did the agent leave failing tests, uncommitted work |
-| `SubagentStop` | A subagent finishes | Capture subagent output, validate report |
-| `SessionEnd` | The session terminates | Cleanup, logging, reminders — output is *not* fed to the agent |
-| `Notification` | Agent emits a notification | Forward to chat, log to file |
-
-Each event accepts a `matcher` (which tool name or pattern triggers it — supports regex like `Edit|Write`) and a list of `hooks` (each with `type: command` and the shell command). The command receives the event payload as JSON on **stdin** — `tool_name`, `tool_input` (with `file_path`, `command`, …) — which you read with `jq`.
-
-#### Where they fit in SDD
-
-- **Enforce conventions.** A `PreToolUse` hook on `Edit|Write` for `.md` files runs `markdownlint`; malformed docs blocked at the source.
-- **Automate doc maintenance.** A `PostToolUse` hook on `Edit|Write` for `guides/*.md` regenerates the PDF via pandoc + Prince. Agent edits markdown; PDF stays in sync without anyone remembering.
-- **Inject context.** A `UserPromptSubmit` hook prepends *"the active ADR list is in `CLAUDE.md` § Active Decisions."* Agent gets the pointer for free.
-- **End-of-session discipline.** A `SessionEnd` hook checks for uncommitted spec changes, missing PR references in shipped specs, stale ADRs not updated this session — and surfaces them to the terminal or a log (the agent itself won't see `SessionEnd` output).
-- **Pre-commit gates.** Block commits that touch `src/` without a corresponding spec update, or modify ADRs with `Status: Accepted`.
-- **Block dangerous tools.** A `PreToolUse` hook on `Bash` that catches `rm -rf` or `git push --force`.
-- **Inject conventions just-in-time.** A `PreToolUse` hook on `Edit` for `*.cs` files prepends the team's C# style guide before the edit.
-
-#### Several example hooks
-
-**1. PDF auto-regen on guide changes**
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *guides/*.md) pandoc guides/spec-driven-development-guide.md guides/working-with-agents-guide.md guides/runbook-operations-guide.md -o pdf/claudecodeSDD-bundle.pdf --pdf-engine=prince -H pdf-style-wide.html --metadata title=\"claudecodeSDD\" ;; esac"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-Any time the agent edits a guide, the PDF rebuilds automatically.
-
-**2. Block edits to ADRs already marked `Status: Accepted`**
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "f=$(jq -r '.tool_input.file_path // empty'); if [[ \"$f\" == *docs/adr/* ]] && grep -q '^Status: Accepted' \"$f\" 2>/dev/null; then echo 'Blocked: ADR is Accepted — only the Status header may change. Create a new ADR with Supersedes instead.' >&2; exit 2; fi"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-The agent tries to edit the ADR; the hook stops it; the agent sees the message on stderr and reconsiders.
-
-**3. Inject the active ADR list on every prompt**
-
-```json
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'Active ADRs:' && grep -l '^Status: Accepted$' docs/adr/*.md 2>/dev/null | sed 's|docs/adr/||'"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-The agent sees the active ADR list before every prompt; the human stops having to remember to include it.
-
-**4. Markdown lint after every doc edit**
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *.md) markdownlint \"$f\" >&2 || true ;; esac"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-The `|| true` keeps the hook from blocking — issues just surface as informational output. Replace `|| true` with `|| exit 2` to escalate: exit code `2` is the blocking error code whose stderr is fed back to the agent (the edit already happened, but the agent sees the lint output and fixes the file).
-
-**5. End-of-session checklist**
-
-```json
-{
-  "hooks": {
-    "SessionEnd": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if git status --porcelain specs/ docs/adr/ | grep -q .; then echo 'Reminder: uncommitted changes in specs/ or docs/adr/.' >&2; fi"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-Surfaces the *"did you commit the spec / ADR?"* nudge when the session terminates. Note: `SessionEnd` output is **not** fed back to the agent — it's for side effects only (a reminder printed to the terminal, a log line). If you want the agent itself to act on the check, use a `Stop` hook with `exit 2` instead — but remember `Stop` fires every time the agent finishes responding, not once per session.
-
-**6. Block `rm -rf` and `git push --force`**
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cmd=$(jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'rm[[:space:]]+-rf|git[[:space:]]+push.*--force'; then echo 'Blocked: destructive command. If intended, run manually.' >&2; exit 2; fi"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-Catches the most common ways to lose work; bypassing requires explicit human action outside the agent.
-
-#### Operational notes
-
-- **Exit code 2 = blocking behavior.** Exit `0` allows the action. Exit `2` is the blocking error: stderr is fed back to the agent (on `PreToolUse` the tool call is blocked; on `PostToolUse` the tool already ran, but the agent sees the message). Any *other* non-zero exit is a non-blocking error shown to the user only — the agent never sees it. Use `2` for gates; use stderr to communicate to the agent.
-- **Hooks must be fast.** A hook that takes 5 seconds adds 5 seconds to every matching tool call. As a rule of thumb, aim for sub-100 ms. Push slow work into subagents or slash commands instead.
-- **Hooks log to stderr by default.** On exit code `2`, the agent sees stderr as part of the tool result; on other exit codes it surfaces to the user. For your own debugging, also tee to a file (`>> ~/.claude/hooks.log 2>&1`).
-- **Matchers support regex.** `Edit|Write` matches both. `Bash` matches all bash calls. `""` (empty) matches everything.
-- **Reading the payload.** The event arrives as JSON on stdin — `session_id`, `tool_name`, `tool_input` (with `file_path`, `command`, …) — read it with `jq`, e.g. `f=$(jq -r '.tool_input.file_path // empty')`. The documented environment variable is `$CLAUDE_PROJECT_DIR` (absolute project root — handy for referencing scripts, e.g. `"$CLAUDE_PROJECT_DIR/scripts/check.sh"`). Details vary by harness version — check current docs before relying on them.
-- **Project vs user scope.** Hooks in `~/.claude/settings.json` apply only to you; the team doesn't see them. For team-shared invariants, put hooks in project `.claude/settings.json` and commit it.
-
-#### Anti-patterns
-
-- **Silent failures.** A hook that fails without logging is invisible damage. Always log to a file or stderr — the agent thinks the convention is enforced, your repo says otherwise.
-- **Hooks doing real work.** A hook that runs a 30-second test suite is a misuse. Hooks validate / block / notify; for actual work, prefer subagents or slash commands.
-- **Over-restrictive `PreToolUse`.** A hook that blocks all Bash calls except a whitelist will frustrate the agent into asking permission for everything. Block dangerous things, not anything that *could theoretically* be wrong.
-- **Hook configuration not committed.** Hooks that only exist in one developer's `~/.claude/settings.json` aren't a team invariant — they're personal preference. For team-shared rules, commit `.claude/settings.json` to the repo.
-- **No way to bypass.** A hook that absolutely blocks a tool call with no escape (e.g., environment variable to skip it) is painful when you legitimately need the action. Build in `CLAUDE_HOOKS_SKIP=1` or similar for the rare valid case.
+**Anti-pattern:** a hook for a problem that hasn't bitten you yet. Add one when a real pain shows up — usually the ADR lock first.
 
 ### Which one to reach for
 

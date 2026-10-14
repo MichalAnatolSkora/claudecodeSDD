@@ -965,7 +965,7 @@ Partially yes. SDD enforcement operates on **three layers**, each with different
 | Layer | What it does | Example |
 |-------|-------------|---------|
 | **Mechanical** (regex, hooks, CI) | Hard gate: blocks specific actions | Block edits to bodies of ADRs with `Status: Accepted` |
-| **LLM evaluator** (configured subagent, slash command) | Soft gate: scores quality, surfaces issues | *"Are these acceptance criteria testable?"* |
+| **LLM evaluator** (read-only slash commands) | Soft gate: scores quality, surfaces issues | *"Are these acceptance criteria testable?"* |
 | **Human review** (code review, architecture meeting) | Judgment: ensures quality, completeness, intent | *"Is this Out-of-scope list complete enough to prevent drift?"* |
 
 The mistake most teams make is trying to mechanize judgment items (like "is this AC testable") or leave mechanical items (like "is the ADR body unchanged") to vigilance. Neither works at scale.
@@ -976,9 +976,9 @@ The mistake most teams make is trying to mechanize judgment items (like "is this
 - *False positive is expensive (blocks legit work), false negative is recoverable* → LLM evaluator that warns, not blocks
 - *Both depend on context* → human review
 
-A working SDD setup typically has: pre-commit hooks for PII and Accepted ADR protection, Claude Code hooks for in-session feedback (active ADR list, end-of-session reminders), a configured subagent (`trio-auditor`) for cross-artifact checks, slash commands (`/spec-check`, `/sdd-6-trio-check`) for user-invoked evaluation, and CI checks that block on mechanical issues but advise on LLM evaluations.
+For most 1–10 teams the working setup is small: good docs, one human on the PR, the break-the-code check already in `/sdd-7-implement`, the shipped read-only audits (`/sdd-3-spec-review`, `/sdd-6-trio-check`) — and one mechanical gate (a PII pre-commit hook, an Accepted-ADR lock) added only when a real pain shows up. CI checks that block on mechanical issues but only advise on LLM evaluations come later, past ~10.
 
-For the full treatment — five implementation patterns (pre-commit hooks, Claude Code hooks, configured subagents, slash commands, CI/CD), what belongs in each category for each SDD artifact, a complete worked example of a setup, and the anti-patterns (over-strict hooks, no escape hatch, mechanical checks of subjective things, alert fatigue) — see [`quality-gates-guide.md`](quality-gates-guide.md).
+For the details — what to mechanize vs leave human, where each check runs, ready pre-commit scripts, the Claude Code hook mechanics with a ready SDD `settings.json`, and the rules that keep automation from backfiring (over-strict hooks, no escape hatch, mechanical checks of subjective things, alert fatigue) — see [`quality-gates-guide.md`](quality-gates-guide.md).
 
 ---
 

@@ -640,7 +640,7 @@ The ADR reads as *"we did X because we did X."*
 
 ### 4. Editing old ADRs
 
-*(To mechanically prevent this — block edits to bodies of ADRs with `Status: Accepted` via a pre-commit hook or Claude Code `PreToolUse` hook — see [`quality-gates-guide.md`](quality-gates-guide.md) § "Pattern A" and "Pattern B".)*
+*(To mechanically prevent this — block edits to bodies of ADRs with `Status: Accepted` via a pre-commit hook or Claude Code `PreToolUse` hook — see [`quality-gates-guide.md`](quality-gates-guide.md) § "Pre-commit hooks" and § "Claude Code hooks" — the ADR lock.)*
 
 
 
