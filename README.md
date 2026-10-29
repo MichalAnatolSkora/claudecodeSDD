@@ -2,28 +2,35 @@
 
 > **Built for teams of 1–10.** A small team wielding AI coding agents can now ship what used to take hundreds of engineers — but raw speed isn't the moat. The moat is keeping the agents aligned with your intent as the codebase grows. This repo gives you that discipline **and the commands that run it.**
 
-Most SDD writeups hand you a *method*. This repo's strong point is the method **plus a runnable pipeline of 14 slash commands** — and, more importantly, **the discipline for operating them** so they fit real work instead of hardening into a waterfall.
+Most SDD writeups hand you a *method*. This repo's strong point is the method **plus a runnable pipeline of four slash commands** — and, more importantly, **the discipline for operating them** so they fit real work instead of hardening into a waterfall.
 
 ---
 
 ## The strong point: commands that *run* SDD — and how to operate them
 
-**The pipeline — 14 `/sdd-*` slash commands, idea to merge.** Each does one narrow thing and **stops for your judgment**: drafts are shown before saving, audits are read-only, open questions are surfaced rather than invented. The agent types; you stay the decision-maker.
+**The pipeline — four `/sdd-*` slash commands, idea to merge** (plus `/sdd-architecture`, run once per project). Each **stops for your judgment**: drafts are shown before saving, audits are read-only, open questions are surfaced rather than invented. The agent types; you stay the decision-maker.
+
+| Command | Does |
+|---------|------|
+| `/sdd-prd` | drafts a lean PRD (from an idea, or from a working PoC), then slices it into features |
+| `/sdd-spec` | writes the next piece of a feature's trio, in order — spec, then plan, then tasks |
+| `/sdd-check` | read-only audit of whatever exists — the gate before code |
+| `/sdd-build` | works the tasks red→green, commits each, then breaks the code on purpose |
 
 ```
     idea
      │
      ▼
-    /sdd-1-prd-new · /sdd-1-prd-from-poc · /sdd-1-prd-review
+    /sdd-prd · /sdd-check                  ← the PRD
      │
      ▼
- ┌─ /sdd-2-features-from-prd
+ ┌─ /sdd-prd                               ← slice into features
  │   │
  │   ▼
- │  /sdd-3-spec-new … /sdd-6-trio-check    ← the trio
+ │  /sdd-spec · /sdd-check                 ← the trio
  │   │
  │   ▼
- │  /sdd-7-implement
+ │  /sdd-build
  │   │
  │   ▼
  │  merge & freeze
@@ -31,18 +38,18 @@ Most SDD writeups hand you a *method*. This repo's strong point is the method **
  └───┘ loop: a shipped slice re-ranks the next slice
 ```
 
-The skill isn't running all 14 in a row — it's **operating** them. Three rules:
+The skill isn't running them all in a row — it's **operating** them. Three rules:
 
-1. **Enter where your change starts; skip the rest.** You rarely run the whole pipeline. A one-line fix is a short spec and `/sdd-7-implement`. A known feature starts at `/sdd-3-spec-new`. A new product starts at `/sdd-1-prd-new` — or, if you've already built a working PoC (how most new products actually start), at `/sdd-1-prd-from-poc`, which backfills the PRD from it without faking specs. → [entry table](guides/flow-guide.md#at-a-glance)
+1. **Enter where your change starts; skip the rest.** You rarely run the whole pipeline. A one-line fix is a short spec and `/sdd-build`. A known feature starts at `/sdd-spec`. A new product starts at `/sdd-prd` — given a seed idea, or, if you've already built a working PoC (how most new products actually start), the path to it, which backfills the PRD without faking specs. → [entry table](guides/flow-guide.md#at-a-glance)
 
 2. **Compress to fit the change.** A one-liner → just a PR. A bug → a short `SPEC.md`. A small feature → a one-file trio (spec/plan/tasks in one file). A real feature → the full three-file trio. Match the ceremony to the size; when in doubt, write the shorter one.
 
-3. **Loop, don't waterfall.** The order — spec → plan → tasks → code — is the discipline *within* a slice; *between* slices you loop. Three loops reuse the **same** commands, no new ones:
-   - **delivery vs discovery** — when you can't write the acceptance criteria yet, mark the spec `discovery`, spike first (throwaway), let the AC *emerge*, then run the trio;
-   - **code→spec** — when implementation proves an AC wrong, edit the still-`Active` spec in place (`CHANGED during implementation:`) and re-run `/sdd-6-trio-check`;
-   - **re-slice** — when a shipped slice reshapes the backlog, re-run `/sdd-2-features-from-prd` (it merges, never resets).
+3. **Loop, don't waterfall.** The order — spec → plan → tasks → code — is the discipline *within* a slice; *between* slices you loop. No extra commands, no modes, no status fields (git is the status: a spec on a branch is editable, merged it's frozen) — three rules:
+   - **can't write the acceptance criteria yet?** Spike first on a throwaway branch, then write the spec from what it taught;
+   - **the code shows an AC was wrong?** Fix the spec before merge — a dated line in the trio's Notes says why — and re-run `/sdd-check`;
+   - **a shipped slice changed the backlog?** Re-run `/sdd-prd` to re-slice the PRD's Feature breakdown.
 
-   → [Iterative loops — the same commands, run in cycles](guides/flow-guide.md#iterative-loops--the-same-commands-run-in-cycles)
+   → [When work loops — three rules](guides/flow-guide.md#when-work-loops--three-rules)
 
 That third rule is the part most SDD tooling misses: a command pipeline that reads as a one-way waterfall and breaks the moment real work loops back. Here the loop is first-class — but the order discipline inside each slice stays intact.
 
@@ -58,7 +65,7 @@ Run *from inside your repo*. Pick based on whether you also want a starter `CLAU
 npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude
 ```
 
-That drops all fourteen `/sdd-*` commands into `.claude/commands/`, plus a one-screen cheat sheet of them by phase ([`templates/.claude/README.md`](templates/.claude/README.md)) — ready to use. The `sdd-N-` prefix just makes them sort in pipeline order; the guides refer to every command by its full name.
+That drops the five `/sdd-*` commands into `.claude/commands/`, plus a one-screen cheat sheet of them ([`templates/.claude/README.md`](templates/.claude/README.md)) — ready to use.
 
 **Commands + a starter `CLAUDE.md`** (plain git — degit can't grab the single `CLAUDE.md` file):
 
@@ -90,7 +97,7 @@ git clone --depth 1 https://github.com/MichalAnatolSkora/claudecodeSDD /tmp/sdd 
 
 Then, in order:
 
-1. **[The whole flow, end to end](guides/flow-guide.md)** — the command pipeline as a runnable sequence: every `/sdd-*` command, what it produces, the entry table, the iterative loops, and a one-screen cheat sheet. **This is the "how to operate the commands" guide.**
+1. **[The whole flow, end to end](guides/flow-guide.md)** — the command pipeline as a runnable sequence: every `/sdd-*` command, what it produces, the entry table, the three rules for when work loops, and a one-screen cheat sheet. **This is the "how to operate the commands" guide.**
 2. **★ [The Feature Trio: spec → plan → tasks](guides/spec-plan-tasks-guide.md)** — the core loop and the one guide to read deeply. Three short markdown files written in order drive every change; the commands above are just this loop, automated. The order holds within a slice; across slices you iterate.
 3. **[Spec-Driven Development Guide](guides/spec-driven-development-guide.md)** — the full map: the stable layer (`CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md`), PRDs, ADRs, the three-layer documentation model, and the workflow that ties them together.
 
@@ -99,8 +106,8 @@ The guides assume a mid-sized project context (.NET, Quartz, SFTP integrations, 
 ## Guides
 
 - **[SDD in 5 files](guides/sdd-in-5-files.md)** — the whole method on one page: the five files you start with, the per-change loop, and when to add more. The front door — start here, and descend into the rest only when a real need fires.
-- **[The whole flow, end to end](guides/flow-guide.md)** — the complete loop as a runnable command sequence: every command and what it produces, from idea → PRD → slice → trio → implement+test → ADR → merge, the entry table, the iterative loops, and a one-screen cheat sheet. Enter where your change starts; skip the rest.
-- **★ [The Feature Trio: spec → plan → tasks](guides/spec-plan-tasks-guide.md)** — **the core loop of the whole method, and the one guide to read first.** Three short markdown files written in order (`SPEC.md` → `PLAN.md` → `TASKS.md`) drive every change. Inside: three worked examples (a feature as the full three-file trio, a small feature as a one-file trio, and a discovery feature whose first spec was wrong), what sections each file needs, the `/sdd-*` command for each authoring step (draft/review/validate per artifact), iteration loops (delivery vs discovery, the code→spec correction loop), cross-artifact consistency checks, and the slash commands worth turning into shortcuts. Deliberately simple — no toolkit required.
+- **[The whole flow, end to end](guides/flow-guide.md)** — the complete loop as a runnable command sequence: every command and what it produces, from idea → PRD → slice → trio → implement+test → ADR → merge, the entry table, the three rules for when work loops, and a one-screen cheat sheet. Enter where your change starts; skip the rest.
+- **★ [The Feature Trio: spec → plan → tasks](guides/spec-plan-tasks-guide.md)** — **the core loop of the whole method, and the one guide to read first.** Three short markdown files written in order (`SPEC.md` → `PLAN.md` → `TASKS.md`) drive every change. Inside: three worked examples (a feature as the full three-file trio, a small feature as a one-file trio, and a discovery feature whose first spec was wrong), what sections each file needs, the two commands behind every authoring step (`/sdd-spec` writes each piece in order, `/sdd-check` audits it), iteration loops (sharpening a draft, spike-first when the acceptance criteria can't be written yet, fixing a wrong AC before merge), cross-artifact consistency checks, and the slash commands worth turning into shortcuts. Deliberately simple — no toolkit required.
 - **[Spec-Driven Development Guide](guides/spec-driven-development-guide.md)** — the map: one short section per piece (PRD, the trio, ADRs, the three-layer model, runbooks, teams) pointing at the guide that covers it, plus the reactive-files trigger table and the spec status lifecycle.
 - **[Runbook / Operations Documentation Guide](guides/runbook-operations-guide.md)** — companion guide for the operational layer: what to do when things break, how to write entries that pass the 3 a.m. test, and how the agent reads runbooks when generating diagnostic scripts.
 - **[Working with AI Coding Agents](guides/working-with-agents-guide.md)** — how the agent actually reads your repo, when it loads a file (and why it sometimes doesn't), how many docs is too many before things break down, token economy, and the practical prompting patterns for specs, ADRs, and refactors (runbook prompts live in the runbook guide).
@@ -120,7 +127,7 @@ The guides assume a mid-sized project context (.NET, Quartz, SFTP integrations, 
 ├── README.md                          # you are here
 ├── guides/                            # long-form methodology guides (the "why" behind the commands)
 │   ├── sdd-in-5-files.md              # the whole method on one page — the front door
-│   ├── flow-guide.md                  # the command pipeline + how to operate it (incl. iterative loops)
+│   ├── flow-guide.md                  # the command pipeline + how to operate it (incl. when work loops)
 │   ├── spec-plan-tasks-guide.md       # ★ the core loop — worked trios + the command per step (read first)
 │   ├── spec-driven-development-guide.md   # the full map
 │   ├── runbook-operations-guide.md
@@ -134,11 +141,10 @@ The guides assume a mid-sized project context (.NET, Quartz, SFTP integrations, 
 │   ├── legacy-to-sdd-migration-guide.md   # retrofitting SDD onto an existing repo
 │   └── who-uses-sdd.md                # who uses SDD and what they call it (plain who-uses-what)
 ├── templates/                         # copy-pasteable starting points
-│   ├── .claude/commands/             # the /sdd-1…7 slash-command pipeline (copy into your project)
+│   ├── .claude/commands/             # the /sdd-* slash-command pipeline (copy into your project)
 │   ├── CLAUDE.md                      # agent instruction hub (behavioral + project layer)
 │   ├── ARCHITECTURE.md                # stable architecture layer: components, boundaries, data flow
 │   ├── PRD.md
-│   ├── FEATURES.md                    # prioritized backlog of vertical slices from the PRD(s)
 │   ├── spec.md
 │   ├── plan.md
 │   ├── tasks.md                       # execution checklist with verification per step
@@ -154,11 +160,10 @@ The guides assume a mid-sized project context (.NET, Quartz, SFTP integrations, 
 
 The artifacts the commands produce and the agent reads. Copy into your project and fill in the brackets:
 
-- **[.claude/ command pipeline](templates/.claude/)** — the 14 Claude Code slash commands (`/sdd-1-prd-new` … `/sdd-7-implement`) that take a change from idea through the trio into implementation. This is the operating layer; see [Get the commands](#get-the-commands) above to install.
+- **[.claude/ command pipeline](templates/.claude/)** — the Claude Code slash commands (`/sdd-prd`, `/sdd-spec`, `/sdd-check`, `/sdd-build`, plus the once-per-project `/sdd-architecture`) that take a change from idea through the trio into implementation. This is the operating layer; see [Get the commands](#get-the-commands) above to install.
 - **[CLAUDE.md](templates/CLAUDE.md)** — agent instruction hub with two layers: literal-copied behavioral guidelines (from [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md), kept verbatim with attribution) + bracketed project-specific sections you fill in
 - **[ARCHITECTURE.md](templates/ARCHITECTURE.md)** — the stable architecture layer: components, boundaries, and the main data flow the agent reads before touching a feature (the *why* lives in ADRs)
-- **[PRD.md](templates/PRD.md)** — product requirements document (problem, users, success criteria, constraints) — the *starting* artifact, freezes after v1
-- **[FEATURES.md](templates/FEATURES.md)** — the feature index: a prioritized backlog of vertical slices derived from the PRD(s), with status per slice (optional — `specs/*/` + git can be the map instead)
+- **[PRD.md](templates/PRD.md)** — product requirements document (problem, users, success criteria, constraints, and the Feature breakdown of slices) — the *starting* artifact, freezes after v1 except the Feature breakdown
 - **[spec.md](templates/spec.md)** — feature specification (goal, scope, acceptance criteria, open questions)
 - **[plan.md](templates/plan.md)** — implementation plan (decisions, file structure, constraints)
 - **[tasks.md](templates/tasks.md)** — execution checklist with one verification per step

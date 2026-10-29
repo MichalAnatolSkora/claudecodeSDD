@@ -40,12 +40,12 @@ Vertical slices, walking-skeleton first. Each becomes one `specs/YYYY-MM-slug/` 
 | 1 | Walking skeleton: export one partner's `RDY` orders to XML, deliver by SFTP, record the batch | G1, G2 | M | — |
 | 2 | CSV format option per partner | G4 | S | 1 |
 | 3 | **Retry failed deliveries (backoff + dead-letter)** | **G1, G3** | **M** | 1 |
-| 4 | Per-partner schedule configuration | G4 | S | 1 |
 | 5 | Operator batch-status view | G2 | M | 1 |
+| 4 | Per-partner schedule configuration | G4 | S | 1 |
 
 This example carries **feature 3** through the full trio (`spec → plan → tasks`) and the ADR it produced — see [`specs/2026-02-delivery-retry/`](../../specs/2026-02-delivery-retry/) and [`ADR-015`](../adr/ADR-015-delivery-retry-backoff.md).
 
-> This list is the slice **snapshot** captured when the PRD was accepted — it freezes with the PRD. Which features are shipped or in flight lives in `specs/` and your tracker, **not here**: a PRD never takes per-feature status edits (the "freeze after v1" rule — see [`prd-guide.md`](../../../../guides/prd-guide.md)).
+> This table is the era's **backlog** — the one part of the PRD that stays editable after it freezes. Re-slicing re-orders it: feature 5 was pulled ahead of 4 once live exports showed operators needed visibility first. **No status column:** what's shipped is what's merged under `specs/`, and git already shows that (see [`prd-guide.md`](../../../../guides/prd-guide.md)).
 
 ## Risks / open questions
 

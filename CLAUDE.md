@@ -14,7 +14,7 @@ Long-form guides + copy-pasteable templates for spec-driven development with AI 
 ├── .claude/commands/                  # repo-local slash commands (e.g. /pdf build helper)
 ├── guides/                            # long-form methodology guides (full list under "Editorial structure")
 ├── templates/                         # copy-pasteable starting points
-│   └── .claude/commands/              # the sdd-1 … sdd-7 slash-command pipeline for user repos
+│   └── .claude/commands/              # the /sdd-* slash-command pipeline for user repos (prd, spec, check, build + architecture)
 ├── examples/                          # worked end-to-end SDD doc sets (illustrative, docs-only)
 │   └── order-export/                  # one fictional app: PRD → trio → ADR, cross-linked
 └── pdf-style-wide.html                # the PDF style (full-width, small font, page footers)
@@ -32,6 +32,8 @@ Built PDFs live in `pdf/` (a per-guide PDF for each `guides/*.md`, plus `claudec
 
 **Design target: teams of 1–10.** Default every convention to the lightest form that works for a solo dev; make ceremony opt-in (e.g. optional `Status:` / `Owner:` headers, not required ones). Multi-person depth — ownership, review flow — lives in `guides/sdd-in-teams-guide.md`, which itself stays scoped to 1–10 (RACI, multi-team/monorepo, and regulated-industry gates are named there as "when you outgrow this", not documented). When an edit would add *required* structure, ask whether a one-person team would still want it; if not, make it optional.
 
+**Commands, status, loops — keep them few.** Four per-change commands (`/sdd-prd`, `/sdd-spec`, `/sdd-check`, `/sdd-build`) plus the once-per-project `/sdd-architecture`; don't split them back into per-step commands. No status fields on specs or trios — git is the status (on a branch = editable, merged = frozen); the slice list lives in the PRD's `## Feature breakdown`, with no status column. Looping is three rules (spike first when the AC can't be written; fix a wrong AC before merge with a dated Notes line; re-slice with `/sdd-prd`), not named modes or markers. ADR status (Proposed / Accepted / Superseded) stays.
+
 When new content needs to land in the docs:
 
 - **High-level principle, workflow framing, or repo-wide convention** → `spec-driven-development-guide.md`
@@ -48,7 +50,7 @@ Existing detail guides:
 - `guides/adr-guide.md` — full ADR how-to: Nygard format, MADR + the compact variant, four worked examples, Supersedes pattern, numbering, cross-referencing, anti-patterns, tooling, maintenance
 - `guides/prd-guide.md` — PRD how-to: formats (PR-FAQ / lean / one-pager / full), anatomy, two worked-example PRDs (era 1 + era 2), era-boundary heuristics, AI-authoring commands (+ one by-hand prompt), lightweight review, slicing into features, anti-patterns
 - `guides/quality-gates-guide.md` — enforcement + evaluation of SDD, kept light: the lightweight 1–10 version first, three kinds of checks (mechanical / LLM evaluator / human), what to mechanize vs leave human, where each check runs, pre-commit scripts, the repo's single home for Claude Code hooks (mechanics + one SDD `settings.json`), CI/subagents only named under "outgrow ~10", golden rules
-- `guides/spec-plan-tasks-guide.md` — **the flagship guide and centerpiece of the repo: the core spec → plan → tasks loop.** Three worked-example trios (a non-trivial feature as the three-file trio, a small feature as a one-file trio, and a discovery feature whose first spec was wrong), one `/sdd-*` command per authoring step (the prompts live only in the command files), iteration loops (incl. delivery vs discovery modes and the code→spec correction loop), cross-artifact consistency checks, slash-command sketches. Deliberately kept simple (no toolkit/scaffolder). Keep this the most polished guide.
+- `guides/spec-plan-tasks-guide.md` — **the flagship guide and centerpiece of the repo: the core spec → plan → tasks loop.** Three worked-example trios (a non-trivial feature as the three-file trio, a small feature as a one-file trio, and a discovery feature whose first spec was wrong), two commands behind every authoring step — `/sdd-spec` writes each piece in order, `/sdd-check` audits it (the prompts live only in the command files) — iteration loops (incl. spike-first and fixing a wrong AC before merge), cross-artifact consistency checks, slash-command sketches. Deliberately kept simple (no toolkit/scaffolder). Keep this the most polished guide.
 - `guides/flow-guide.md` — the whole SDD flow as a runnable sequence: each step's command and output (idea → PRD → slice → trio → implement+test → ADR → merge), an entry-points table, and a cheat sheet. The spine; depth lives in the linked guides. Complements the "The whole flow" map section in the overview.
 - `guides/sdd-in-teams-guide.md` — running SDD with 2–10 people, kept deliberately light: who owns what (one name per artifact), lightweight PR review, spec lifecycle, ADRs as a shared decision log, the solo case, onboarding, small-team failure modes, and what to add only when you outgrow ~10. No RACI / enterprise ceremony.
 - `guides/legacy-to-sdd-migration-guide.md` — the one-time process of retrofitting SDD onto an existing codebase (audit, foundation, forward-only specs, reactive ADRs, agent prompts, worked examples)

@@ -1,8 +1,8 @@
 # [Feature name]
 
 > Copy this file to `specs/YYYY-MM-feature-slug/spec.md` and fill in.
-> Optional (1–10 people): top with a `Status:` line (Draft → Active → Shipped → Superseded); add `Owner:` only past ~5 people — below that, `git blame` covers it.
-> At merge, append `STATUS: shipped (PR #N, YYYY-MM-DD)` — that line is the lightweight default marker; if you use the `Status:` header too, flip it as well. After that the spec is frozen.
+> No status line — git is the status: editable on a branch, frozen once merged (the PR description links it: `Implements: specs/YYYY-MM-feature-slug/`).
+> Optional past ~5 people: an `Owner:` line — below that, `git blame` covers it.
 
 ## Goal
 

@@ -28,4 +28,4 @@
 | AC7 deterministic timing | 4 |
 
 ---
-*Illustrative tasks. After merge: append `STATUS: shipped (PR #N, date)` to the spec, then it freezes.*
+*Illustrative tasks. Once the PR merges, the trio freezes — there's no status line to flip; git is the status.*

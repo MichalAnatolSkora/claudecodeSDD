@@ -500,7 +500,7 @@ Do **not** list Superseded or Deprecated ADRs here — the agent should not trea
 
 How ADRs connect to the spec → plan → tasks loop (see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md)):
 
-- **`PLAN.md` cites the ADRs that constrain it.** The plan's § Technical decisions lists the Accepted ADRs it must respect (ADR-007 Dapper, ADR-003 Quartz, …); the `/sdd-4-plan-validate` gate checks that those citations are real and current.
+- **`PLAN.md` cites the ADRs that constrain it.** The plan's § Technical decisions lists the Accepted ADRs it must respect (ADR-007 Dapper, ADR-003 Quartz, …); the `/sdd-check` gate checks that those citations are real and current.
 - **Hard decisions graduate into ADRs.** When a genuinely hard call surfaces during spec review or implementation, it leaves the trio: write a new ADR, reference it from the plan, and add it to `CLAUDE.md` § Active decisions. That's exactly how this repo's example [ADR-015](../examples/order-export/docs/adr/ADR-015-delivery-retry-backoff.md) came out of the `delivery-retry` trio.
 - **Solo case:** you accept your own ADR. The value is the written alternatives, not the ceremony.
 
@@ -530,7 +530,7 @@ If the ADR fails any of those, comment and ask the author to revise before Accep
 
 The agent can do most of the typing; you do the judging. Three reusable prompts — other guides link here rather than repeating them.
 
-For the once-per-project foundation pass you don't need them: [`/sdd-2-architecture-from-prd`](../templates/.claude/commands/sdd-2-architecture-from-prd.md) (greenfield) and [`/sdd-2-architecture-from-code`](../templates/.claude/commands/sdd-2-architecture-from-code.md) (existing codebase) stub one ADR per hard-to-reverse decision while they draft `ARCHITECTURE.md`. The prompts below are for one decision at a time, after that.
+For the once-per-project foundation pass you don't need them: [`/sdd-architecture`](../templates/.claude/commands/sdd-architecture.md) — by Q&A from the PRD (greenfield) or read off the code (existing codebase) — stubs one ADR per hard-to-reverse decision while it drafts `ARCHITECTURE.md`. The prompts below are for one decision at a time, after that.
 
 ### Draft a new ADR from a decision summary
 

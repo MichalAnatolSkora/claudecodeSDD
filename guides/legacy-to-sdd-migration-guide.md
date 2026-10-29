@@ -93,7 +93,7 @@ Then cut hard. The agent invents conventions that aren't real, misses the unwrit
 
 ### Day 2–3 — `ARCHITECTURE.md`
 
-Run the shipped command [**`/sdd-2-architecture-from-code`**](../templates/.claude/commands/sdd-2-architecture-from-code.md). It scans the source and follows imports to the real boundaries (not the folder names), then drafts a short, structural `ARCHITECTURE.md`: components one line each, where I/O and cross-cutting concerns live, and the main data flow including the failure path. It also stubs a *reactive* ADR for each load-bearing decision already in force (the ORM, the scheduler, the service shape), and marks every inference `[VERIFY]`. It describes what's there rather than what should be. Not on Claude Code? Paste the command file's body into your agent.
+Run the shipped command [**`/sdd-architecture`**](../templates/.claude/commands/sdd-architecture.md) (it picks its *from code* mode on an existing codebase). It scans the source and follows imports to the real boundaries (not the folder names), then drafts a short, structural `ARCHITECTURE.md`: components one line each, where I/O and cross-cutting concerns live, and the main data flow including the failure path. It also stubs a *reactive* ADR for each load-bearing decision already in force (the ORM, the scheduler, the service shape), and marks every inference `[VERIFY]`. It describes what's there rather than what should be. Not on Claude Code? Paste the command file's body into your agent.
 
 Review it with someone who knows the system — the agent draws boundaries that aren't enforced and misses ones that are.
 
@@ -141,7 +141,7 @@ You don't have to hand-type the spec/plan/tasks prompts — the commands ship wi
 npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude
 ```
 
-Then it's `/sdd-3-spec-new` → `/sdd-4-plan-from-spec` → `/sdd-5-tasks-from-plan` → `/sdd-6-trio-check` — the shipped files are phase-numbered so they sort in pipeline order. (The whole loop, step by step: [`flow-guide.md`](flow-guide.md). The trio itself: [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).)
+Then it's `/sdd-spec` (spec, then plan, then tasks) → `/sdd-check` → `/sdd-build`. (The whole loop, step by step: [`flow-guide.md`](flow-guide.md). The trio itself: [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md).)
 
 ---
 
@@ -179,10 +179,10 @@ Write any of these before the trigger and you get a doc that's wrong, generic, o
 
 After a month of real use you'll notice yourself typing the same prompts. That's the signal to package them.
 
-- **You don't have to build the trio commands** — this repo ships them ready-made (`/sdd-1-prd-new`, `/sdd-2-features-from-prd`, `/sdd-3-spec-new`, … `/sdd-6-trio-check`). Copy them with the one-liner above.
+- **You don't have to build the trio commands** — this repo ships them ready-made (`/sdd-prd`, `/sdd-spec`, `/sdd-check`, `/sdd-build`, plus the once-per-project `/sdd-architecture`). Copy them with the one-liner above.
 - **Your own repeated prompts** → a slash command. Anything you've typed 5+ times becomes a single `.claude/commands/<name>.md` (e.g. an `audit-docs` or `end-session` prompt).
 - **Repeated read-heavy audits** (doc-staleness, ADR-vs-code checks) → a subagent, so they don't bloat your main session.
-- **Invariants you want enforced** (block edits to accepted ADRs, check that shipped specs link a PR) → a `settings.json` hook.
+- **Invariants you want enforced** (block edits to accepted ADRs, block edits to merged specs) → a `settings.json` hook.
 
 Don't do this in week 1. The prompts that *look* recurring on day 1 are mostly wrong; the real ones surface after a few weeks of use. (Mechanics: [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks).)
 

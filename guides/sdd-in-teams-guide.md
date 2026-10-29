@@ -42,7 +42,7 @@ In a team of 1–10, everyone wears several hats. Job titles don't matter; one t
 
 You don't need nine roles. In practice a small team has three hats, and one person often wears two:
 
-- **Driver** — whoever's making the change. Writes the spec/plan/tasks, implements, marks it shipped.
+- **Driver** — whoever's making the change. Writes the spec/plan/tasks, implements, merges it.
 - **Reviewer** — someone *other than* the driver. Checks scope ("is this what we meant to build?") and sanity ("does the plan fight an ADR?").
 - **Keeper** — the most senior engineer or the founder. Owns the stable layer (`CLAUDE.md`, `ARCHITECTURE.md`, the active-ADR list) and breaks ties.
 
@@ -57,32 +57,31 @@ A rough owner per artifact:
 | `DOMAIN.md` / glossary | whoever knows the domain best |
 | a runbook entry | whoever resolved the incident |
 
-That's the whole ownership model. Put the owner's name in the file header if it isn't obvious — but below ~5 people it usually is, and `git blame` settles the rest (the next section covers the optional `Owner:` / `Status:` header).
+That's the whole ownership model. Put the owner's name in the file header if it isn't obvious — but below ~5 people it usually is, and `git blame` settles the rest (the next section covers the optional `Owner:` header).
 
 ---
 
 ## Status and owner on docs (optional)
 
-Two optional one-liners can sit at the top of any spec/plan/tasks doc:
+One optional one-liner can sit at the top of any spec/plan/tasks doc:
 
 ```text
-Status: Active
 Owner:  @ana
 ```
 
-Add them only when they earn their place — default to the lightest form.
+Add it only when it earns its place — default to the lightest form.
 
-**Status** — what state the doc is in: **Draft** (being written) → **Active** (approved, in progress) → **Shipped** (merged) → **Superseded** (a later doc replaces it — link it). Same lifecycle the templates and the overview use for specs, generalized to all three docs.
+**Status** — no header for it: git is the status. A spec on a branch or in an open PR is in flight and still editable; once its PR merges, it's shipped and frozen. A later spec that replaces it links it from its own References. A hand-kept status field only repeats what git already says — and goes stale the first time someone forgets to flip it.
 
 **Owner** — who to ask. At the small end, skip it: `git blame` and the PR author already say who wrote and merged a doc, more reliably than a hand-kept field that goes stale.
 
 Scale it to your team:
 
-| Team size | Status | Owner |
-|-----------|--------|-------|
-| Solo (1) | skip — unless you juggle several specs at once | skip — it's you |
-| Small (2–5) | useful (Draft / Active / Shipped) | optional — git usually covers it |
-| Toward 10 | useful | add it when *"who do I ask?"* stops being obvious |
+| Team size | Owner |
+|-----------|-------|
+| Solo (1) | skip — it's you |
+| Small (2–5) | optional — git usually covers it |
+| Toward 10 | add it when *"who do I ask?"* stops being obvious |
 
 This is the doc-header companion to [§ Who owns what](#who-owns-what--one-name-per-artifact) above: that section is *who's on the hook*; this is *how you mark it on the doc* when it's worth the keystrokes.
 
@@ -100,8 +99,7 @@ At 2+ people, one opt-in ritual earns its keep: a **docs checklist in the PR tem
 
 ```markdown
 ## Documentation
-- [ ] Spec at `specs/YYYY-MM-slug/`
-- [ ] Spec status set to `shipped` (post-merge)
+- [ ] PR description links the spec: `Implements: specs/YYYY-MM-slug/`
 - [ ] ARCHITECTURE.md updated (or N/A)
 - [ ] CLAUDE.md updated if a new convention emerged (or N/A)
 - [ ] Active ADR list updated if an ADR changed (or N/A)
@@ -113,13 +111,13 @@ The `(or N/A)` matters — people won't tick boxes that don't apply, so make the
 
 ## Spec lifecycle
 
-A spec moves through a few states. Who's involved at each:
+A spec moves through a few stages — all of them visible in git, none of them a field you maintain. Who's involved at each:
 
-1. **Draft** — the driver writes `SPEC.md` (plus `PLAN.md` / `TASKS.md` if the change earns them); open questions listed at the end.
-2. **Review** — a process step, not a status (the doc is still `Draft`): one other person checks scope and sanity; open questions get answered or pushed into an ADR.
-3. **Active** — implementation in progress; the driver works the tasks, and the PR links the spec folder.
-4. **Shipped** — PR merged; the driver appends `STATUS: shipped (PR #N, YYYY-MM-DD)` to the spec (and flips the `Status:` header if you use one). The spec freezes as history in `specs/<slug>/`. If the feature changes later, write a *new* spec; never edit a shipped one.
-5. **Superseded** — only if a later spec replaces it; link the new spec from the old one.
+1. **Draft** — on a branch, the driver writes `SPEC.md` (plus `PLAN.md` / `TASKS.md` if the change earns them); open questions listed at the end.
+2. **Review** — in the PR: one other person checks scope and sanity; open questions get answered or pushed into an ADR.
+3. **Build** — the driver works the tasks on the same branch, and the PR description links the spec (`Implements: specs/<slug>/`). Until merge the spec can still change: if the code shows an AC was wrong, fix it in place — a dated line in the trio's Notes says why — and re-run `/sdd-check`.
+4. **Merged** — the merge *is* the shipped marker: the spec freezes as history in `specs/<slug>/`. If the feature changes later, write a *new* spec; never edit a merged one.
+5. **Replaced** — only if a later spec replaces it; the new spec links the old one from its References.
 
 Where it leaks: the **Review** step (busy reviewers, specs piling up). The 24-hour timebox above is the fix.
 
@@ -205,7 +203,7 @@ None of that is documented here on purpose. Adding it for a five-person team is 
 
 1. **One name per artifact, never "the team."** The fastest way team SDD dies.
 2. **The driver writes the docs.** Whoever makes the change writes its spec and updates what it touched — not a dedicated scribe.
-3. **Docs ride with the PR.** Spec status, ADR list, `CLAUDE.md` — same PR as the code.
+3. **Docs ride with the PR.** The spec, the ADR list, `CLAUDE.md` — same PR as the code.
 4. **Engineer proposes, the keeper ratifies.** Keeps decisions consistent without bottlenecking on one person.
 5. **24 hours to review, or it ships.** A timebox beats a perfect review nobody reaches.
 6. **Onboarding is an audit.** A new person's confusion points at the doc that needs work.

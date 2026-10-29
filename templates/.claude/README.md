@@ -1,6 +1,6 @@
-# SDD trio commands (copy into your project's `.claude/`)
+# SDD commands (copy into your project's `.claude/`)
 
-Copy-pasteable Claude Code slash commands for the full SDD loop: idea → PRD → features → **spec → plan → tasks** → check → implement. Every command is namespaced `sdd-` and carries its **phase number**, so `/sdd` + Tab lists them in flow order and you can always see which phase you're in. See [`guides/spec-plan-tasks-guide.md`](../../guides/spec-plan-tasks-guide.md) § "Slash commands worth having" and [`guides/flow-guide.md`](../../guides/flow-guide.md) for the whole flow.
+Copy-pasteable Claude Code slash commands for the whole SDD loop: idea → PRD → features → **spec → plan → tasks** → check → build. Four commands do the per-change work, plus one you run once per project. See [`guides/spec-plan-tasks-guide.md`](../../guides/spec-plan-tasks-guide.md) and [`guides/flow-guide.md`](../../guides/flow-guide.md) for the whole flow.
 
 ## Get them
 
@@ -10,31 +10,28 @@ Drop the whole `.claude/` into your repo (commands **+ this cheat sheet**):
 npx degit MichalAnatolSkora/claudecodeSDD/templates/.claude .claude
 ```
 
-## Cheat sheet — commands by phase
+## Cheat sheet
 
-The number **is** the phase in the flow. `<...>` is required input; `[path]` is optional and defaults to the most recent folder under `specs/` (or the PRD under `docs/prd/`).
+`<...>` is required input; `[...]` is optional — with no path, a command uses the most recent spec under `specs/` (or the PRD under `docs/prd/`) and tells you which.
 
-| Phase | Command | What it does |
-|-------|---------|--------------|
-| **1 · PRD** | `/sdd-1-prd-new <1–3 sentences>` | Sketch a lean PRD from a seed idea, then fill the gaps by Q&A |
-| | `/sdd-1-prd-from-poc [path]` | Already built a working PoC? Read it (default `src/`), ask you the *why* the code can't tell, backfill a lean PRD — never a spec |
-| | `/sdd-1-prd-review [path]` | Audit a draft PRD for gaps (read-only) |
-| **2 · Features + Architecture** | `/sdd-2-features-from-prd [path]` | Slice an accepted PRD into a prioritized, vertically-sliced feature list (read-only) |
-| | `/sdd-2-architecture-from-prd [path]` | Greenfield: Q&A the foundational choices (hosting, datastore, shape) → `ARCHITECTURE.md` + a stub ADR per hard decision |
-| | `/sdd-2-architecture-from-code [path]` | Existing codebase: reverse-engineer `ARCHITECTURE.md` + ADRs for the decisions already in force |
-| **3 · Spec** | `/sdd-3-spec-new <idea>` | Draft a `spec.md` from a one-paragraph idea |
-| | `/sdd-3-spec-review [path]` | Audit a spec for gaps (read-only) |
-| **4 · Plan** | `/sdd-4-plan-from-spec [path]` | Draft `plan.md` from a reviewed spec |
-| | `/sdd-4-plan-validate [path]` | Check the plan against ADRs + `ARCHITECTURE.md` (read-only) |
-| **5 · Tasks** | `/sdd-5-tasks-from-plan [path]` | Draft an ordered, verifiable `tasks.md` |
-| | `/sdd-5-tasks-add <what> [path]` | Append/insert task(s) into an existing `tasks.md` (or a one-file trio's Tasks section) |
-| **6 · Check** | `/sdd-6-trio-check [path]` | Final consistency audit across spec/plan/tasks — the gate before code (read-only) |
-| **7 · Implement** | `/sdd-7-implement [path]` | Work `tasks.md` red→green, commit per task, then the break-the-code check |
+| Command | What it does |
+|---------|--------------|
+| `/sdd-prd [idea \| PoC path \| PRD path]` | Draft a lean PRD from a 1–3 sentence idea, or backfill one from a kept PoC (never a spec) — then, on an accepted PRD, slice it into the `## Feature breakdown` (run it again to re-slice) |
+| `/sdd-spec [idea \| spec path \| tasks to add]` | Write the next missing piece of a feature's trio, in order — spec, then plan, then tasks — showing each draft before saving; on a finished trio, insert tasks |
+| `/sdd-check [path]` | Read-only audit of whatever exists — PRD, spec, plan vs ADRs + `ARCHITECTURE.md`, trio consistency. The gate before code |
+| `/sdd-build [path]` | Work `tasks.md` red→green, commit per task, then the break-the-code check |
+| `/sdd-architecture [path]` | **Once per project:** `ARCHITECTURE.md` + an ADR per hard-to-reverse decision — read off existing code, or decided by Q&A from the PRD (greenfield) |
 
-**Full run:** `/sdd-1-prd-new` (or `/sdd-1-prd-from-poc`, if a PoC came first) → `/sdd-1-prd-review` → `/sdd-2-features-from-prd` → per feature: `/sdd-3-spec-new` → `/sdd-3-spec-review` → `/sdd-4-plan-from-spec` → `/sdd-4-plan-validate` → `/sdd-5-tasks-from-plan` → `/sdd-6-trio-check` → `/sdd-7-implement`.
+**Full run:** `/sdd-prd` → `/sdd-check` → `/sdd-prd` (slice) → per feature: `/sdd-spec` (spec) → `/sdd-check` → `/sdd-spec` (plan) → `/sdd-spec` (tasks) → `/sdd-check` → `/sdd-build`.
 
-**Foundation (once per project, not per feature):** run **one** of `/sdd-2-architecture-from-prd` (greenfield, from the PRD) or `/sdd-2-architecture-from-code` (existing codebase) to establish `ARCHITECTURE.md` + the foundational ADRs. `/sdd-4-plan-validate` checks every plan against them.
+**Enter where your change starts, skip the rest** — most work isn't the whole run. A bugfix is often a short `/sdd-spec` then `/sdd-build`; a known single feature starts at `/sdd-spec`.
 
-**Enter where your change starts, skip the rest** — most work isn't the whole pipeline. A bugfix is often just `/sdd-3-spec-new` then `/sdd-7-implement`; a known single feature starts at phase 3.
+**When work loops** — no extra commands, three rules:
 
-These assume the standard SDD layout (`specs/`, `templates/`, `docs/adr/`, `ARCHITECTURE.md`, `CLAUDE.md`). Adjust the paths inside each command file to match your project.
+- **Can't write the acceptance criteria yet?** Spike first on a throwaway branch, then `/sdd-spec` from what it taught.
+- **The code shows an AC was wrong?** Fix the spec before merge — unmerged means not frozen; a dated line in the trio's Notes says why; re-run `/sdd-check`.
+- **A shipped slice changed the backlog?** `/sdd-prd` re-slices the PRD's Feature breakdown.
+
+No status fields anywhere: git is the status. A spec on a branch is editable; merged, it's frozen history.
+
+These assume the standard SDD layout (`specs/`, `templates/`, `docs/prd/`, `docs/adr/`, `ARCHITECTURE.md`, `CLAUDE.md`). Adjust the paths inside each command file to match your project.

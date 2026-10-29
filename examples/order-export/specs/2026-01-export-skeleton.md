@@ -1,6 +1,6 @@
 # Export skeleton — one partner's orders to XML over SFTP
 
-> Feature 1 (walking skeleton) from the [PRD](../docs/prd/2026-01-order-export.md). One-file trio: spec / plan / tasks as three sections. **STATUS: shipped (PR #12, 2026-01).** Frozen — later changes get a new spec.
+> Feature 1 (walking skeleton) from the [PRD](../docs/prd/2026-01-order-export.md). One-file trio: spec / plan / tasks as three sections. Frozen since it merged — later changes get a new spec.
 
 ## Spec — what & why
 

@@ -67,7 +67,7 @@ Copy-pasteable full versions: [`templates/CLAUDE.md`](../templates/CLAUDE.md), [
 1. Write spec.md          goal + acceptance criteria + out of scope
 2. Agent implements it    each acceptance criterion → one failing test → make it pass (red → green)
 3. Break the code         flip a value on purpose; the test must go red. Don't trust green.
-4. Merge & freeze         append `STATUS: shipped (PR #N, date)`; never edit the spec again
+4. Merge & freeze         the PR links the spec; once merged, never edit it again (git is the status)
 5. Corrected the agent?   add ONE line to CLAUDE.md — that's how it stops drifting next time
 ```
 

@@ -18,7 +18,7 @@
 
 **How**
 5. [How the three documents reference each other](#how-the-three-documents-reference-each-other)
-6. [AI-assisted authoring: one command per step](#ai-assisted-authoring-one-command-per-step)
+6. [AI-assisted authoring: two commands](#ai-assisted-authoring-two-commands)
 7. [Iteration patterns — sharpening a draft](#iteration-patterns--sharpening-a-draft)
 8. [Cross-artifact consistency checks](#cross-artifact-consistency-checks)
 9. [Cross-trio anti-patterns](#cross-trio-anti-patterns)
@@ -40,7 +40,7 @@ This is the definitive, hands-on treatment of the trio — the centerpiece of th
 What you get here:
 
 - **Three worked examples** — a non-trivial feature as the full three-file trio (all three documents filled in, cross-references explicit), a small feature as a one-file trio, and a discovery feature whose first acceptance criterion was wrong (the messy, realistic case) — all ready to copy as starting points
-- **AI-assisted authoring** — the shipped `/sdd-*` command for each step (draft, review, validate each artifact against the others), plus the prompts for refining a draft
+- **AI-assisted authoring** — two shipped commands: `/sdd-spec` writes each piece in order, `/sdd-check` audits whatever exists so far — plus the prompts for refining a draft
 - **Iteration patterns** — how a rough draft becomes a tight spec, then a clear plan, then an executable task list
 - **Cross-artifact consistency checks** — concrete rules that keep the three documents honest (every acceptance criterion has a task; every "out of scope" survives into the plan; every open question resolves into a decision or an ADR)
 
@@ -133,7 +133,7 @@ Each section in the trio earns its place — none are decoration. Below: the **b
 | Section | Why it helps |
 |---------|--------------|
 | **Setup** | Branch, migration, env — the prerequisites before step 1. |
-| **Post-merge** | The follow-ups that always get forgotten: flip the spec status, update the runbook, close the ticket. |
+| **Post-merge** | The follow-ups that always get forgotten: update the stable layer and the runbook, close the ticket. |
 | **Notes (append as you work)** | The running log of gotchas and mid-build decisions — the messy reality the worked examples show. Cheap insurance against *"why did we do that?"* |
 
 The bare-minimum rows are the sections you'll see filled in across the [worked examples](#worked-example-1--rate-limiting-on-the-orders-endpoint) below; the nice-to-haves are what a multi-module feature accumulates and a bug-fix never needs.
@@ -162,7 +162,7 @@ Match the weight to the need, lightest first:
 |------|-------------------|
 | ASCII wireframe inline in `SPEC.md` | Layout intent is enough — grepable, diffable, costs nothing. |
 | Mermaid diagram inline | Flows and screen states. |
-| Frozen PNG in the spec folder + live link in References | Pixels matter. The agent can read the image during `/sdd-7-implement`. |
+| Frozen PNG in the spec folder + live link in References | Pixels matter. The agent can read the image during `/sdd-build`. |
 | Throwaway HTML mockup (a spike) | The UX itself is an open question — click it, resolve the Open Question into the spec, and the spike never becomes production code. |
 
 Two honesty rules: a visual check in `TASKS.md` is a *human* step (`→ verify: screenshot side-by-side with mockup-list-view.png — human eyeball`), don't dress it up as mechanical; and concept-level product mocks belong one layer up — `docs/prd/assets/`, frozen with the PRD ([`prd-guide.md`](prd-guide.md)).
@@ -180,22 +180,22 @@ The trio is the default for any real change. The main lever isn't *dropping* spe
 | Small feature (1–3 files, ~half a day) | The one-file trio — spec / plan / tasks as three sections in a single file ([Worked example 2](#worked-example-2--the-whole-trio-in-one-file)). |
 | Non-trivial feature (multiple modules, multi-day) | The full three-file trio ([Worked example 1](#worked-example-1--rate-limiting-on-the-orders-endpoint)). |
 | Refactor (no behavior change, larger surface) | Short spec + full plan + tasks — the *how* and *order* matter more than the *what*. |
-| Spike / research (discovery) | A spec heavy on Open Questions; spike first, let the acceptance criteria *emerge*, then fill them in — see [Two modes: delivery and discovery](#two-modes-delivery-and-discovery) below. Plan and tasks wait until the spike resolves. |
+| Spike / research (discovery) | No spec yet: spike first on a throwaway branch, then write the spec from the acceptance criteria it surfaced — see [When you can't write the acceptance criteria yet](#when-you-cant-write-the-acceptance-criteria-yet) below. |
 
 The rule: **if you'd struggle to explain the change in a one-paragraph PR description, write a spec.** If the execution order would change had you been interrupted for a week, write the tasks. Reach for three *separate* files only when the plan or tasks get long, or when more than one person edits them at once — otherwise the one-file trio keeps everything in view.
 
 When in doubt, write the shorter form. You can always promote a one-file trio into three files later (nothing is rewritten, only relocated); you can't recover the time spent ceremony-ing a tiny change.
 
-### Two modes: delivery and discovery
+### When you can't write the acceptance criteria yet
 
-Most work is **delivery**: you can write the acceptance criteria up front, so the trio runs as above — spec → plan → tasks → code, plan-first. That's the default; both [Worked example 1](#worked-example-1--rate-limiting-on-the-orders-endpoint) and [2](#worked-example-2--the-whole-trio-in-one-file) are it. You don't label it — you just write the spec.
+Most of the time you can write the acceptance criteria up front, so the trio runs as above — spec → plan → tasks → code. Both [Worked example 1](#worked-example-1--rate-limiting-on-the-orders-endpoint) and [2](#worked-example-2--the-whole-trio-in-one-file) are that case.
 
-Some work is **discovery**: you genuinely can't write the AC until you've seen something run — a new UX, an unfamiliar integration, an algorithm you have to feel out. Forcing acceptance criteria up front there just freezes a guess. The move:
+Sometimes you genuinely can't until you've seen something run — a new UX, an unfamiliar integration, an algorithm you have to feel out. Forcing acceptance criteria up front there just freezes a guess. The rule: **spike first, then write the spec.**
 
-1. **Spike first — throwaway.** Build the smallest thing that answers the open question (a script, an HTML mockup, a branch you'll delete — the same throwaway rule as the [mockup spike](#mockups-and-visual-artifacts)). The spike's job is to *teach you the AC*, not to ship.
+1. **Spike — throwaway.** Build the smallest thing that answers the open question (a script, an HTML mockup, a branch you'll delete — the same throwaway rule as the [mockup spike](#mockups-and-visual-artifacts)). The spike's job is to *teach you the AC*, not to ship.
 2. **Then write the thin spec.** With the AC finally known, capture them and run the trio normally. The spike is deleted; production code comes from the trio, not the spike.
 
-Discovery **defers** the order, it doesn't waive it: the spec still comes before the *production* code, and the spike never becomes that code (that's [anti-pattern 3](#3-spec-retro-fitted-from-completed-code) — a spike is throwaway, not a feature pretending to be a spec). Reach for discovery only when the AC are genuinely unknowable up front; when in doubt, you're in delivery. [Worked example 3](#worked-example-3--discovery-the-first-spec-was-wrong) shows the whole loop.
+This **defers** the order, it doesn't waive it: the spec still comes before the *production* code, and the spike never becomes that code (that's [anti-pattern 3](#3-spec-retro-fitted-from-completed-code) — a spike is throwaway, not a feature pretending to be a spec). Spike only when the AC are genuinely unknowable up front; when in doubt, write the spec. [Worked example 3](#worked-example-3--discovery-the-first-spec-was-wrong) shows the whole thing.
 
 ---
 
@@ -226,21 +226,20 @@ A trio without cross-references is three documents that happen to share a folder
 
 ---
 
-## AI-assisted authoring: one command per step
+## AI-assisted authoring: two commands
 
-The agent does most of the typing; you do the judging. Every authoring step ships as a slash command, so the prompt lives in exactly one place — the command file — and there's no second copy here to drift from it. Not on Claude Code? Each file is a plain-markdown prompt: open it and paste the body into any agent, with your input in place of `$ARGUMENTS`.
+The agent does most of the typing; you do the judging. Two shipped slash commands cover every authoring step, so the prompts live in exactly one place — the command files — and there's no second copy here to drift from them: [`/sdd-spec`](../templates/.claude/commands/sdd-spec.md) writes the **next missing piece** of the trio each time you run it (spec, then plan, then tasks), and [`/sdd-check`](../templates/.claude/commands/sdd-check.md) audits **whatever exists so far**. Not on Claude Code? Each file is a plain-markdown prompt: open it and paste the body into any agent, with your input in place of `$ARGUMENTS`.
 
 | Step | Command | What it does | Gate |
 |------|---------|--------------|------|
-| Draft `SPEC.md` from a one-paragraph idea | [`/sdd-3-spec-new`](../templates/.claude/commands/sdd-3-spec-new.md) | Goal, in / out of scope, acceptance criteria phrased as test names, impact on existing code (real paths from `src/`), open questions left open, `[VERIFY]` on every guess | shows the draft before saving |
-| Review the spec for missing pieces | [`/sdd-3-spec-review`](../templates/.claude/commands/sdd-3-spec-review.md) | Seven checks: goal as a problem, ≥ 3 out-of-scope items, testable ACs, real file paths, genuine open questions, ADR numbers that exist, nothing in scope contradicting an ADR | read-only |
-| Draft `PLAN.md` from the reviewed spec | [`/sdd-4-plan-from-spec`](../templates/.claude/commands/sdd-4-plan-from-spec.md) | Technical decisions citing active ADRs, data model only if there's persistent state, concrete file structure, constraints carried forward from Out of scope | shows the draft |
-| Validate the plan against ADRs and `ARCHITECTURE.md` | [`/sdd-4-plan-validate`](../templates/.claude/commands/sdd-4-plan-validate.md) | A table: plan decision → ADR / section it touches → consistent / contradicts / not addressed | read-only |
-| Draft `TASKS.md` from the plan | [`/sdd-5-tasks-from-plan`](../templates/.claude/commands/sdd-5-tasks-from-plan.md) | Red→green order, ` → verify:` on every task, a Verification section that maps every AC, only paths from the plan | shows the draft |
-| Add task(s) to an existing list | [`/sdd-5-tasks-add`](../templates/.claude/commands/sdd-5-tasks-add.md) | Inserts in execution order without rewriting unrelated tasks; works on a one-file trio's Tasks section too | shows the diff |
-| Trio consistency check — the gate before code | [`/sdd-6-trio-check`](../templates/.claude/commands/sdd-6-trio-check.md) | Every AC has a task, every planned file has a task, out of scope respected, open questions resolved, no Accepted ADR contradicted, no paths outside the plan (a `discovery` spec reports *"pending spike"* instead of failing) | read-only |
+| Draft `SPEC.md` from a one-paragraph idea | `/sdd-spec "<idea>"` | Goal, in / out of scope, acceptance criteria phrased as test names, impact on existing code (real paths from `src/`), open questions left open, `[VERIFY]` on every guess | shows the draft; you confirm the AC |
+| Review the spec for missing pieces | `/sdd-check` | Seven checks: goal as a problem, ≥ 3 out-of-scope items, testable ACs, real file paths, genuine open questions, ADR numbers that exist, nothing in scope contradicting an ADR | read-only |
+| Draft `PLAN.md` from the reviewed spec | `/sdd-spec` | Technical decisions citing active ADRs, data model only if there's persistent state, concrete file structure, constraints carried forward from Out of scope — and it won't start while the spec still has open questions | shows the draft |
+| Draft `TASKS.md` from the plan | `/sdd-spec` | Red→green order, ` → verify:` on every task, a Verification section that maps every AC, only paths from the plan | shows the draft |
+| Add task(s) to an existing list | `/sdd-spec "<tasks to add>"` | Inserts in execution order without rewriting unrelated tasks; works on a one-file trio's Tasks section too | shows the diff |
+| The gate before code | `/sdd-check` | The plan against Accepted ADRs and `ARCHITECTURE.md` (decision → ADR → consistent / contradicts), plus every AC has a task, every planned file has a task, out of scope respected, open questions resolved, no paths outside the plan | read-only |
 
-Run them in that order, with a human look between each — the gates are what keep the order honest ([anti-pattern 4](#4-trio-written-all-at-once-by-ai-without-human-verification)). The agent's draft takes 30 seconds; your edit takes 5 minutes instead of the 30 a blank page would. The two read-only audits are the cheap ones to skip and the expensive ones to miss: a spec that "looked complete" but missed three obvious ACs, or a plan that quietly contradicts ADR-007, is far cheaper to catch here than in code review. Once `/sdd-6-trio-check` passes, `/sdd-7-implement` takes the trio into code ([`flow-guide.md`](flow-guide.md) Step 4).
+Run them in that order, with a human look between each — the gates are what keep the order honest ([anti-pattern 4](#4-trio-written-all-at-once-by-ai-without-human-verification)). `/sdd-spec` writes one piece per run, so the order is built in. The agent's draft takes 30 seconds; your edit takes 5 minutes instead of the 30 a blank page would. The two `/sdd-check` runs are the cheap ones to skip and the expensive ones to miss: a spec that "looked complete" but missed three obvious ACs, or a plan that quietly contradicts ADR-007, is far cheaper to catch here than in code review. Once `/sdd-check` passes on the full trio, `/sdd-build` takes the trio into code ([`flow-guide.md`](flow-guide.md) Step 4).
 
 ---
 
@@ -316,13 +315,13 @@ After these three loops, the trio is usually ready to drive implementation. *Usu
 
 ### When the code shows the spec was wrong
 
-The three loops above sharpen the trio *before* code. One more runs *during* it: you start implementing and an acceptance criterion turns out wrong. That's expected, not a failure — and while the spec is still **Active** (pre-merge) the fix is cheap. Edit the spec in place, mark it with a dated `CHANGED during implementation: <what and why>` note next to the AC, update `PLAN.md`/`TASKS.md`, and re-run `/sdd-6-trio-check`. The canonical rule lives in [the overview's spec lifecycle](spec-driven-development-guide.md#spec-status-lifecycle); `/sdd-7-implement`'s *"that's a spec gap, not a cue to improvise"* is the same loop seen from the command side. The freeze starts at *merge* — everything before it is allowed to change. (Once shipped, a change is a *new* spec, not an edit — [golden rule 10](#golden-rules-for-trio-authoring).)
+The three loops above sharpen the trio *before* code. One more runs *during* it: you start implementing and an acceptance criterion turns out wrong. That's expected, not a failure — and while the spec isn't merged yet, it isn't frozen, so the fix is cheap. The rule: **fix the spec before merge.** Edit it in place, add a dated line to the trio's Notes saying what changed and why, update `PLAN.md`/`TASKS.md`, and re-run `/sdd-check`. The canonical rule lives in [the overview's spec lifecycle](spec-driven-development-guide.md#spec-status-lifecycle); `/sdd-build`'s *"that's a spec gap, not a cue to improvise"* is the same rule seen from the command side. The freeze starts at *merge* — everything before it is allowed to change. (Once shipped, a change is a *new* spec, not an edit — [golden rule 10](#golden-rules-for-trio-authoring).)
 
 ---
 
 ## Cross-artifact consistency checks
 
-The consistency checks I'd add as either subagent calls or `/sdd-6-trio-check` slash command:
+The consistency checks I'd add as either subagent calls or the `/sdd-check` slash command:
 
 1. **AC → task coverage.** Every acceptance criterion in `SPEC.md` has at least one task that produces evidence for it.
 2. **Out-of-scope respect.** Every item in `SPEC.md` § Out of scope appears nowhere in `PLAN.md` or `TASKS.md`.
@@ -334,7 +333,7 @@ The consistency checks I'd add as either subagent calls or `/sdd-6-trio-check` s
 
 A trio that passes these seven checks is ready for implementation. A trio that fails on (1) or (4) usually loops back through review.
 
-`/sdd-6-trio-check` runs checks 1–5 as a read-only audit (plus: every planned file has a task); 6 and 7 are yours on review. For when an LLM check should warn rather than block, and what's worth mechanizing at all, see [`quality-gates-guide.md`](quality-gates-guide.md).
+`/sdd-check` runs checks 1–5 as a read-only audit (plus: every planned file has a task); 6 and 7 are yours on review. For when an LLM check should warn rather than block, and what's worth mechanizing at all, see [`quality-gates-guide.md`](quality-gates-guide.md).
 
 ---
 
@@ -346,7 +345,7 @@ The five most damaging mistakes specific to writing the trio together.
 
 Engineer drafts spec, doesn't wait for review, starts writing plan. Plan locks in architectural choices that the spec review then invalidates. Result: plan thrown out and rewritten.
 
-**Fix:** Spec must be reviewed (Open Questions resolved, ACs sharpened — it stays `Draft` until implementation starts; review is a step, not a status) before plan starts. Imposing a 24-hour SLA on spec review usually fixes this.
+**Fix:** Spec must be reviewed (Open Questions resolved, ACs sharpened) before plan starts — `/sdd-spec` won't draft the plan while open questions remain. Imposing a 24-hour SLA on spec review usually fixes this.
 
 ### 2. Tasks written before plan
 
@@ -375,19 +374,19 @@ Three documents in `specs/YYYY-MM-feature-slug/`. Each looks complete in isolati
 
 The implementation proceeds anyway. Code reviewer catches the gap. Now you're patching specs after the fact.
 
-**Fix:** Run `/sdd-6-trio-check` ([the checks it makes](#cross-artifact-consistency-checks)) before the first commit — or wire it into a hook that runs on PR open.
+**Fix:** Run `/sdd-check` ([the checks it makes](#cross-artifact-consistency-checks)) before the first commit — or wire it into a hook that runs on PR open.
 
 ---
 
 ## Slash commands worth having
 
-The whole pipeline ships ready-made as fourteen commands in [`templates/.claude/commands/`](../templates/.claude/commands/) — copy the folder into your project's `.claude/` and adjust the paths inside to match your layout. The files are namespaced and phase-numbered (`sdd-3-spec-new.md` → `/sdd-3-spec-new`), so they sort in pipeline order; this guide refers to every command by its full name. Around the trio:
+The whole pipeline ships ready-made as four commands, plus one you run once per project, in [`templates/.claude/commands/`](../templates/.claude/commands/) — copy the folder into your project's `.claude/` and adjust the paths inside to match your layout. Around the trio:
 
-- **Upstream** — `/sdd-1-prd-new`, `/sdd-1-prd-from-poc`, and `/sdd-1-prd-review` draft, backfill (from a working PoC), and review a PRD; `/sdd-2-features-from-prd` slices it into features; `/sdd-2-architecture-from-prd` / `/sdd-2-architecture-from-code` lay the once-per-project foundation — `ARCHITECTURE.md` plus a stub ADR per hard-to-reverse decision — that `/sdd-4-plan-validate` later checks every plan against. Details: [`prd-guide.md`](prd-guide.md).
-- **The trio** — `/sdd-3-spec-new` … `/sdd-6-trio-check`, one row each in [§ AI-assisted authoring](#ai-assisted-authoring-one-command-per-step) above.
-- **Downstream** — `/sdd-7-implement` works `TASKS.md` task by task red→green, commits each green task, then runs the break-the-code check ([`flow-guide.md`](flow-guide.md) Step 4, [`testing-guide.md`](testing-guide.md)).
+- **Upstream** — [`/sdd-prd`](../templates/.claude/commands/sdd-prd.md) drafts a PRD (from an idea, or backfilled from a working PoC) and, once it's accepted, slices it into the PRD's Feature breakdown; [`/sdd-architecture`](../templates/.claude/commands/sdd-architecture.md) lays the once-per-project foundation — `ARCHITECTURE.md` plus a stub ADR per hard-to-reverse decision — that `/sdd-check` later checks every plan against. Details: [`prd-guide.md`](prd-guide.md).
+- **The trio** — `/sdd-spec` and `/sdd-check`, one row per step in [§ AI-assisted authoring](#ai-assisted-authoring-two-commands) above.
+- **Downstream** — [`/sdd-build`](../templates/.claude/commands/sdd-build.md) works `TASKS.md` task by task red→green, commits each green task, then runs the break-the-code check ([`flow-guide.md`](flow-guide.md) Step 4, [`testing-guide.md`](testing-guide.md)).
 
-The one-screen list of all fourteen, by phase, is the cheat sheet in [`templates/.claude/README.md`](../templates/.claude/README.md); the order you run them in is [`flow-guide.md`](flow-guide.md). For writing your own, see [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks).
+The one-screen list of all five is the cheat sheet in [`templates/.claude/README.md`](../templates/.claude/README.md); the order you run them in is [`flow-guide.md`](flow-guide.md). For writing your own, see [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks).
 
 ---
 
@@ -557,7 +556,6 @@ None — all resolved during spec review (see `spec.md` § Open questions).
 
 ## Post-merge
 
-- [ ] Append `STATUS: shipped (PR #N, YYYY-MM-DD)` to `spec.md`
 - [ ] Update `docs/runbooks/orders-api-degraded.md` with a new "check rate-limit breaches" diagnostic step
 - [ ] Add a line to `CLAUDE.md` § Conventions: *"Per-endpoint middleware → `src/Api/Middleware/` with options bound from `appsettings.json`"*
 - [ ] Close ticket ORDERS-1234
@@ -641,28 +639,31 @@ Reach for the one-file trio when a change has genuine *how* and *order* decision
 
 ## Worked example 3 — discovery (the first spec was wrong)
 
-Not every feature can be specced up front. Ops asks for *"a view of which export batches need attention."* You can't write the acceptance criteria — **nobody knows what "needs attention" means** until someone looks at real batches. This is [discovery mode](#two-modes-delivery-and-discovery): spike first, let the AC emerge, then spec.
+Not every feature can be specced up front. Ops asks for *"a view of which export batches need attention."* You can't write the acceptance criteria — **nobody knows what "needs attention" means** until someone looks at real batches. So [spike first, then write the spec](#when-you-cant-write-the-acceptance-criteria-yet).
 
 **Spike (throwaway).** A half-day branch dumps every batch with its order statuses and age into a plain table; an ops operator looks at it. What you learn: they don't care about *status* — they scan for **stuck** batches (orders still `RDY` more than 2 h after the batch was created) and **partial** ones (some orders `SENT`, some still `RDY`). *"Needs attention"* just got a definition. Delete the branch.
 
-**Then the thin spec** — a one-file trio. The part worth seeing is its acceptance criteria once implementation had started:
+**Then the thin spec** — a one-file trio. The part worth seeing is its acceptance criteria, and the Notes line implementation added:
 
 ```markdown
 **Acceptance criteria**
 - [x] AC1: a batch whose orders are still `RDY` more than 2h after it was created shows as `stuck`, with the hours-idle
 - [x] AC2: a batch with some orders `SENT` and some still `RDY` shows as `partial`, with the unsent count
 - [x] AC3: fully-sent batches are absent (not greyed out, not zero-count rows)
-  - ~~AC1 (v1, WRONG): list all batches ordered by status, newest first~~
-    **CHANGED during implementation (2026-03-04):** building it, the ops reviewer
-    pointed out they'd still have to eyeball every row to find the bad ones — a list
-    of statuses isn't a "needs attention" view. Replaced with the `stuck` / `partial`
-    signals the spike had actually surfaced. The spec was still **Active**, so this
-    was an in-place edit + a re-run of `/sdd-6-trio-check`, not a new spec.
+
+## Notes
+
+- [2026-03-04]: **AC1 was wrong.** The first draft said *"list all batches ordered by
+  status, newest first."* Building it, the ops reviewer pointed out they'd still have
+  to eyeball every row to find the bad ones — a list of statuses isn't a "needs
+  attention" view. Replaced it with the `stuck` / `partial` signals the spike had
+  actually surfaced. Not merged yet, so not frozen: an in-place edit + a re-run of
+  `/sdd-check`, not a new spec.
 ```
 
 The whole file — spec, plan, and tasks, with the spike recorded as step 0 — is in the example app: [`examples/order-export/specs/2026-03-batch-status-view.md`](../examples/order-export/specs/2026-03-batch-status-view.md). There it also shows re-slicing: the feature was pulled ahead of another one once operators kept asking *"did my batch actually go out?"*
 
-**Why this is the honest case.** The first acceptance criterion (the struck-through line) was *wrong* — and that isn't a failure, it's discovery working. Because the spec was still **Active** (pre-merge), fixing it was a one-line edit with a dated `CHANGED during implementation:` note ([§ When the code shows the spec was wrong](#when-the-code-shows-the-spec-was-wrong)), not a new spec. The freeze starts at merge; everything before it is allowed to be wrong on the way to right. Keep the struck line and the note — that fossil is more useful than a clean rewrite.
+**Why this is the honest case.** Even after the spike, the first acceptance criterion was *wrong* — and that isn't a failure, it's the spike-first rule working. Because the spec wasn't merged yet, fixing it was an in-place edit plus one dated line in Notes ([§ When the code shows the spec was wrong](#when-the-code-shows-the-spec-was-wrong)), not a new spec. The freeze starts at merge; everything before it is allowed to be wrong on the way to right. Keep the Notes line — that fossil is more useful than a clean history.
 
 ---
 
@@ -672,7 +673,7 @@ The whole file — spec, plan, and tasks, with the spike recorded as step 0 — 
 2. **Each document references the previous one explicitly.** Without cross-refs, you have three documents that share a folder, not a coherent decision chain.
 3. **The agent drafts; you judge.** Especially for Context, Alternatives Rejected, and Acceptance Criteria — the agent's plausible-sounding fills are most likely to be wrong here.
 4. **Human gates between artifacts.** Spec → review → plan → review → tasks → verify. No skipping reviews because *"the agent said it was fine."*
-5. **A consistency check before the first commit.** Run `/sdd-6-trio-check` (or paste its command file into your agent) before you start implementing; catch contradictions when they're cheap to fix.
+5. **A consistency check before the first commit.** Run `/sdd-check` (or paste its command file into your agent) before you start implementing; catch contradictions when they're cheap to fix.
 6. **Compress for small changes.** A bugfix doesn't need three documents. A short spec is enough. The trio is for changes worth the ceremony.
 7. **Out of scope is the most important section in SPEC.md.** It does more to prevent drift than any positive guidance.
 8. **Every AC traces to a task. Every task traces to an AC.** No orphans.

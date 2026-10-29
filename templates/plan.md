@@ -1,7 +1,7 @@
 # Plan: [Feature name]
 
 > Copy this file next to `SPEC.md`. The plan answers *how*; the spec answers *what*; `TASKS.md` answers *in what order*.
-> Optional (1–10 people): top with a `Status:` line (Draft → Active → Shipped → Superseded); add `Owner:` only past ~5 people — below that, `git blame` covers it.
+> No status line — git is the status. Optional past ~5 people: an `Owner:` line — below that, `git blame` covers it.
 
 ## Technical decisions
 

@@ -2,7 +2,7 @@
 
 > Feature 3 from the [PRD](../../docs/prd/2026-01-order-export.md). Part of `examples/order-export/` (illustrative). Trio order: **this → [plan.md](plan.md) → [tasks.md](tasks.md)**.
 
-**Status:** Active · **Serves:** PRD goals G1 (on-time delivery), G3 (resilience)
+**Serves:** PRD goals G1 (on-time delivery), G3 (resilience)
 
 ## Goal
 

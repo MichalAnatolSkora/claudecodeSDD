@@ -23,12 +23,12 @@
 
 - **Good docs the agent actually reads** — a fresh `CLAUDE.md`, a spec before each change. The gate that matters most, and it needs no automation.
 - **One human on the PR** — a second pair of eyes reading the diff against the spec's acceptance criteria. Judgment, not tooling (see [`sdd-in-teams-guide.md`](sdd-in-teams-guide.md)).
-- **The break-the-code check** — already built into `/sdd-7-implement` ([`testing-guide.md`](testing-guide.md)). It catches confidently-wrong green suites for free.
+- **The break-the-code check** — already built into `/sdd-build` ([`testing-guide.md`](testing-guide.md)). It catches confidently-wrong green suites for free.
 
 Add exactly one gate when you feel a specific pain — and only that one:
 
 - the first time someone nearly commits a customer name → the `pii-scan` [pre-commit hook](#pre-commit-hooks-mechanical-team-wide);
-- the third time a trio ships with an uncovered acceptance criterion → make [`/sdd-6-trio-check`](../templates/.claude/commands/sdd-6-trio-check.md) a habit before `/sdd-7-implement` (it already ships);
+- the third time a trio ships with an uncovered acceptance criterion → make [`/sdd-check`](../templates/.claude/commands/sdd-check.md) a habit before `/sdd-build` (it already ships);
 - the first time the agent edits the body of an Accepted ADR → the ADR lock [Claude Code hook](#claude-code-hooks-in-session).
 
 Nothing else until it earns its place. The rest of this guide is how to pick and build those gates without the automation backfiring.
@@ -42,7 +42,7 @@ Different checks need different tools. The mistake most teams make is automating
 | Kind | What it can check | Runs as | Strength | Weakness |
 |------|-------------------|---------|----------|----------|
 | **Mechanical** (regex, structure, format) | A required section exists; ACs are `- [ ]` checkboxes; PII patterns; the body of an Accepted ADR changed | Pre-commit hook, Claude Code hook, CI script | Deterministic, fast, no token cost | Presence and pattern only — it can't judge quality |
-| **LLM evaluator** (semantic, rules plus judgment) | Are the ACs testable? Does implementation detail leak into the spec? Does every AC have a task? Does the plan contradict an ADR? | The shipped read-only commands — `/sdd-3-spec-review`, `/sdd-4-plan-validate`, `/sdd-6-trio-check` | Reads meaning; catches what regex can't | Probabilistic — verdicts on judgment calls vary between runs of the same audit; costs tokens |
+| **LLM evaluator** (semantic, rules plus judgment) | Are the ACs testable? Does implementation detail leak into the spec? Does every AC have a task? Does the plan contradict an ADR? | The shipped read-only command — `/sdd-check` | Reads meaning; catches what regex can't | Probabilistic — verdicts on judgment calls vary between runs of the same audit; costs tokens |
 | **Human** (judgment, context, intent) | Are the ACs *complete*? Is Out of scope enough to prevent drift? Are an ADR's rejected alternatives real or straw men? Does the spec serve the actual user need? | PR review | Captures intent and context | Doesn't scale; gets shortcut under pressure |
 
 **Block or warn? The asymmetric-cost rule decides.** An enforcement check that wrongly fires becomes a workaround magnet (commits with `--no-verify`, hooks edited around); an evaluation that wrongly fires becomes noise nobody reads.
@@ -65,7 +65,7 @@ The hardest design choice in this whole topic. The honest split:
 
 |  | Cheap to mechanize | Expensive to mechanize |
 |---|---|---|
-| **High-frequency check** | **Mechanize** (every commit needs it) | **A read-only command** (the shipped audits) |
+| **High-frequency check** | **Mechanize** (every commit needs it) | **A read-only command** (the shipped `/sdd-check`) |
 | **Low-frequency check** | Mechanize if trivial, otherwise human | **Just keep it human** — automation cost > savings |
 
 The most common mistake: mechanizing infrequent checks because *"we can."* Each automation carries ongoing cost — false positives, maintenance, alert fatigue. Pay it only where the math works.
@@ -80,7 +80,7 @@ Pick the earliest place that actually sees the mistake.
 |-------|------------|----------|------|
 | **Pre-commit hook** | `git commit`, from any editor | Mechanical checks, for every contributor — human or agent | Needs `pre-commit install` per contributor; bypassable with `--no-verify` |
 | **Claude Code hook** | The agent's own tool calls, in-session | The same mechanical checks, with feedback the agent can act on immediately | Only fires when the agent is the editor — a human in vim walks past it |
-| **Slash command** | When you run it | LLM evaluation — `/sdd-3-spec-review`, `/sdd-4-plan-validate`, `/sdd-6-trio-check` | Someone has to run it (`/sdd-7-implement` refuses a trio that clearly skipped `/sdd-6-trio-check`); uses the main session's context |
+| **Slash command** | When you run it | LLM evaluation — `/sdd-check` | Someone has to run it (`/sdd-build` refuses a trio that clearly skipped `/sdd-check`); uses the main session's context |
 | **CI** | Every PR, from any source | Team-wide invariants | Slower feedback; LLM steps need API credentials — see [When you outgrow ~10](#when-you-outgrow-10) |
 
 ---
@@ -288,7 +288,7 @@ The same mechanics run non-gating side effects too — `markdownlint` after a do
 Past ~10 people — contributors who don't share a memory, a real CI pipeline, ADR bodies worth protecting on every PR — a few more pieces start to pay. Named here, not documented, on purpose:
 
 - **The same scripts in CI.** The pre-commit scripts above run unchanged as required PR checks (`adr-frozen-check.sh --ci` diffs against `origin/main`; check out with full history — `fetch-depth: 0` on GitHub Actions — so that ref exists). Pre-commit only catches local commits; CI catches every PR from any source.
-- **An advisory LLM audit on PRs.** Run the trio-check prompt headless (`claude -p` with the body of `sdd-6-trio-check.md`, pointed at the changed spec folder) and post the result as a PR comment or step summary — never as a required check ([golden rule 3](#golden-rules)).
+- **An advisory LLM audit on PRs.** Run the check prompt headless (`claude -p` with the body of `sdd-check.md`, pointed at the changed spec folder) and post the result as a PR comment or step summary — never as a required check ([golden rule 3](#golden-rules)).
 - **A configured audit subagent** (`.claude/agents/`) once the audit's file reading would swamp the main session — where it lives and when it pays: [`working-with-agents-guide.md` § Claude Code Building Blocks](working-with-agents-guide.md#claude-code-building-blocks).
 
 Lift the one piece you need, not the whole apparatus.

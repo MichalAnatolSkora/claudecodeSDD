@@ -1,8 +1,8 @@
 # Batch status view — what needs a human
 
-> Feature 5 from the [PRD](../docs/prd/2026-01-order-export.md). One-file trio, **discovery-shaped**: the acceptance criteria came out of a spike, not from up-front guessing. **STATUS: shipped (PR #41, 2026-03).** Frozen — later changes get a new spec.
+> Feature 5 from the [PRD](../docs/prd/2026-01-order-export.md). One-file trio, **discovery-shaped**: the acceptance criteria came out of a spike, not from up-front guessing. Frozen since it merged — later changes get a new spec.
 
-> **Why discovery.** *"A view of batch status"* had no testable AC up front — nobody knew what the ops team actually needed to see until they looked at real batches. So we spiked first (see Tasks, step 0), let the AC emerge, then wrote this trio. See [`spec-plan-tasks-guide.md` § Two modes](../../../guides/spec-plan-tasks-guide.md#two-modes-delivery-and-discovery).
+> **Why discovery.** *"A view of batch status"* had no testable AC up front — nobody knew what the ops team actually needed to see until they looked at real batches. So we spiked first (see Tasks, step 0), let the AC emerge, then wrote this trio. See [`spec-plan-tasks-guide.md` § When you can't write the acceptance criteria yet](../../../guides/spec-plan-tasks-guide.md#when-you-cant-write-the-acceptance-criteria-yet).
 
 ## Spec — what & why
 
@@ -21,12 +21,6 @@
 - [x] AC1: a batch whose orders are still `RDY` more than 2h after it was created shows as `stuck`, with the hours-idle
 - [x] AC2: a batch with some orders `SENT` and some still `RDY` shows as `partial`, with the unsent count
 - [x] AC3: fully-sent batches are absent (not greyed out, not zero-count rows)
-  - ~~AC1 (v1, WRONG): list all batches ordered by status, newest first~~
-    **CHANGED during implementation (2026-03-04):** building it, the ops reviewer
-    pointed out they'd still have to eyeball every row to find the bad ones — a list
-    of statuses isn't a "needs attention" view. Replaced with the `stuck` / `partial`
-    signals the spike had actually surfaced. The spec was still **Active**, so this
-    was an in-place edit + a re-run of `/sdd-6-trio-check`, not a new spec.
 
 ## Plan — how
 
@@ -42,5 +36,9 @@
 - [x] 2. `BatchAttentionRepository` query + unit tests for both signals → verify: AC1, AC2 green
 - [x] 3. Wire `GET /ops/batches/attention`, exclude fully-sent → verify: AC3 green end to end
 
+## Notes
+
+- [2026-03-04]: **AC1 was wrong.** The first draft said *"list all batches ordered by status, newest first."* Building it, the ops reviewer pointed out they'd still have to eyeball every row to find the bad ones — a list of statuses isn't a "needs attention" view. Replaced it with the `stuck` / `partial` signals the spike had actually surfaced. Not merged yet, so not frozen: an in-place edit + a re-run of `/sdd-check`, not a new spec.
+
 ---
-*Illustrative one-file discovery trio (shipped). The struck-through AC and the `CHANGED during implementation` note are kept on purpose — the messy reality of a first spec that was wrong is the point, not something to tidy away.*
+*Illustrative one-file discovery trio (merged). The Notes line about the wrong first AC is kept on purpose — the messy reality of a first spec that was wrong is the point, not something to tidy away.*

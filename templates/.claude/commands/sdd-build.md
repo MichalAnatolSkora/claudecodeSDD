@@ -1,16 +1,16 @@
 ---
-description: Work tasks.md task-by-task, red→green, commit each, then the break-the-code check
-argument-hint: [path to the spec folder] (optional)
+description: Build a trio — work tasks.md red→green, commit each task, then the break-the-code check
+argument-hint: [path to the spec folder or one-file trio] (optional)
 ---
 
-# Implement the trio
+# Build the trio
 
 Build the feature by working `tasks.md` one task at a time. Target: `$ARGUMENTS`
 If no path is given, use the most recently modified spec under `specs/` — a folder **or** a one-file trio (`specs/<slug>.md`) — and tell me which one.
 
 ## Before you start
 
-Read `spec.md`, `plan.md`, `tasks.md` in that folder (for a one-file trio: its Spec / Plan / Tasks sections), plus `TESTING.md` and `CLAUDE.md` if present. If the trio clearly hasn't passed `/sdd-6-trio-check` (an unresolved open question, an acceptance criterion with no task), stop and say so — don't build on a broken trio. If `specs/FEATURES.md` exists, flip this feature's row to `in progress` before the first task.
+Read `spec.md`, `plan.md`, `tasks.md` in that folder (for a one-file trio: its Spec / Plan / Tasks sections), plus `TESTING.md` and `CLAUDE.md` if present. If the trio clearly hasn't passed `/sdd-check` (an unresolved open question, an acceptance criterion with no task), stop and say so — don't build on a broken trio.
 
 ## The loop — one task at a time, in order
 
@@ -23,9 +23,9 @@ Do one task per cycle. Don't batch tasks or skip ahead.
 
 ## If you can't implement a task
 
-Stop — that's a **spec gap, not a cue to improvise.** Name what's missing (an unresolved open question, an underspecified AC, a file not in the plan) and pick one: shrink the task, feed the missing context, or send it back to `/sdd-3-spec-review` / `/sdd-5-tasks-add`. Don't vibe-code past it.
+Stop — that's a **spec gap, not a cue to improvise.** Name what's missing (an unresolved open question, an underspecified AC, a file not in the plan) and pick one: shrink the task, feed the missing context, or send it back to `/sdd-spec`. Don't vibe-code past it.
 
-If the gap is a *wrong* acceptance criterion (not a missing one), that's the code→spec loop: while the spec is still **Active** (pre-merge) edit it in place with a dated `CHANGED during implementation: <what and why>` note, update `plan.md`/`tasks.md`, re-run `/sdd-6-trio-check`, then continue. The freeze starts at merge — until then the spec is allowed to change.
+If an acceptance criterion turns out **wrong** (not missing): the spec isn't merged yet, so it isn't frozen — fix it in place, add a dated line to the trio's Notes saying why, update the plan and tasks to match, re-run `/sdd-check`, then continue.
 
 ## After the last task — break the code (don't trust green)
 
@@ -33,8 +33,7 @@ If the gap is a *wrong* acceptance criterion (not a missing one), that's the cod
 2. For each new test, break the implementation on purpose (flip a condition, return a wrong value) and confirm the test goes **red**.
 3. Report any test that stayed green — that's false confidence; fix the assertion, not the code.
 4. Restore the implementation; confirm the suite is green again.
-5. If `specs/FEATURES.md` exists, set this feature's row to `shipped` (the spec's own `STATUS: shipped` marker is added later at merge, per `tasks.md` Post-merge).
-6. If building this taught you something about the next slice — a new one, a now-unnecessary one, a re-ordering — say so, and re-run `/sdd-2-features-from-prd` to merge it into the backlog before the next trio. Shipping a slice routinely re-ranks what comes next.
+5. If building this taught you something about the next slice — a new one, a now-unnecessary one, a re-ordering — say so; `/sdd-prd` re-slices the PRD's Feature breakdown before the next trio.
 
 ## Constraints
 

@@ -108,8 +108,7 @@ Everything in this guide fits one pipeline — and for a team of **1–10**, you
 ```
 PRD  →  slice into  →  ┌ spec → plan → tasks ┐ → implement + test → ADR? → merge
 (per    features         └──── the trio ──────┘   (agent, red→green)  (record  (freeze
- era)   (/features-       one per feature                             keepers)  the spec)
-                       from-prd)
+ era)   (/sdd-prd)        one per feature                             keepers)  the spec)
 ```
 
 **Where you enter** — most small-team work enters late; you rarely run the whole pipeline. The entry table (*what you have* → *where to start* → *what to skip*) lives once, in the spine [`flow-guide.md`](flow-guide.md), so the two copies can't drift.
@@ -126,7 +125,7 @@ At 2–3 people you'll usually skip formal **research** and a heavy **PRD** (a o
 4. **Implement + test** — [`working-with-agents-guide.md`](working-with-agents-guide.md) (the implementation loop) and [`testing-guide.md`](testing-guide.md) (how the agent writes the tests): the agent works `TASKS.md` red→green; the tests come straight from the spec's acceptance criteria.
 5. **Decisions** — [`adr-guide.md`](adr-guide.md): record the ones worth not relitigating.
 
-Under all of it sits the **stable layer** — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md` — the docs the agent reads every session. That's where you actually start on day one ([The Absolute Minimum](#the-absolute-minimum), next), adding the rest reactively. When `ARCHITECTURE.md` earns its place, `/sdd-2-architecture-from-prd` (greenfield) or `/sdd-2-architecture-from-code` (existing codebase) bootstraps it — structure plus a stub ADR per hard-to-reverse decision.
+Under all of it sits the **stable layer** — `CLAUDE.md`, `ARCHITECTURE.md`, `DOMAIN.md` — the docs the agent reads every session. That's where you actually start on day one ([The Absolute Minimum](#the-absolute-minimum), next), adding the rest reactively. When `ARCHITECTURE.md` earns its place, `/sdd-architecture` bootstraps it once — from the PRD on a greenfield project, from the code on an existing one — structure plus a stub ADR per hard-to-reverse decision.
 
 **For the full step-by-step** — every command and what it produces, with a cheat sheet — see [`flow-guide.md`](flow-guide.md).
 
@@ -207,7 +206,7 @@ The PRD answers *why this system exists*; specs answer *what changed this week*.
 
 **The agent doesn't implement from the PRD.** It reads the PRD to draft, review, or slice it — never as a code-generation source; it implements from `SPEC.md → PLAN.md → TASKS.md`. So don't write implementation detail into a PRD *"for the agent"*: *"use Dapper"* or *"implement Y as middleware"* belongs in `PLAN.md`, an ADR, or `CLAUDE.md`.
 
-**One PRD per era, frozen.** Once an era ships, its PRD freezes as history — feature changes live in specs, not PRD edits (an ever-edited PRD becomes a Frankenstein that reads like a press release for a product that doesn't exist). A real direction shift — a new market, a major capability set, a pivot — gets a *new* dated PRD in `docs/prd/`, and the directory listing becomes the strategic timeline. Most projects have one PRD that lasts years.
+**One PRD per era, frozen.** Once an era ships, its PRD freezes as history — feature changes live in specs, not PRD edits (an ever-edited PRD becomes a Frankenstein that reads like a press release for a product that doesn't exist). The one exception is its **Feature breakdown**: the era's backlog of slices, re-ordered as shipped slices teach you — with no status column, because merged specs already show what shipped. A real direction shift — a new market, a major capability set, a pivot — gets a *new* dated PRD in `docs/prd/`, and the directory listing becomes the strategic timeline. Most projects have one PRD that lasts years.
 
 Formats, two worked PRDs, the era-boundary heuristics, the commands that draft and review a PRD, and slicing it into features: [`prd-guide.md`](prd-guide.md).
 
@@ -231,16 +230,14 @@ Every feature runs through three short files, written in order: `SPEC.md` (*what
 
 ### Spec status lifecycle
 
-A spec moves through four states — the same vocabulary [`templates/spec.md`](../templates/spec.md) uses:
+There's no status field to maintain — **git is the status**:
 
-1. **Draft** — being written and reviewed; open questions still listed.
-2. **Active** — open questions answered (or moved to ADRs); `PLAN.md` and `TASKS.md` written alongside; engineer is coding.
-3. **Shipped** — PR merged. Append `STATUS: shipped (PR #N, YYYY-MM-DD)` at the top of `SPEC.md` (and if you use the optional `Status:` header, flip it too — the appended line is the lightweight default, the header is for teams that want a visible state field). From this point the spec is *history*: never edit retroactively. It's frozen as the **intent you had at merge, not as a description of current behavior** — if the spec and the code later disagree, the code wins. If the feature changes, write a new spec. (Need to flag that a shipped spec has gone stale without rewriting it? Append a dated, one-line erratum at the bottom — `Correction (YYYY-MM-DD): <what's now wrong> → see <newer spec / ADR / the code>` — append-only: a pointer, never an edit to the body, and never a substitute for a new spec when the feature actually changes.)
-4. **Superseded** — a later spec replaces this one; link the replacement.
+1. **On a branch / in an open PR** — the spec is being written, reviewed, and built. It's editable: open questions get answered, the plan and tasks get written alongside, the code follows.
+2. **Merged** — shipped. The PR description links the spec (`Implements: specs/YYYY-MM-slug/`), so traceability lives in git. From this point the spec is *history*: never edit retroactively. It's frozen as the **intent you had at merge, not as a description of current behavior** — if the spec and the code later disagree, the code wins. If the feature changes, write a new spec that links the old one in its References. (Need to flag that a merged spec has gone stale without rewriting it? Append a dated, one-line erratum at the bottom — `Correction (YYYY-MM-DD): <what's now wrong> → see <newer spec / ADR / the code>` — append-only: a pointer, never an edit to the body, and never a substitute for a new spec when the feature actually changes.)
 
-**Changing a spec mid-implementation is allowed — the freeze starts at merge.** If an acceptance criterion turns out wrong while the status is still *Active*, edit the spec, mark the edit visibly (e.g. `CHANGED during implementation: <what and why>` next to the AC), update `PLAN.md`/`TASKS.md` to match, and re-run the trio consistency check. What's forbidden is silently rewriting history *after* the PR merges — that's when a change means a new spec.
+**Changing a spec mid-implementation is allowed — the freeze starts at merge.** If an acceptance criterion turns out wrong before merge, fix it in place, add a dated line to the trio's Notes saying what changed and why, update `PLAN.md`/`TASKS.md` to match, and re-run `/sdd-check`. What's forbidden is silently rewriting history *after* the PR merges — that's when a change means a new spec.
 
-The most common rot pattern: specs sitting in *Draft* indefinitely. A spec older than ~2 weeks with unanswered Open Questions should either move forward — resolve the open questions and start implementation — or be deleted; stale drafts pollute the catalog and erode trust in the discipline.
+The most common rot pattern: specs that never merge. A spec older than ~2 weeks with unanswered Open Questions should either move forward — resolve the open questions and start implementation — or be deleted; stale drafts pollute the catalog and erode trust in the discipline.
 
 ---
 
@@ -258,8 +255,8 @@ The "physics" of your codebase. The agent reads them nearly every session — `C
 
 ### Layer 2: Frozen — written once, then history
 
-- `specs/2026-01-order-retry/` — one folder (or one file) per change; append `STATUS: shipped (PR #123, 2026-01-15)` at merge, never edit after
-- `docs/prd/` — one PRD per era, frozen once that era ships
+- `specs/2026-01-order-retry/` — one folder (or one file) per change; frozen once merged (git is the status), never edit after
+- `docs/prd/` — one PRD per era, frozen once that era ships (all but its Feature breakdown)
 
 Frozen as the intent you had at the time, not as a description of today's behavior: when a frozen doc and the code disagree, the code wins.
 
@@ -310,7 +307,7 @@ In `CLAUDE.md` you add one line in the "Conventions" section: *"Batch compressio
 
 **"Impact on existing code" section in every SPEC.md.** Forces thinking about side effects before the agent starts generating. This is where you catch "ah, this breaks the `IBaseHandler<TSelf>` contract" *before* four hours of debugging.
 
-**Link spec to PR.** In the PR description: `Implements: specs/2026-01-order-retry/`. After merge, append the PR number to SPEC.md. After a year you have full traceability: feature → spec → code → decision.
+**Link spec to PR.** In the PR description: `Implements: specs/2026-01-order-retry/`. That one line is all the bookkeeping — git already knows what merged and when. After a year you have full traceability: feature → spec → code → decision.
 
 ---
 
@@ -379,7 +376,7 @@ This guide covers *what* to write down; [`working-with-agents-guide.md`](working
 
 ## Enforcing and Evaluating SDD
 
-Can you make the discipline stick without everyone remembering every rule? For most 1–10 teams: good docs the agent reads, one human on the PR, and the break-the-code check already in `/sdd-7-implement` — plus one mechanical gate (a PII pre-commit hook, an Accepted-ADR lock) added only when a real pain shows up. The rule for any gate: block only when a false positive is cheap, warn when it's expensive, and leave judgment to a human. The details, ready scripts, and the Claude Code hooks: [`quality-gates-guide.md`](quality-gates-guide.md).
+Can you make the discipline stick without everyone remembering every rule? For most 1–10 teams: good docs the agent reads, one human on the PR, and the break-the-code check already in `/sdd-build` — plus one mechanical gate (a PII pre-commit hook, an Accepted-ADR lock) added only when a real pain shows up. The rule for any gate: block only when a false positive is cheap, warn when it's expensive, and leave judgment to a human. The details, ready scripts, and the Claude Code hooks: [`quality-gates-guide.md`](quality-gates-guide.md).
 
 ---
 

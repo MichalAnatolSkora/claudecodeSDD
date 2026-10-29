@@ -1,6 +1,6 @@
 # CSV export format option per partner
 
-> Feature 2 from the [PRD](../docs/prd/2026-01-order-export.md). One-file trio: spec / plan / tasks as three sections. **STATUS: shipped (PR #19, 2026-02).** Frozen.
+> Feature 2 from the [PRD](../docs/prd/2026-01-order-export.md). One-file trio: spec / plan / tasks as three sections. Frozen since it merged.
 
 ## Spec — what & why
 

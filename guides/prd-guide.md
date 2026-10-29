@@ -35,7 +35,7 @@
 
 **When you actually need one.** A PRD earns its place when **more than one person has to agree**, or the bet is big enough that building the wrong thing is expensive. Skip it — or shrink it to a one-paragraph issue — when you're solo, the change is small, or the *what & why* already fits in your head. (When in doubt, the one-pager format below is the lightest real PRD.) Either way, ground it: a PRD that cites what you learned — even *"~6 customer conversations"* — is mostly evidence; one without is mostly opinion (see [overview § Before the PRD](spec-driven-development-guide.md#before-the-prd-research-and-discovery)).
 
-**When to write a *v2* (a new era).** A PRD **freezes after v1 ships** — you do *not* edit it for every new feature (features get specs, not PRD edits; an ever-edited PRD becomes a Frankenstein). You write a **new** PRD when the product's *direction* shifts materially: a new market or segment, a major new capability, a pivot, or a post-reorg change of direction. Routine features are not a new era. For the concrete test, see [Era boundary heuristics](#era-boundary-heuristics--when-do-you-need-a-new-prd) below; for the layered model (PRD vs spec, the three documentation layers), see [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer).
+**When to write a *v2* (a new era).** A PRD **freezes after v1 ships** — you do *not* edit it for every new feature (features get specs, not PRD edits; an ever-edited PRD becomes a Frankenstein). The one part that stays editable is its Feature breakdown — the era's backlog ([§ Slicing](#slicing-the-prd-into-features)). You write a **new** PRD when the product's *direction* shifts materially: a new market or segment, a major new capability, a pivot, or a post-reorg change of direction. Routine features are not a new era. For the concrete test, see [Era boundary heuristics](#era-boundary-heuristics--when-do-you-need-a-new-prd) below; for the layered model (PRD vs spec, the three documentation layers), see [`spec-driven-development-guide.md` § "The PRD Layer"](spec-driven-development-guide.md#the-prd-layer).
 
 ---
 
@@ -91,7 +91,7 @@ The format isn't sacred. Mix and match — a lean PRD with a press-release secti
 
 Regardless of format, most PRDs have the same underlying questions. The section list below follows [`templates/PRD.md`](../templates/PRD.md) — the canonical template in this repo: Problem / Users / Success criteria / In scope (v1) / Out of scope / Constraints / Risks and unknowns / References.
 
-Two sanctioned variants exist, and that's fine. A `## Summary` opener (used in the worked examples below) is an optional courtesy for skimmers. And the `/sdd-1-prd-new` command produces a lean variant whose headings differ slightly. The underlying questions are what matters; the template's list is the default.
+Two sanctioned variants exist, and that's fine. A `## Summary` opener (used in the worked examples below) is an optional courtesy for skimmers. And the `/sdd-prd` command produces a lean variant whose headings differ slightly. The underlying questions are what matters; the template's list is the default.
 
 Here's how to think about each:
 
@@ -450,14 +450,14 @@ Don't fall into the trap of writing a new PRD every quarter to feel productive. 
 
 ## AI-assisted PRD authoring
 
-The agent can speed up PRD drafting and review meaningfully, *as long as you remember the agent can't make the product decisions for you*. The recurring steps ship as slash commands, so each prompt lives in exactly one place — its command file. Not on Claude Code? Each file is a plain-markdown prompt: open it and paste the body into any agent, with your input in place of `$ARGUMENTS`.
+The agent can speed up PRD drafting and review meaningfully, *as long as you remember the agent can't make the product decisions for you*. The recurring steps ship as two slash commands — [`/sdd-prd`](../templates/.claude/commands/sdd-prd.md) drafts and slices, [`/sdd-check`](../templates/.claude/commands/sdd-check.md) reviews — so each prompt lives in exactly one place, its command file. Not on Claude Code? Each file is a plain-markdown prompt: open it and paste the body into any agent, with your input in place of `$ARGUMENTS`.
 
 | Step | Command | What it does |
 |------|---------|--------------|
-| Draft a PRD from a 1–3 sentence idea | [`/sdd-1-prd-new`](../templates/.claude/commands/sdd-1-prd-new.md) | Sketches a lean PRD with no implementation detail and `[VERIFY]` on every guess, then asks you the genuinely open questions (who exactly the user is, success in numbers, out of scope, hard constraints) a few at a time and fills in your answers |
-| Reverse a PRD out of a working PoC | [`/sdd-1-prd-from-poc`](../templates/.claude/commands/sdd-1-prd-from-poc.md) | Reads what the PoC does, asks you the *why* the code can't supply (problem, user, success, what's deliberately out), and backfills a lean PRD — never a spec, never invented acceptance criteria |
-| Review a draft for completeness and clarity | [`/sdd-1-prd-review`](../templates/.claude/commands/sdd-1-prd-review.md) | Read-only audit: specific users, a problem with a cost today, measurable success with a timeframe, ≥ 5 out-of-scope items, no implementation leakage, risks with consequences, still a page or two |
-| Turn an accepted PRD into the era's first specs | [`/sdd-2-features-from-prd`](../templates/.claude/commands/sdd-2-features-from-prd.md) | Slices the PRD into vertical, prioritized features, walking skeleton first — see [§ Slicing the PRD into features](#slicing-the-prd-into-features) |
+| Draft a PRD from a 1–3 sentence idea | `/sdd-prd "<idea>"` | Sketches a lean PRD with no implementation detail and `[VERIFY]` on every guess, then asks you the genuinely open questions (who exactly the user is, success in numbers, out of scope, hard constraints) a few at a time and fills in your answers |
+| Reverse a PRD out of a working PoC | `/sdd-prd <path to the PoC>` | Reads what the PoC does, asks you the *why* the code can't supply (problem, user, success, what's deliberately out), and backfills a lean PRD — never a spec, never invented acceptance criteria |
+| Review a draft for completeness and clarity | `/sdd-check <path to the PRD>` | Read-only audit: specific users, a problem with a cost today, measurable success with a timeframe, ≥ 5 out-of-scope items, no implementation leakage, risks with consequences, still a page or two |
+| Slice an accepted PRD into features (and re-slice later) | `/sdd-prd` on the accepted PRD | Writes the PRD's `## Feature breakdown`: vertical, prioritized slices, walking skeleton first — see [§ Slicing the PRD into features](#slicing-the-prd-into-features) |
 
 **The PoC isn't the spec.** Once a backfilled PRD is accepted, the spec-before-code discipline starts with your *next* change — either harden the prototype through a fresh spec → trio, or treat it as legacy (forward-only specs). The prototype's code is a reference, not a contract.
 
@@ -566,13 +566,13 @@ What comes out of an accepted PRD is a list of **features**, each sized to its o
 
 **Prioritize and sequence.** Tag each feature P1/P2/P3 (or MoSCoW). Order by *value × dependency*: build only the foundation the next valuable slice actually needs — not all of it up front. Mark hard dependencies so nothing is scheduled before its prerequisite.
 
-**Re-slice as you learn — the list is a first guess, not a contract.** A shipped slice routinely changes what the next one should be: a partner edge case you didn't anticipate, a step that turned out trivial, a whole slice that became unnecessary. After a slice ships, let what you learned re-rank, add, or drop slices before you start the next trio — in `FEATURES.md` if you keep one, otherwise just in your tracker or your head. This is the upstream half of the loop the trio runs downstream: the PRD freezes, the slice list does not. (Guardrail: re-slice when a *ship* taught you something — not endlessly; if you're re-slicing without having shipped anything, see the anti-patterns below.)
+**Re-slice as you learn — the list is a first guess, not a contract.** A shipped slice routinely changes what the next one should be: a partner edge case you didn't anticipate, a step that turned out trivial, a whole slice that became unnecessary. After a slice ships, let what you learned re-rank, add, or drop slices before you start the next trio — in the PRD's Feature breakdown, the one section that stays editable after the PRD freezes. This is the upstream half of the loop the trio runs downstream: the PRD freezes, the slice list does not. (Guardrail: re-slice when a *ship* taught you something — not endlessly; if you're re-slicing without having shipped anything, see the anti-patterns below.)
 
 **Right-size to a trio.** Each feature should fit one trio: a `SPEC.md` under ~150 lines, a few days of work. Too big (multi-week, sprawling spec) → split it. Too small (a one-liner) → fold it into a neighbor or treat it as a bugfix-shape spec.
 
-**The output is a lightweight list, not an artifact.** A prioritized table — feature, the PRD outcome it serves, rough size, dependencies — is enough. It can live in the PRD or an issue tracker. Each row becomes a `specs/YYYY-MM-slug/` when you pick it up. Don't turn the backlog into a second heavy document.
+**The output is a lightweight list, not an artifact.** A prioritized table — feature, the PRD outcome it serves, rough size, dependencies — is enough. It lives in the PRD as `## Feature breakdown` (or in your issue tracker, if that's where your team plans). No status column: what's shipped is what's merged under `specs/`. Each row becomes a `specs/YYYY-MM-slug/` when you pick it up. Don't turn the backlog into a second heavy document.
 
-**Let the agent draft it, then you triage.** [`/sdd-2-features-from-prd`](../templates/.claude/commands/sdd-2-features-from-prd.md) turns the PRD into a candidate breakdown in seconds — the rules above applied for you: vertical slices sized to a trio, the walking skeleton flagged, the rest ordered by value × dependency, nothing that violates Out of scope, no specs written. You cut and reorder; only once you accept the list does it save it (to `specs/FEATURES.md`, if you keep one).
+**Let the agent draft it, then you triage.** [`/sdd-prd`](../templates/.claude/commands/sdd-prd.md), run on an accepted PRD, turns it into a candidate breakdown in seconds — the rules above applied for you: vertical slices sized to a trio, the walking skeleton flagged, the rest ordered by value × dependency, nothing that violates Out of scope, no specs written. You cut and reorder; only once you accept the list does it save it, into the PRD's Feature breakdown.
 
 **Anti-patterns:** horizontal slices (layers that ship nothing); one giant spec for the whole PRD (big-bang); slicing by team or component instead of user value; building all the infrastructure before any user-visible slice; decomposition that never ends (if you're on the third re-slice, pick the obvious P1 and start).
 
@@ -669,7 +669,7 @@ The PRD says *"Status: Draft"* for 18 months. Nobody ratifies it. Engineering bu
 
 5. **One PRD per era.** Not per feature, not per quarter. Era boundaries are recognizable events, not calendar entries.
 
-6. **Each PRD freezes after its era ships.** Body never edited again. New direction → new PRD.
+6. **Each PRD freezes after its era ships.** Body never edited again — only the Feature breakdown, the era's backlog, keeps moving. New direction → new PRD.
 
 7. **Pick the format your audience will read.** A lean PRD nobody reads beats nothing; a full PRD that gets skimmed beats one that gets ignored.
 

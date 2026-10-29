@@ -454,7 +454,7 @@ All the documentation in the world is useless if you don't actually use it when 
 
 Begin every non-trivial session by anchoring the agent in the relevant context. Don't assume it remembers anything from before — even in long-running tools like Claude Code, fresh context windows are the norm.
 
-**For a new feature** — run [`/sdd-3-spec-new`](../templates/.claude/commands/sdd-3-spec-new.md) `<one-paragraph idea>`. It drafts `specs/<date-slug>/spec.md` from the spec template before any code exists, and lists the open questions instead of answering them itself. (The trio's other steps each have their own command — see [`spec-plan-tasks-guide.md` § AI-assisted authoring](spec-plan-tasks-guide.md#ai-assisted-authoring-one-command-per-step).)
+**For a new feature** — run [`/sdd-spec`](../templates/.claude/commands/sdd-spec.md) `<one-paragraph idea>`. It drafts `specs/<date-slug>/spec.md` from the spec template before any code exists, and lists the open questions instead of answering them itself. (Run it again for the plan, then the tasks — see [`spec-plan-tasks-guide.md` § AI-assisted authoring](spec-plan-tasks-guide.md#ai-assisted-authoring-two-commands).)
 
 **For modifying an existing feature** — **Prompt:**
 
@@ -526,9 +526,9 @@ Please:
 
 A spec is ready. Now you want the agent to implement it. Don't just say *"code it up."*
 
-(For *authoring* the spec / plan / tasks themselves with AI help — the command for each artifact, the trio consistency check, the iteration loops — see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). This assumes the trio is already written and reviewed.)
+(For *authoring* the spec / plan / tasks themselves with AI help — the authoring command, the consistency check, the iteration loops — see [`spec-plan-tasks-guide.md`](spec-plan-tasks-guide.md). This assumes the trio is already written and reviewed.)
 
-Run [`/sdd-7-implement`](../templates/.claude/commands/sdd-7-implement.md) `[spec folder]`. It reads the trio plus `TESTING.md` and `CLAUDE.md`, refuses to build on a trio that clearly hasn't passed `/sdd-6-trio-check`, then works `TASKS.md` one task at a time: failing test first, the minimum code to turn it green, the task's `→ verify:` step, one commit per green task — touching only the files listed in `plan.md`. When a task can't be built it stops and names the spec gap instead of improvising, and after the last task it runs the break-the-code check.
+Run [`/sdd-build`](../templates/.claude/commands/sdd-build.md) `[spec folder]`. It reads the trio plus `TESTING.md` and `CLAUDE.md`, refuses to build on a trio that clearly hasn't passed `/sdd-check`, then works `TASKS.md` one task at a time: failing test first, the minimum code to turn it green, the task's `→ verify:` step, one commit per green task — touching only the files listed in `plan.md`. When a task can't be built it stops and names the spec gap instead of improvising, and after the last task it runs the break-the-code check.
 
 Every commit is a checkpoint you can roll back to. If you'd rather approve each task before the next one starts, say so when you invoke it — either way the principle holds: **task by task, with checkpoints**.
 
@@ -541,11 +541,10 @@ This is the step most teams skip, and it's why repos rot. After merging code, th
 ```text
 We just merged PR #123 implementing specs/[date-slug]/.
 Please:
-1. Append "STATUS: shipped (PR #123, [date])" to spec.md
-2. Check if ARCHITECTURE.md needs updating (new component, changed boundary?)
-3. Check if DOMAIN.md needs updating (new term introduced?)
-4. Check if CLAUDE.md conventions section needs a line about [new pattern]
-5. Show me proposed diffs — I'll approve each one separately.
+1. Check if ARCHITECTURE.md needs updating (new component, changed boundary?)
+2. Check if DOMAIN.md needs updating (new term introduced?)
+3. Check if CLAUDE.md conventions section needs a line about [new pattern]
+4. Show me proposed diffs — I'll approve each one separately.
 ```
 
 This 5-minute habit prevents documentation drift over months.
@@ -629,7 +628,7 @@ Plain prompting takes you a long way. Claude Code (and similar agent tools) adds
 
 | Situation | Right tool | Where it lives |
 |-----------|-----------|----------------|
-| A prompt you type a lot | **Slash command** — you invoke it; `$ARGUMENTS` is whatever you type after it | `.claude/commands/<name>.md`. This repo ships fourteen — [`sdd-3-spec-new.md`](../templates/.claude/commands/sdd-3-spec-new.md) shows the shape |
+| A prompt you type a lot | **Slash command** — you invoke it; `$ARGUMENTS` is whatever you type after it | `.claude/commands/<name>.md`. This repo ships five — [`sdd-spec.md`](../templates/.claude/commands/sdd-spec.md) shows the shape |
 | A multi-step procedure with file lookups and branches | **Skill** — the agent can pick it up when a prompt matches its description | `.claude/skills/<name>/SKILL.md` (frontmatter says *when* it applies, the body is the procedure) |
 | A read-heavy job (an audit, cross-repo research) that would bloat the main context | **Subagent** — its own context window; the main session sees only its final report | Ad hoc (*"spawn a subagent to…"*), or configured in `.claude/agents/<name>.md` with a `description`, a `tools` list, and a prompt body |
 | Something that must happen on an event — a tool call, a prompt, session end | **Hook** — run by the harness, not the agent | `.claude/settings.json` — mechanics and the ready SDD hooks: [`quality-gates-guide.md` § Claude Code hooks](quality-gates-guide.md#claude-code-hooks-in-session) |
